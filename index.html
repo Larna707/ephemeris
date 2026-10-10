@@ -190,6 +190,21 @@ textarea{font:13px var(--f-data);color:var(--ink);background:var(--panel);border
         <div id="chAsp" class="note"></div>
       </div>
     </div>
+    <div class="panel" style="margin-top:18px" id="syncPanel" hidden>
+      <h2>Синхронизация между устройствата</h2>
+      <p class="note" id="syncIntro">Свържете страницата с профила си в GitHub. Картите и събитията се пазят в таен файл (gist) там и се виждат на всяко устройство, на което направите същото свързване.</p>
+      <div id="syncSetup">
+        <ol class="note" style="padding-left:1.2em">
+          <li>Отворете <a href="https://github.com/settings/tokens/new?scopes=gist&description=Efemeridi" target="_blank" rel="noopener">тази страница в GitHub</a>. Отметката <b>gist</b> вече е избрана, не отмятайте нищо друго.</li>
+          <li>В „Expiration“ изберете <b>No expiration</b> и натиснете зеления бутон <b>Generate token</b> най-долу.</li>
+          <li>Копирайте кода, който започва с <code>ghp_</code>, поставете го отдолу и натиснете „Свържи“.</li>
+        </ol>
+        <p class="note">Запазете кода в бележка. На всяко ново устройство го поставяте тук веднъж. Кодът дава достъп само до вашите gist файлове, не до хранилищата.</p>
+        <div class="flex"><input type="password" id="ghToken" placeholder="ghp_..." autocomplete="off" style="flex:1 1 16em"><button class="primary" type="button" id="ghConnect">Свържи</button></div>
+      </div>
+      <div class="flex" id="syncOn" hidden><span>Свързано. Картите се синхронизират автоматично.</span><button type="button" id="ghSyncNow">Обнови сега</button><button type="button" id="ghDisconnect">Прекъсни на това устройство</button></div>
+      <p class="status" id="syncStatus"></p>
+    </div>
     <div class="panel" style="margin-top:18px">
       <h2>Резервно копие на картите</h2>
       <p class="note">Бутонът „Запази като натална карта“ записва картата в страницата, не сваля файл. Когато сте влезли в Claude, картите и събитията се пазят в профила ви и се виждат на всяко устройство. За отделно копие на компютъра натиснете „Изтегли файл с картите“. За да ги възстановите, изберете файла или поставете текста отдолу.</p>
@@ -6072,7 +6087,7 @@ const active = () => profiles.find(p=>p.id===activeId) || profiles[0];
 function saveProfiles(){ store.set('profiles', profiles); store.set('active', activeId); cloudPush(); }
 let cloudRef=null, cloudTimer=null;
 function cloudPush(){
-  if (!cloudRef) return;
+  if (!cloudRef){ if (typeof gistPush==='function') gistPush(); return; }
   clearTimeout(cloudTimer);
   cloudTimer=setTimeout(()=>{
     cloudRef.set({profiles: profiles.filter(p=>!p.example), updatedAt: Date.now()})
@@ -6082,7 +6097,7 @@ function cloudPush(){
 }
 function setCloudStat(st){
   const el=document.getElementById('cloudStat'); if(!el) return;
-  el.textContent = st==='ok' ? 'Картите се пазят в профила ви в Claude' : st==='err' ? 'Не успях да запиша в профила. Картите са в браузъра.' : st==='full' ? 'Хранилището е пълно. Картите са в браузъра.' : 'Картите се пазят само в този браузър';
+  el.textContent = st==='gist' ? 'Картите се синхронизират през GitHub' : st==='gisterr' ? 'Няма връзка с GitHub. Промените са в браузъра и ще се изпратят по-късно.' : st==='ok' ? 'Картите се пазят в профила ви в Claude' : st==='err' ? 'Не успях да запиша в профила. Картите са в браузъра.' : st==='full' ? 'Хранилището е пълно. Картите са в браузъра.' : 'Картите се пазят само в този браузър';
 }
 
 // ---------- natal cache ----------
@@ -6982,6 +6997,82 @@ function importBackup(txt){
 $('bkLoad').onclick=()=>importBackup($('bkText').value);
 $('bkFile').onchange=()=>{ const f=$('bkFile').files[0]; if(!f) return; const r=new FileReader(); r.onload=()=>importBackup(String(r.result)); r.readAsText(f); $('bkFile').value=''; };
 
+// ---------- GitHub Gist sync (when hosted outside Claude) ----------
+const GIST_FILE='ephemeris-charts.json';
+let gist=store.get('gist',null), gistTimer=null, gistBusy=false;
+async function gh(path, opts){
+  opts=opts||{};
+  const r=await fetch('https://api.github.com'+path,{method:opts.method||'GET', cache:'no-store', headers:Object.assign({'Authorization':'Bearer '+gist.token,'Accept':'application/vnd.github+json'}, opts.body?{'Content-Type':'application/json'}:{}), body:opts.body});
+  if (!r.ok){ const e=new Error('http '+r.status); e.status=r.status; throw e; }
+  return r.status===204?null:r.json();
+}
+function applyRemote(list){
+  profiles = list.length ? list : [EXAMPLE];
+  if (!profiles.find(x=>x.id===activeId)) activeId=profiles[0].id;
+  store.set('profiles', profiles); store.set('active', activeId);
+  renderProfileSel(); profileChanged(); render();
+}
+async function gistPull(first){
+  if (!gist||!gist.id) return;
+  const g=await gh('/gists/'+gist.id);
+  const f=g.files&&g.files[GIST_FILE]; if(!f) throw new Error('missing');
+  let txt=f.content; if (f.truncated) txt=await (await fetch(f.raw_url,{cache:'no-store'})).text();
+  let remote=[]; try{ remote=(JSON.parse(txt).profiles)||[]; }catch(e){}
+  let merged=remote.slice(), push=false;
+  if (first){ profiles.filter(p=>!p.example).forEach(p=>{ if(!merged.find(x=>x.id===p.id)){ merged.push(p); push=true; } }); }
+  const before=JSON.stringify(profiles.filter(p=>!p.example));
+  if (JSON.stringify(merged)!==before) applyRemote(merged);
+  if (push) await gistWrite();
+  setCloudStat('gist');
+}
+async function gistWrite(){
+  await gh('/gists/'+gist.id,{method:'PATCH', body:JSON.stringify({files:{[GIST_FILE]:{content:backupJson()}}})});
+}
+function gistPush(){
+  if (!gist||!gist.id) return;
+  clearTimeout(gistTimer);
+  gistTimer=setTimeout(()=>{ gistWrite().then(()=>setCloudStat('gist')).catch(()=>{ setCloudStat('gisterr'); store.set('gistDirty',true); }); }, 600);
+}
+function syncUI(){
+  const on=!!(gist&&gist.id);
+  $('syncSetup').hidden=on; $('syncOn').hidden=!on;
+}
+async function gistConnect(token){
+  gist={token};
+  let id=null;
+  for (let page=1; page<=10 && !id; page++){
+    const list=await gh('/gists?per_page=100&page='+page);
+    if (!list.length) break;
+    const f=list.find(x=>x.files && x.files[GIST_FILE]); if (f) id=f.id;
+  }
+  if (!id){
+    const created=await gh('/gists',{method:'POST', body:JSON.stringify({description:'Ефемериди: натални карти', public:false, files:{[GIST_FILE]:{content:backupJson()}}})});
+    id=created.id;
+  }
+  gist.id=id; store.set('gist',gist);
+  await gistPull(true);
+}
+function initGistSync(){
+  $('syncPanel').hidden=false; syncUI();
+  $('ghConnect').onclick=async()=>{
+    const t=$('ghToken').value.trim();
+    if (!/^(ghp_|github_pat_)/.test(t)){ $('syncStatus').textContent='Поставете кода от GitHub. Той започва с ghp_.'; return; }
+    $('syncStatus').textContent='Свързвам…';
+    try{ await gistConnect(t); $('ghToken').value=''; syncUI(); $('syncStatus').textContent='Свързано. Картите вече се пазят в GitHub.'; }
+    catch(e){ gist=null; store.set('gist',null); syncUI(); $('syncStatus').textContent = e.status===401 ? 'GitHub не прие кода. Проверете дали е копиран целият.' : e.status===403||e.status===404 ? 'Кодът няма разрешение за gist. Създайте нов с отметка „gist“.' : 'Няма връзка с GitHub. Опитайте отново.'; }
+  };
+  $('ghSyncNow').onclick=async()=>{ $('syncStatus').textContent='Обновявам…'; try{ await gistPull(false); $('syncStatus').textContent='Обновено.'; }catch(e){ $('syncStatus').textContent = e.status===401?'Кодът вече не е валиден. Прекъснете и свържете отново.':'Няма връзка с GitHub.'; } };
+  $('ghDisconnect').onclick=()=>{
+    if (!$('ghDisconnect').dataset.confirm){ $('ghDisconnect').dataset.confirm='1'; $('ghDisconnect').textContent='Потвърди прекъсването'; setTimeout(()=>{ delete $('ghDisconnect').dataset.confirm; $('ghDisconnect').textContent='Прекъсни на това устройство'; },3000); return; }
+    gist=null; store.set('gist',null); syncUI(); setCloudStat('local'); $('syncStatus').textContent='Прекъснато. Картите остават в GitHub и в този браузър.';
+  };
+  if (gist&&gist.id){
+    const dirty=store.get('gistDirty',false);
+    (dirty ? gistWrite().then(()=>store.set('gistDirty',false)) : gistPull(false)).then(()=>setCloudStat('gist')).catch(()=>setCloudStat('gisterr'));
+    document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible' && gist && gist.id) gistPull(false).catch(()=>setCloudStat('gisterr')); });
+  }
+}
+
 // ---------- boot ----------
 renderProfileSel();
 setCloudStat('local');
@@ -6989,7 +7080,8 @@ showTab(tab);
 function backupJson(){ return JSON.stringify({app:'ephemeris', version:1, profiles:profiles.filter(p=>!p.example)}); }
 (async()=>{
   if (!window.claude || typeof window.claude.use!=='function'){
-    // standalone (e.g. GitHub Pages): ordinary browser download
+    // standalone (e.g. GitHub Pages): ordinary browser download + GitHub sync
+    initGistSync();
     $('bkDownload').hidden=false;
     $('bkDownload').onclick=()=>{ const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([backupJson()],{type:'application/json'})); a.download=`efemeridi-karti-${isoDay(new Date())}.json`; document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href); a.remove();},1000); $('bkStatus').textContent='Файлът е изтеглен.'; };
     return;
