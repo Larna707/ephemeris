@@ -6976,7 +6976,7 @@ function importBackup(txt){
     profiles=profiles.filter(x=>!x.example); if(!profiles.length) profiles=[EXAMPLE];
     if (!profiles.find(x=>x.id===activeId)) activeId=profiles[0].id;
     saveProfiles(); renderProfileSel(); profileChanged();
-    $('bkStatus').textContent=`Заредени: ${added} нови, ${updated} обновени карти.`;
+    $('bkStatus').textContent = (added+updated)===0 ? 'Файлът не съдържа карти. Изтеглете го от страницата, в която са въведени картите (версията в Claude).' : `Заредени: ${added} нови, ${updated} обновени карти. Вижте менюто „Натална карта“ горе.`;
   }catch(e){ $('bkStatus').textContent='Текстът не е валидно резервно копие. Поставете целия копиран текст.'; }
 }
 $('bkLoad').onclick=()=>importBackup($('bkText').value);
