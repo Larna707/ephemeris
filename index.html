@@ -6128,7 +6128,8 @@ document.getElementById('bgPlaces').textContent.trim().split('\n').forEach(line=
   const label = v==='0' ? `гр. ${name} (обл. ${prov})` : `с. ${name} (общ. ${mun}, обл. ${prov})`;
   PLACES.set(label,{name, lat:+lat, lon:+lon, tz:'Europe/Sofia'});
 });
-CITIES.forEach(c=>{ if(c[3]) PLACES.set(c[0], {name:c[0], lat:c[1], lon:c[2], tz:c[3]}); });
+const EN_NAMES={'Лондон':'London','Брикстън (Лондон)':'Brixton, London','Ливърпул':'Liverpool','Манчестър':'Manchester','Берлин':'Berlin','Мюнхен':'Munich','Париж':'Paris','Мадрид':'Madrid','Рим':'Rome','Милано':'Milan','Виена':'Vienna','Прага':'Prague','Варшава':'Warsaw','Будапеща':'Budapest','Белград':'Belgrade','Скопие':'Skopje','Залцбург':'Salzburg','Атина':'Athens','Солун':'Thessaloniki','Букурещ':'Bucharest','Истанбул':'Istanbul','Москва':'Moscow','Ню Йорк':'New York','Бостън':'Boston','Вашингтон':'Washington DC','Филаделфия':'Philadelphia','Маями':'Miami','Атланта':'Atlanta','Детройт':'Detroit','Лексингтън (Кентъки)':'Lexington, Kentucky','Чикаго':'Chicago','Гари (Индиана)':'Gary, Indiana','Хюстън':'Houston','Далас':'Dallas','Мемфис':'Memphis','Ню Орлиънс':'New Orleans','Тупело (Мисисипи)':'Tupelo, Mississippi','Косцюшко (Мисисипи)':'Kosciusko, Mississippi','Лос Анджелис':'Los Angeles','Кълвър Сити':'Culver City, California','Сан Франциско':'San Francisco','Сан Диего':'San Diego','Сиатъл':'Seattle','Лас Вегас':'Las Vegas','Денвър':'Denver','Финикс':'Phoenix','Торонто':'Toronto','Монреал':'Montreal'};
+CITIES.forEach(c=>{ if(c[3]){ const v={name:c[0], lat:c[1], lon:c[2], tz:c[3]}; PLACES.set(c[0], v); if(EN_NAMES[c[0]]) PLACES.set(EN_NAMES[c[0]]+' ('+c[0]+')', v); } });
 $('placeList').innerHTML = [...PLACES.keys()].map(k=>`<option value="${k}"></option>`).join('');
 function findPlace(txt){
   txt=(txt||'').trim(); if(!txt) return null;
@@ -6137,6 +6138,8 @@ function findPlace(txt){
   // exact town name first, then exact village name, then any label starting with the text
   for (const pre of ['гр. ','с. ']) for (const [k,v] of PLACES) if (k.toLowerCase().startsWith(pre+t+' (')) return {label:k, ...v};
   for (const [k,v] of PLACES) if (v.name.toLowerCase()===t) return {label:k, ...v};
+  const t1=t.split(',')[0].trim();
+  for (const [k,v] of PLACES) if (k.toLowerCase().startsWith(t1)) return {label:k, ...v};
   return null;
 }
 
