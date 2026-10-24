@@ -88,6 +88,16 @@ details summary{cursor:pointer;color:var(--accent);font-size:14px}
 textarea{font:13px var(--f-data);color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:8px;width:100%;margin:8px 0}
 .lg-in{color:var(--ink);font-weight:500} .lg-out{color:var(--accent);font-weight:500}
 .gantt{display:block;width:100%;height:auto}
+header.top>*{min-width:0;max-width:100%}.profilebar>*{min-width:0;max-width:100%}.profilebar select{max-width:100%}#cloudStat{white-space:normal}
+select{max-width:100%}
+.kwcards{display:grid;grid-template-columns:repeat(auto-fit,minmax(15em,1fr));gap:12px;margin:12px 0}
+.kwgroup{border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--bg);min-width:0}
+.kwtitle{font-weight:600;font-size:14px}.kwsub{font-size:12px;color:var(--muted);margin:2px 0 8px}
+.kwchips{display:flex;flex-wrap:wrap;gap:6px}
+.kwchip{font:13px var(--f-body);border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:999px;padding:4px 10px;cursor:pointer}
+.kwchip.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.kwsentence{font-family:var(--f-display);font-size:clamp(18px,2.2vw,22px);line-height:1.45;padding:14px 16px;border-left:3px solid var(--gold);background:var(--gold-soft);border-radius:6px;margin:6px 0 12px;max-width:70ch}
+.kwtask{font-family:var(--f-display);font-size:20px;margin:12px 0}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:8px 14px;border-radius:8px;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none}
 .toast.on{opacity:1}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
@@ -119,6 +129,7 @@ textarea{font:13px var(--f-data);color:var(--ink);background:var(--panel);border
     <button role="tab" data-tab="hs">През домовете</button>
     <button role="tab" data-tab="sr">Солар и лунар</button>
     <button role="tab" data-tab="pd">Прогресии и дирекции</button>
+    <button role="tab" data-tab="kw">Ключови думи</button>
     <button role="tab" data-tab="rect">Ректификация</button>
     <button role="tab" data-tab="cyc">Цикли и възрасти</button>
     <button role="tab" data-tab="jr">Дневник</button>
@@ -477,6 +488,57 @@ textarea{font:13px var(--f-data);color:var(--ink);background:var(--panel);border
           <span class="status" id="pevStatus"></span>
         </div>
         <div class="scroll"><table id="pevTable"></table></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- KEYWORDS -->
+  <section id="tab-kw" role="tabpanel" hidden>
+    <div class="panel">
+      <h2>Конструктор на изречения</h2>
+      <p class="note">Методът на ключовите думи: <b>планетата</b> казва какво, <b>знакът</b> как, <b>домът</b> къде, а <b>аспектът</b> как две функции работят заедно. Изберете позиция и думите, които ви звучат най-точно. Изречението се сглобява само. Ползвайте го като отправна точка и после го кажете със свои думи.</p>
+      <div class="controls">
+        <label class="field"><span>Какво разчитам</span><select id="kwMode">
+          <option value="pos">Планета в знак и дом</option>
+          <option value="asp">Аспект между две планети</option>
+          <option value="tr">Транзит към натална планета</option>
+          <option value="trh">Транзит през натален дом</option>
+        </select></label>
+        <label class="field" id="kwP1W"><span id="kwP1L">Планета</span><select id="kwP1"></select></label>
+        <label class="field" id="kwSignW"><span>Знак</span><select id="kwSign"></select></label>
+        <label class="field" id="kwHouseW"><span>Дом</span><select id="kwHouse"></select></label>
+        <label class="field" id="kwAspW"><span>Аспект</span><select id="kwAsp"></select></label>
+        <label class="field" id="kwP2W"><span id="kwP2L">Втора планета</span><select id="kwP2"></select></label>
+        <button type="button" id="kwFromChart">Вземи от наталната карта</button>
+      </div>
+      <div id="kwCards" class="kwcards"></div>
+      <div class="kwsentence" id="kwSentence" aria-live="polite"></div>
+      <div class="flex"><button class="primary" type="button" id="kwCopy">Копирай изречението</button><button type="button" id="kwShuffle">Друг вариант</button><span class="status" id="kwStatus"></span></div>
+    </div>
+
+    <div class="panel" style="margin-top:18px">
+      <h2 id="kwChartHead">Разчитане на картата по ключови думи</h2>
+      <p class="note">Всички планети от избраната карта с първите ключови думи и силата на планетата в знака. Изречение за всяка позиция и за мажорните аспекти. Добра основа за собствено тълкуване.</p>
+      <div class="flex"><button type="button" id="kwChartRun">Сглоби за избраната карта</button><button type="button" id="kwChartCopy">Копирай всичко</button></div>
+      <div class="scroll" style="margin-top:10px"><table id="kwChartTable"></table></div>
+      <h3>Аспекти</h3>
+      <ul class="evlist" id="kwChartAsp"></ul>
+    </div>
+
+    <div class="grid2" style="margin-top:18px">
+      <div class="panel">
+        <h2>Тренировка</h2>
+        <p class="note">Страницата дава случайна позиция. Опитайте сами да я формулирате и чак тогава вижте ключовите думи.</p>
+        <div class="flex"><button class="primary" type="button" id="qzNew">Нова задача</button><select id="qzType"><option value="pos">Планета в знак и дом</option><option value="asp">Аспект</option><option value="tr">Транзит</option></select></div>
+        <div class="kwtask" id="qzTask">Натиснете „Нова задача“.</div>
+        <textarea id="qzAnswer" rows="3" placeholder="Вашето изречение"></textarea>
+        <div class="flex"><button type="button" id="qzShow">Покажи ключовите думи</button></div>
+        <div id="qzReveal" class="note" hidden></div>
+      </div>
+      <div class="panel">
+        <h2>Справочник</h2>
+        <div class="controls"><label class="field"><span>Покажи</span><select id="refType"><option value="planets">Планети</option><option value="signs">Знаци</option><option value="houses">Домове</option><option value="aspects">Аспекти</option><option value="dign">Достойнства на планетите</option></select></label></div>
+        <div class="scroll"><table id="refTable"></table></div>
       </div>
     </div>
   </section>
@@ -7339,7 +7401,7 @@ INTX.initUI();
 
 
 // =============== TABS ===============
-const TABS=['eph','chart','an','tr','pass','hs','sr','pd','rect','cyc','jr'];
+const TABS=['eph','chart','an','tr','pass','hs','sr','pd','kw','rect','cyc','jr'];
 tab = store.get('tab','eph'); if (!TABS.includes(tab)) tab='eph';
 function showTab(t){
   tab=t; store.set('tab',t);
@@ -7357,6 +7419,7 @@ function render(){
   else if (tab==='sr') runSR();
   else if (tab==='pd') runPD();
   else if (tab==='rect') initRect();
+  else if (tab==='kw') { kwRender(); refRender(); }
   else if (tab==='cyc') INTX.runCyc();
   else if (tab==='jr') INTX.renderJr();
 }
@@ -7806,6 +7869,184 @@ $('rcTable').addEventListener('click', e=>{
   $('rcApply').hidden=false;
   $('rcApply').onclick=()=>{ const p=active(); if(p.example){ toast('Примерът не може да се променя'); return; } p.time=r.tm; saveProfiles(); renderProfileSel(); profileChanged(); toast(`Часът на картата е сменен на ${r.tm}`); };
 });
+
+// =============== KEYWORDS: sentence builder ===============
+const KW = {
+  planets: {
+    Sun:     {fn:['волята','самоизразяването','жизнената сила','идентичността','стремежът към признание'], tr:['фокус и внимание','повече увереност','осветяване на темата'], note:'Аз-ът, целта, бащата'},
+    Moon:    {fn:['емоциите','нуждата от сигурност','навиците','грижата','интуицията'], tr:['емоционални реакции','нужда от уют','промени в настроението'], note:'Чувствата, майката, ежедневните нужди'},
+    Mercury: {fn:['мисленето','общуването','ученето','обмяната на информация','търговията'], tr:['разговори и решения','документи и пътувания','нова информация'], note:'Умът, речта, контактите'},
+    Venus:   {fn:['любовта','ценностите','удоволствието','естетическият усет','привличането'], tr:['хармония и удоволствие','сближаване в отношенията','внимание към парите и красотата'], note:'Любов, ценности, пари'},
+    Mars:    {fn:['действието','желанието','смелостта','конкуренцията','енергията за борба'], tr:['енергия и инициатива','повече напрежение и бързане','импулс за действие'], note:'Действие, воля за борба, сексуалност'},
+    Jupiter: {fn:['растежът','вярата','оптимизмът','щедростта','търсенето на смисъл'], tr:['разширяване и възможности','оптимизъм и подкрепа','склонност към преувеличаване'], note:'Растеж, късмет, мироглед'},
+    Saturn:  {fn:['дисциплината','отговорността','структурата','границите','изграждането с времето'], tr:['проверка и структуриране','повече отговорност','нужда от търпение и реализъм'], note:'Граници, отговорност, време'},
+    Chiron:  {fn:['раната и лечението','уязвимостта','наставничеството','мъдростта от болката'], tr:['досег до стари рани','шанс за изцеление','учене от уязвимостта'], note:'Ранен лечител'},
+    Uranus:  {fn:['свободата','промяната','оригиналността','бунтът','внезапните прозрения'], tr:['внезапна промяна','освобождаване от старото','неочаквани обрати'], note:'Свобода, иновации, изненади'},
+    Neptune: {fn:['въображението','мечтите','състраданието','духовността','илюзиите'], tr:['размиване на границите','вдъхновение и чувствителност','нужда от яснота и реализъм'], note:'Мечти, духовност, заблуди'},
+    Pluto:   {fn:['трансформацията','властта','дълбоката промяна','кризата и възраждането','контролът'], tr:['дълбока трансформация','пренареждане на властта и контрола','край на нещо старо и ново начало'], note:'Сила, криза, прераждане'},
+    Node:    {fn:['пътят на развитие','задачата на живота','посоката на растеж'], tr:['повратни моменти','среща със съдбовни хора и възможности'], note:'Посока на развитие'},
+    Lilith:  {fn:['потиснатите желания','независимостта','бунтът срещу нормите','сенчестата страна'], tr:['изплуване на потиснато','изкушения и бунт'], note:'Сянка, неприети желания'}
+  },
+  signs: [
+    {adv:['енергично','импулсивно','директно','смело','състезателно'], el:'Огън', mod:'Кардинален', ruler:'Марс'},
+    {adv:['спокойно','практично','устойчиво','чувствено','бавно и сигурно'], el:'Земя', mod:'Фиксиран', ruler:'Венера'},
+    {adv:['любопитно','гъвкаво','многостранно','комуникативно','бързо'], el:'Въздух', mod:'Мутабилен', ruler:'Меркурий'},
+    {adv:['грижовно','чувствително','защитно','емоционално','привързано'], el:'Вода', mod:'Кардинален', ruler:'Луна'},
+    {adv:['щедро','творчески','гордо','драматично','сърдечно'], el:'Огън', mod:'Фиксиран', ruler:'Слънце'},
+    {adv:['аналитично','прецизно','услужливо','критично','практично'], el:'Земя', mod:'Мутабилен', ruler:'Меркурий'},
+    {adv:['дипломатично','хармонично','справедливо','естетично','чрез партньорство'], el:'Въздух', mod:'Кардинален', ruler:'Венера'},
+    {adv:['интензивно','дълбоко','страстно','контролирано','проницателно'], el:'Вода', mod:'Фиксиран', ruler:'Плутон (трад. Марс)'},
+    {adv:['оптимистично','свободно','философски','с размах','щедро'], el:'Огън', mod:'Мутабилен', ruler:'Юпитер'},
+    {adv:['отговорно','амбициозно','дисциплинирано','предпазливо','целеустремено'], el:'Земя', mod:'Кардинален', ruler:'Сатурн'},
+    {adv:['оригинално','независимо','хуманно','нестандартно','приятелски'], el:'Въздух', mod:'Фиксиран', ruler:'Уран (трад. Сатурн)'},
+    {adv:['интуитивно','съпричастно','мечтателно','жертвоготовно','артистично'], el:'Вода', mod:'Мутабилен', ruler:'Нептун (трад. Юпитер)'}
+  ],
+  houses: [
+    {name:'Личност', area:['личността','външния вид','начина, по който се представя','новите начинания']},
+    {name:'Ресурси', area:['парите','ресурсите','самооценката','материалната сигурност']},
+    {name:'Общуване', area:['общуването','ученето','близкото обкръжение','братята и сестрите','кратките пътувания']},
+    {name:'Дом и корени', area:['дома','семейството','корените','вътрешната сигурност']},
+    {name:'Творчество и любов', area:['творчеството','любовта и романтиката','децата','удоволствията']},
+    {name:'Работа и здраве', area:['работата','ежедневието','здравето','услугите и задълженията']},
+    {name:'Партньорство', area:['партньорството','брака','договорите','откритите противници']},
+    {name:'Трансформация', area:['общите ресурси','интимността','кризите и промяната','наследството']},
+    {name:'Мироглед', area:['висшето образование','далечните пътувания','вярата и мирогледа','чужбина']},
+    {name:'Кариера', area:['кариерата','общественото положение','дългосрочните цели','авторитета']},
+    {name:'Приятели и мечти', area:['приятелствата','групите и съмишлениците','мечтите за бъдещето','социалните каузи']},
+    {name:'Уединение', area:['уединението','подсъзнанието','духовната практика','скритите неща']}
+  ],
+  aspects: {
+    0:  {ph:['се слива с','се обединява с','засилва'], nature:'Сливане: двете функции действат като едно цяло'},
+    60: {ph:['получава възможност за развитие чрез','лесно си сътрудничи с'], nature:'Възможност: работи, когато се използва съзнателно'},
+    90: {ph:['влиза в напрежение с','се сблъсква с','е предизвикан от'], nature:'Напрежение: изисква усилие и води до действие и растеж'},
+    120:{ph:['се подкрепя хармонично от','протича леко заедно с'], nature:'Хармония: естествен талант, лесен поток'},
+    180:{ph:['търси баланс с','се оглежда в','се разпъва между себе си и'], nature:'Полярност: осъзнаване чрез другите, нужда от баланс'},
+    150:{ph:['трябва да се приспособи към','трудно намира общ език с'], nature:'Приспособяване: несъвместими теми, нужни са корекции'}
+  }
+};
+const DOMICILE={Sun:[4],Moon:[3],Mercury:[2,5],Venus:[1,6],Mars:[0,7],Jupiter:[8,11],Saturn:[9,10],Uranus:[10],Neptune:[11],Pluto:[7]};
+const EXALT={Sun:0,Moon:1,Mercury:5,Venus:11,Mars:9,Jupiter:3,Saturn:6};
+function dignity(k,s){
+  if (DOMICILE[k]&&DOMICILE[k].includes(s)) return {t:'обител',c:'easy',d:'планетата е силна, действа естествено'};
+  if (EXALT[k]===s) return {t:'екзалтация',c:'easy',d:'планетата е издигната, проявява най-доброто си'};
+  if (DOMICILE[k]&&DOMICILE[k].map(x=>(x+6)%12).includes(s)) return {t:'изгнание',c:'hard',d:'планетата е в чужда среда, трябва повече усилие'};
+  if (EXALT[k]!=null && (EXALT[k]+6)%12===s) return {t:'падение',c:'hard',d:'планетата е отслабена, проявява се трудно'};
+  return null;
+}
+const KW_PLANETS=['Sun','Moon','Mercury','Venus','Mars','Jupiter','Saturn','Chiron','Uranus','Neptune','Pluto','Node','Lilith'];
+const KW_TRANSIT=['Sun','Mercury','Venus','Mars','Jupiter','Saturn','Chiron','Uranus','Neptune','Pluto','Node'];
+const kwSel={};
+const pick=(arr,key)=>arr[Math.min(kwSel[key]||0, arr.length-1)];
+const cap=s=>s.charAt(0).toUpperCase()+s.slice(1);
+const pn=k=>shortN(k);
+const GEN={Sun:'n',Moon:'f',Venus:'f',Lilith:'f'};
+const trN=k=>({n:'Транзитното ',f:'Транзитната '}[GEN[k]]||'Транзитният ')+pn(k);
+const trNl=k=>({n:'транзитното ',f:'транзитната '}[GEN[k]]||'транзитният ')+pn(k);
+const natN=k=>({n:'натално ',f:'натална '}[GEN[k]]||'натален ')+pn(k);
+(function initKw(){
+  fillSelect($('kwP1'), KW_PLANETS.map(k=>[k, g(BY[k].g)+' '+pn(k)]), 'Sun');
+  fillSelect($('kwP2'), KW_PLANETS.map(k=>[k, g(BY[k].g)+' '+pn(k)]), 'Saturn');
+  fillSelect($('kwSign'), SIGNS.map((n,i)=>[i, SGg[i]+' '+n]), '0');
+  fillSelect($('kwHouse'), KW.houses.map((h,i)=>[i+1, `${i+1} дом · ${h.name}`]), '1');
+  fillSelect($('kwAsp'), [0,60,90,120,180,150].map(a=>[a, g(aspOf(a).g)+' '+aspOf(a).n]), '90');
+  ['kwMode','kwP1','kwP2','kwSign','kwHouse','kwAsp'].forEach(id=>$(id).addEventListener('change',()=>{ if(id!=='kwMode') Object.keys(kwSel).forEach(k=>{ if(k.startsWith(id)) delete kwSel[k]; }); kwRender(); }));
+  $('kwCards').addEventListener('click',e=>{ const b=e.target.closest('button[data-kw]'); if(!b) return; kwSel[b.dataset.kw]=+b.dataset.i; kwRender(); });
+  $('kwShuffle').onclick=()=>{ document.querySelectorAll('#kwCards .kwgroup').forEach(gp=>{ const n=gp.querySelectorAll('button[data-kw]').length; if(n) kwSel[gp.dataset.key]=Math.floor(Math.random()*n); }); kwRender(); };
+  $('kwCopy').onclick=()=>copyText($('kwSentence').textContent);
+  $('kwFromChart').onclick=kwFromChart;
+  $('kwChartRun').onclick=kwChart; $('kwChartCopy').onclick=()=>{ if(!kwChartText){ toast('Първо натиснете „Сглоби“'); return; } copyText(kwChartText); };
+  $('qzNew').onclick=qzNew; $('qzShow').onclick=()=>{ $('qzReveal').hidden=false; };
+  $('refType').onchange=refRender;
+})();
+function kwGroup(key,title,sub,words){
+  return `<div class="kwgroup" data-key="${key}"><div class="kwtitle">${title}</div>${sub?`<div class="kwsub">${sub}</div>`:''}<div class="kwchips">${words.map((w,i)=>`<button type="button" class="kwchip${(kwSel[key]||0)===i?' on':''}" data-kw="${key}" data-i="${i}">${w}</button>`).join('')}</div></div>`;
+}
+function signInfo(s){ const x=KW.signs[s]; return `${x.el} · ${x.mod} · управител ${x.ruler}`; }
+function kwRender(){
+  const mode=$('kwMode').value, p1=$('kwP1').value, p2=$('kwP2').value, s=+$('kwSign').value, h=+$('kwHouse').value, a=+$('kwAsp').value;
+  const show=(id,on)=>{ $(id).hidden=!on; };
+  show('kwSignW', mode==='pos'); show('kwHouseW', mode==='pos'||mode==='trh'); show('kwAspW', mode==='asp'||mode==='tr'); show('kwP2W', mode==='asp'||mode==='tr');
+  $('kwP1L').textContent = mode==='tr'||mode==='trh' ? 'Транзитна планета' : 'Планета';
+  $('kwP2L').textContent = mode==='tr' ? 'Натална планета' : 'Втора планета';
+  $('kwFromChart').hidden = !(mode==='pos'||mode==='trh');
+  const P1=KW.planets[p1], P2=KW.planets[p2];
+  let cards='', sent='';
+  if (mode==='pos'){
+    const dg=dignity(p1,s);
+    cards = kwGroup('kwP1', `${g(BY[p1].g)} ${pn(p1)}: какво`, P1.note, P1.fn)
+          + kwGroup('kwSign', `${SGg[s]} ${SIGNS[s]}: как`, signInfo(s)+(dg?` · <span class="chip ${dg.c}">${dg.t}</span> ${dg.d}`:''), KW.signs[s].adv)
+          + kwGroup('kwHouse', `${h} дом: къде`, KW.houses[h-1].name, KW.houses[h-1].area);
+    sent = `${cap(pick(P1.fn,'kwP1'))} (${pn(p1)}) се проявява ${pick(KW.signs[s].adv,'kwSign')} в сферата на ${pick(KW.houses[h-1].area,'kwHouse')}.`;
+  } else if (mode==='asp'){
+    const A=KW.aspects[a];
+    cards = kwGroup('kwP1', `${g(BY[p1].g)} ${pn(p1)}`, P1.note, P1.fn) + kwGroup('kwAsp', `${g(aspOf(a).g)} ${aspOf(a).n}: как работят заедно`, A.nature, A.ph) + kwGroup('kwP2', `${g(BY[p2].g)} ${pn(p2)}`, P2.note, P2.fn);
+    sent = `${cap(pick(P1.fn,'kwP1'))} (${pn(p1)}) ${pick(A.ph,'kwAsp')} ${pick(P2.fn,'kwP2')} (${pn(p2)}).`;
+  } else if (mode==='tr'){
+    const A=KW.aspects[a];
+    cards = kwGroup('kwP1', `${g(BY[p1].g)} ${trN(p1)}: какво носи`, P1.note, P1.tr) + kwGroup('kwAsp', `${g(aspOf(a).g)} ${aspOf(a).n}`, A.nature, A.ph) + kwGroup('kwP2', `${g(BY[p2].g)} ${cap(natN(p2))}: коя тема`, P2.note, P2.fn);
+    const tone = [90,180,150].includes(a) ? 'Периодът изисква усилие, но дава възможност за растеж.' : a===0 ? 'Темата става централна за периода.' : 'Периодът носи подкрепа, ако се използва съзнателно.';
+    sent = `${trN(p1)} носи ${pick(P1.tr,'kwP1')} и ${pick(A.ph,'kwAsp')} ${pick(P2.fn,'kwP2')} (${natN(p2)}). ${tone}`;
+  } else {
+    cards = kwGroup('kwP1', `${g(BY[p1].g)} ${trN(p1)}: какво носи`, P1.note, P1.tr) + kwGroup('kwHouse', `${h} дом: в коя сфера`, KW.houses[h-1].name, KW.houses[h-1].area);
+    sent = `Докато ${trNl(p1)} минава през ${h} дом, в сферата на ${pick(KW.houses[h-1].area,'kwHouse')} се проявяват ${pick(P1.tr,'kwP1')}.`;
+  }
+  $('kwCards').innerHTML=cards; $('kwSentence').textContent=sent;
+}
+function kwFromChart(){
+  const n=natalOf(active()), k=$('kwP1').value, p=n.pts.find(x=>x.k===k);
+  if (!p){ toast('Тази точка я няма в картата'); return; }
+  if ($('kwMode').value==='pos'){ $('kwSign').value=Math.floor(p.lon/30); $('kwHouse').value=p.house; }
+  else { const l=AC.lon(k,AC.T(new Date())); $('kwHouse').value=AC.houseOf(l,n.hs.cusp); }
+  Object.keys(kwSel).forEach(x=>delete kwSel[x]);
+  $('kwStatus').textContent = $('kwMode').value==='pos' ? `${active().name}: ${pn(k)} в ${SIGNS[Math.floor(p.lon/30)]}, ${p.house} дом.` : `Днес ${trNl(k)} е в ${$('kwHouse').value} натален дом.`;
+  kwRender();
+}
+let kwChartText='';
+function kwChart(){
+  const p=active(), n=natalOf(p), lines=[`${p.name}: разчитане по ключови думи`,''];
+  $('kwChartHead').textContent=`Разчитане по ключови думи: ${p.name}`;
+  const rows=n.pts.filter(x=>KW.planets[x.k]).map(x=>{
+    const s=Math.floor(x.lon/30), d=dignity(x.k,s), P=KW.planets[x.k];
+    const sent=`${cap(P.fn[0])} се проявява ${KW.signs[s].adv[0]} и ${KW.signs[s].adv[1]} в сферата на ${KW.houses[x.house-1].area[0]}, ${KW.houses[x.house-1].area[1]}.`;
+    lines.push(`${pn(x.k)} в ${SIGNS[s]}, ${x.house} дом${d?` (${d.t})`:''}: ${sent}`);
+    return `<tr><td class="l">${nameCell(x.k)}</td><td>${L(x.lon)}</td><td>${x.house}</td><td class="l">${d?`<span class="chip ${d.c}">${d.t}</span>`:''}</td><td class="l" style="font-family:var(--f-body);white-space:normal;min-width:18em">${sent}</td></tr>`;
+  });
+  $('kwChartTable').innerHTML=`<thead><tr><th class="t l">Планета</th><th class="t">Позиция</th><th class="t">Дом</th><th class="t l">Сила</th><th class="t l">Изречение</th></tr></thead><tbody>${rows.join('')}</tbody>`;
+  const pts=n.pts.filter(x=>!['Node','Lilith'].includes(x.k)); const asp=[];
+  for (let i=0;i<pts.length;i++) for (let j=i+1;j<pts.length;j++){
+    const d=Math.abs(dif(pts[i].lon,pts[j].lon));
+    [0,60,90,120,180].forEach(a=>{ const lum=['Sun','Moon'].includes(pts[i].k)||['Sun','Moon'].includes(pts[j].k); const orb=lum?8:6; const o=Math.abs(d-a); if(o<=orb) asp.push({i:pts[i].k,j:pts[j].k,a,o}); });
+  }
+  asp.sort((x,y)=>x.o-y.o);
+  lines.push('','Аспекти:');
+  $('kwChartAsp').innerHTML = asp.map(x=>{ const s=`${cap(KW.planets[x.i].fn[0])} (${pn(x.i)}) ${KW.aspects[x.a].ph[0]} ${KW.planets[x.j].fn[0]} (${pn(x.j)}).`; lines.push(`${pn(x.i)} ${aspOf(x.a).n} ${pn(x.j)} (${x.o.toFixed(1)}°): ${s}`);
+    return `<li><time>${PN(x.i)} <span class="pg ${aspCls(x.a)}">${g(aspOf(x.a).g)}</span> ${PN(x.j)} ${x.o.toFixed(1)}°</time><span>${s}</span></li>`; }).join('') || '<li>Няма мажорни аспекти.</li>';
+  kwChartText=lines.join('\n');
+}
+function qzNew(){
+  const t=$('qzType').value, r=a=>a[Math.floor(Math.random()*a.length)];
+  const p1=r(KW_PLANETS.filter(k=>!['Node','Lilith'].includes(k)));
+  let task, rev;
+  if (t==='pos'){ const s=Math.floor(Math.random()*12), h=1+Math.floor(Math.random()*12), d=dignity(p1,s);
+    task=`${g(BY[p1].g)} ${pn(p1)} в ${SGg[s]} ${SIGNS[s]}, ${h} дом`;
+    rev=`<b>${pn(p1)}:</b> ${KW.planets[p1].fn.join(', ')}<br><b>${SIGNS[s]}:</b> ${KW.signs[s].adv.join(', ')} (${signInfo(s)})${d?`<br><b>Сила:</b> ${d.t}, ${d.d}`:''}<br><b>${h} дом:</b> ${KW.houses[h-1].area.join(', ')}<br><b>Пример:</b> ${cap(KW.planets[p1].fn[0])} се проявява ${KW.signs[s].adv[0]} в сферата на ${KW.houses[h-1].area[0]}.`;
+  } else { const p2=r(KW_PLANETS.filter(k=>k!==p1&&!['Node','Lilith'].includes(k))), a=r([0,60,90,120,180]); const A=KW.aspects[a];
+    if (t==='asp'){ task=`${g(BY[p1].g)} ${pn(p1)} ${g(aspOf(a).g)} ${aspOf(a).n} ${g(BY[p2].g)} ${pn(p2)}`;
+      rev=`<b>${pn(p1)}:</b> ${KW.planets[p1].fn.join(', ')}<br><b>${aspOf(a).n}:</b> ${A.nature}<br><b>${pn(p2)}:</b> ${KW.planets[p2].fn.join(', ')}<br><b>Пример:</b> ${cap(KW.planets[p1].fn[0])} ${A.ph[0]} ${KW.planets[p2].fn[0]}.`; }
+    else { const tp=r(['Jupiter','Saturn','Chiron','Uranus','Neptune','Pluto']); task=`${trN(tp)} ${g(aspOf(a).g)} ${aspOf(a).n} ${natN(p2)}`;
+      rev=`<b>${trN(tp)} носи:</b> ${KW.planets[tp].tr.join(', ')}<br><b>${aspOf(a).n}:</b> ${A.nature}<br><b>${cap(natN(p2))}:</b> ${KW.planets[p2].fn.join(', ')}<br><b>Пример:</b> ${trN(tp)} носи ${KW.planets[tp].tr[0]} и ${A.ph[0]} ${KW.planets[p2].fn[0]}.`; }
+  }
+  $('qzTask').innerHTML=task; $('qzReveal').innerHTML=rev; $('qzReveal').hidden=true; $('qzAnswer').value='';
+}
+function refRender(){
+  const t=$('refType').value; let h='';
+  if (t==='planets') h=`<thead><tr><th class="t l">Планета</th><th class="t l">Ключови думи</th><th class="t l">Като транзит носи</th></tr></thead><tbody>`+KW_PLANETS.map(k=>`<tr><td class="l">${nameCell(k)}</td><td class="l" style="font-family:var(--f-body);white-space:normal">${KW.planets[k].fn.join(', ')}</td><td class="l" style="font-family:var(--f-body);white-space:normal">${KW.planets[k].tr.join(', ')}</td></tr>`).join('');
+  else if (t==='signs') h=`<thead><tr><th class="t l">Знак</th><th class="t l">Стихия · кръст · управител</th><th class="t l">Как</th></tr></thead><tbody>`+SIGNS.map((n,i)=>`<tr><td class="l"><span class="sg">${SGg[i]}</span> <span style="font-family:var(--f-body)">${n}</span></td><td class="l" style="font-family:var(--f-body)">${signInfo(i)}</td><td class="l" style="font-family:var(--f-body);white-space:normal">${KW.signs[i].adv.join(', ')}</td></tr>`).join('');
+  else if (t==='houses') h=`<thead><tr><th class="t l">Дом</th><th class="t l">Сфера</th></tr></thead><tbody>`+KW.houses.map((x,i)=>`<tr><td class="l" style="font-family:var(--f-body)">${i+1} · ${x.name}</td><td class="l" style="font-family:var(--f-body);white-space:normal">${x.area.join(', ')}</td></tr>`).join('');
+  else if (t==='aspects') h=`<thead><tr><th class="t l">Аспект</th><th class="t l">Смисъл</th><th class="t l">Свързващи думи</th></tr></thead><tbody>`+[0,60,90,120,180,150].map(a=>`<tr><td class="l">${aspCell(a)} ${a}°</td><td class="l" style="font-family:var(--f-body);white-space:normal">${KW.aspects[a].nature}</td><td class="l" style="font-family:var(--f-body);white-space:normal">${KW.aspects[a].ph.join(' / ')}</td></tr>`).join('');
+  else h=`<thead><tr><th class="t l">Планета</th><th class="t l">Обител</th><th class="t l">Екзалтация</th><th class="t l">Изгнание</th><th class="t l">Падение</th></tr></thead><tbody>`+Object.keys(DOMICILE).map(k=>`<tr><td class="l">${nameCell(k)}</td><td class="l" style="font-family:var(--f-body)">${DOMICILE[k].map(s=>SIGNS[s]).join(', ')}</td><td class="l" style="font-family:var(--f-body)">${EXALT[k]!=null?SIGNS[EXALT[k]]:'—'}</td><td class="l" style="font-family:var(--f-body)">${DOMICILE[k].map(s=>SIGNS[(s+6)%12]).join(', ')}</td><td class="l" style="font-family:var(--f-body)">${EXALT[k]!=null?SIGNS[(EXALT[k]+6)%12]:'—'}</td></tr>`).join('');
+  $('refTable').innerHTML=h+'</tbody>';
+}
 
 // =============== BACKUP ===============
 $('bkCopy').onclick=()=>{
