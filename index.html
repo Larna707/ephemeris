@@ -130,6 +130,8 @@ select{max-width:100%}
     <button role="tab" data-tab="sr">Солар и лунар</button>
     <button role="tab" data-tab="pd">Прогресии и дирекции</button>
     <button role="tab" data-tab="kw">Ключови думи</button>
+    <button role="tab" data-tab="syn">Синастрия</button>
+    <button role="tab" data-tab="hor">Хорар</button>
     <button role="tab" data-tab="rect">Ректификация</button>
     <button role="tab" data-tab="cyc">Цикли и възрасти</button>
     <button role="tab" data-tab="jr">Дневник</button>
@@ -525,6 +527,17 @@ select{max-width:100%}
       <ul class="evlist" id="kwChartAsp"></ul>
     </div>
 
+    <div class="panel" style="margin-top:18px">
+      <h2 id="hrHead">Управители на домовете</h2>
+      <p class="note">Всеки дом се управлява от планетата на знака на върха му. Там, където стои управителят, показва чрез какво се осъществява темата на дома. Пример: управителят на 10 дом в 4 дом значи, че кариерата е свързана с дома или семейството.</p>
+      <div class="controls">
+        <label class="field"><span>Управители</span><select id="hrSys"><option value="mod">Съвременни (Уран, Нептун, Плутон)</option><option value="trad">Традиционни (до Сатурн)</option></select></label>
+        <button type="button" id="hrCopy">Копирай всичко</button>
+      </div>
+      <div class="kv" id="hrInfo" style="margin:10px 0"></div>
+      <div class="scroll"><table id="hrTable"></table></div>
+    </div>
+
     <div class="grid2" style="margin-top:18px">
       <div class="panel">
         <h2>Тренировка</h2>
@@ -539,6 +552,92 @@ select{max-width:100%}
         <h2>Справочник</h2>
         <div class="controls"><label class="field"><span>Покажи</span><select id="refType"><option value="planets">Планети</option><option value="signs">Знаци</option><option value="houses">Домове</option><option value="aspects">Аспекти</option><option value="dign">Достойнства на планетите</option></select></label></div>
         <div class="scroll"><table id="refTable"></table></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SYNASTRY -->
+  <section id="tab-syn" role="tabpanel" hidden>
+    <div class="panel">
+      <h2>Синастрия: две карти заедно</h2>
+      <p class="note">Първата карта е избраната горе в менюто „Натална карта“. Втората изберете тук. Напрегнатите аспекти не са „лоши“: те дават динамика и изискват работа. Хармоничните дават лекота. Аспектите между Уран, Нептун и Плутон на двамата не се показват, защото са общи за цяло поколение.</p>
+      <div class="controls">
+        <div class="field"><span>Първа карта (вътре)</span><b id="synAName" style="padding:6px 0"></b></div>
+        <label class="field"><span>Втора карта (отвън)</span><select id="synB"></select></label>
+        <button type="button" id="synSwap">Размени картите</button>
+        <button type="button" id="synCopy">Копирай всичко</button>
+      </div>
+      <p class="note" id="synNone" hidden>Нужни са поне две запазени карти. Добавете втора карта от бутона „Нова“ горе.</p>
+    </div>
+    <div id="synBody">
+      <div class="grid2" style="margin-top:18px">
+        <div class="panel"><svg class="wheel" id="synWheel" viewBox="0 0 520 520" role="img" aria-label="Две карти една в друга"></svg><p class="note"><span class="lg-in" id="synLgA"></span> · <span class="lg-out" id="synLgB"></span></p></div>
+        <div class="panel">
+          <h2>Главни теми</h2>
+          <div class="kv" id="synSum"></div>
+          <ul class="evlist" id="synThemes" style="margin-top:10px"></ul>
+        </div>
+      </div>
+      <div class="panel" style="margin-top:18px">
+        <h2>Аспекти между картите</h2>
+        <p class="note">Подредени по важност: първо Слънце, Луна, Асцендент, Венера и Марс и най-тесните орбиси.</p>
+        <div class="scroll"><table id="synTable"></table></div>
+      </div>
+      <div class="grid2" style="margin-top:18px">
+        <div class="panel"><h2 id="synOvBH"></h2><p class="note">Къде в живота на човека се чувства влиянието на другия.</p><div class="scroll"><table id="synOvB"></table></div></div>
+        <div class="panel"><h2 id="synOvAH"></h2><p class="note">Същото, погледнато от другата страна.</p><div class="scroll"><table id="synOvA"></table></div></div>
+      </div>
+      <div class="panel" style="margin-top:18px">
+        <h2>Композитна карта</h2>
+        <p class="note">Средната точка между планетите на двамата. Описва връзката като отделно цяло: какъв „характер“ има самата връзка.</p>
+        <div class="scroll"><table id="synComp"></table></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HORARY -->
+  <section id="tab-hor" role="tabpanel" hidden>
+    <div class="panel">
+      <h2>Хорарен въпрос</h2>
+      <p class="note">Хорарът е карта за момента, в който въпросът е ясно формулиран. Изберете дома, за който е въпросът. Страницата намира значителите и проверява дали се сближават. Правилата са традиционни, по Уилям Лили. Резултатът е ориентир, не присъда.</p>
+      <div class="controls">
+        <label class="field" style="flex:1 1 22em"><span>Въпрос</span><input id="horQ" type="text" placeholder="напр. Ще получа ли работата?"></label>
+        <label class="field" style="flex:1 1 20em"><span>За какво е въпросът</span><select id="horH"></select></label>
+      </div>
+      <div class="controls">
+        <label class="field"><span>Дата</span><input id="horDate" type="date" min="1900-01-01" max="2100-12-31"></label>
+        <label class="field"><span>Час (местен)</span><input id="horTime" type="time" step="60"></label>
+        <label class="field"><span>Часова зона</span><select id="horTz"></select></label>
+        <label class="field" style="flex:1 1 16em"><span>Място</span><input id="horCity" type="text" list="placeList" autocomplete="off"></label>
+        <label class="field"><span>Ширина</span><input id="horLat" type="number" step="0.0001"></label>
+        <label class="field"><span>Дължина</span><input id="horLon" type="number" step="0.0001"></label>
+      </div>
+      <div class="flex"><button type="button" id="horNow">Сега</button><button class="primary" type="button" id="horRun">Изчисли</button><button type="button" id="horCopy">Копирай резултата</button><span class="status" id="horStatus"></span></div>
+    </div>
+    <div class="grid2" style="margin-top:18px">
+      <div class="panel"><svg class="wheel" id="horWheel" viewBox="0 0 520 520" role="img" aria-label="Хорарна карта"></svg><div class="kv" id="horMeta"></div></div>
+      <div class="panel">
+        <h2>Отговор накратко</h2>
+        <div class="kwsentence" id="horVerdict" aria-live="polite"></div>
+        <p class="note" id="horAsp"></p>
+        <h3>Проверки преди тълкуване</h3>
+        <ul class="evlist" id="horChecks"></ul>
+      </div>
+    </div>
+    <div class="panel" style="margin-top:18px">
+      <h2>Значители</h2>
+      <div class="scroll"><table id="horSig"></table></div>
+    </div>
+    <div class="grid2" style="margin-top:18px">
+      <div class="panel">
+        <h2>Пътят на Луната до края на знака</h2>
+        <p class="note">Аспектите на Луната описват как ще се развият нещата. Последният минал аспект описва какво току-що е станало.</p>
+        <ul class="evlist" id="horMoon"></ul>
+      </div>
+      <div class="panel">
+        <h2>Сила на планетите</h2>
+        <div class="scroll"><table id="horDig"></table></div>
+        <p class="note">Обител +5, екзалтация +4, тригон +3, термин +2, декан +1. Изгнание −5, падение −4, перегрин (без достойнство) −5. Термините са египетските, тригонът е по Лили.</p>
       </div>
     </div>
   </section>
@@ -7401,7 +7500,7 @@ INTX.initUI();
 
 
 // =============== TABS ===============
-const TABS=['eph','chart','an','tr','pass','hs','sr','pd','kw','rect','cyc','jr'];
+const TABS=['eph','chart','an','tr','pass','hs','sr','pd','kw','syn','hor','rect','cyc','jr'];
 tab = store.get('tab','eph'); if (!TABS.includes(tab)) tab='eph';
 function showTab(t){
   tab=t; store.set('tab',t);
@@ -7419,7 +7518,9 @@ function render(){
   else if (tab==='sr') runSR();
   else if (tab==='pd') runPD();
   else if (tab==='rect') initRect();
-  else if (tab==='kw') { kwRender(); refRender(); }
+  else if (tab==='kw') { kwRender(); refRender(); hrRender(); }
+  else if (tab==='syn') runSyn();
+  else if (tab==='hor') { initHor(); runHor(); }
   else if (tab==='cyc') INTX.runCyc();
   else if (tab==='jr') INTX.renderJr();
 }
@@ -8046,6 +8147,339 @@ function refRender(){
   else if (t==='aspects') h=`<thead><tr><th class="t l">Аспект</th><th class="t l">Смисъл</th><th class="t l">Свързващи думи</th></tr></thead><tbody>`+[0,60,90,120,180,150].map(a=>`<tr><td class="l">${aspCell(a)} ${a}°</td><td class="l" style="font-family:var(--f-body);white-space:normal">${KW.aspects[a].nature}</td><td class="l" style="font-family:var(--f-body);white-space:normal">${KW.aspects[a].ph.join(' / ')}</td></tr>`).join('');
   else h=`<thead><tr><th class="t l">Планета</th><th class="t l">Обител</th><th class="t l">Екзалтация</th><th class="t l">Изгнание</th><th class="t l">Падение</th></tr></thead><tbody>`+Object.keys(DOMICILE).map(k=>`<tr><td class="l">${nameCell(k)}</td><td class="l" style="font-family:var(--f-body)">${DOMICILE[k].map(s=>SIGNS[s]).join(', ')}</td><td class="l" style="font-family:var(--f-body)">${EXALT[k]!=null?SIGNS[EXALT[k]]:'—'}</td><td class="l" style="font-family:var(--f-body)">${DOMICILE[k].map(s=>SIGNS[(s+6)%12]).join(', ')}</td><td class="l" style="font-family:var(--f-body)">${EXALT[k]!=null?SIGNS[(EXALT[k]+6)%12]:'—'}</td></tr>`).join('');
   $('refTable').innerHTML=h+'</tbody>';
+}
+
+// =============== УПРАВИТЕЛИ НА ДОМОВЕТЕ и ДИСПОЗИТОРИ ===============
+const RUL_MOD=['Mars','Venus','Mercury','Moon','Sun','Mercury','Venus','Pluto','Jupiter','Saturn','Uranus','Neptune'];
+const RUL_TRAD=['Mars','Venus','Mercury','Moon','Sun','Mercury','Venus','Mars','Jupiter','Saturn','Saturn','Jupiter'];
+const sgn = l => Math.floor(norm(l)/30);
+let hrText='';
+function hrRender(){
+  const p=active(), n=natalOf(p), trad=$('hrSys').value==='trad', R=trad?RUL_TRAD:RUL_MOD;
+  const pos=k=>n.pts.find(x=>x.k===k);
+  const lines=[`${p.name}: управители на домовете (${trad?'традиционни':'съвременни'})`,''];
+  const rows=[];
+  for (let h=1; h<=12; h++){
+    const s=sgn(n.hs.cusp[h]), r=R[s], q=pos(r), hr=q.house, a1=KW.houses[h-1].area[0], a2=KW.houses[hr-1].area[0];
+    const sent = hr===h ? `Управителят е в собствения си дом: темата за ${a1} е силна и самостоятелна.` : `Темата за ${a1} се осъществява чрез ${a2} (${hr} дом).`;
+    lines.push(`${h} дом в ${SIGNS[s]}: управител ${pn(r)} в ${SIGNS[sgn(q.lon)]}, ${hr} дом. ${sent}`);
+    rows.push(`<tr><td>${h}</td><td class="l" style="font-family:var(--f-body)">${KW.houses[h-1].name}</td><td><span class="sg">${SGg[s]}</span></td><td class="l">${nameCell(r)}</td><td>${L(q.lon)}</td><td>${hr}</td><td class="l" style="font-family:var(--f-body);white-space:normal;min-width:16em">${sent}</td></tr>`);
+  }
+  $('hrTable').innerHTML=`<thead><tr><th class="t">Дом</th><th class="t l">Сфера</th><th class="t">Знак</th><th class="t l">Управител</th><th class="t">Позиция</th><th class="t">В дом</th><th class="t l">Какво означава</th></tr></thead><tbody>${rows.join('')}</tbody>`;
+  // управител на картата
+  const as=sgn(n.hs.asc), cr=R[as], cq=pos(cr);
+  const info=[`<dt>Управител на картата</dt><dd style="font-family:var(--f-body)">${pn(cr)} (Асцендентът е в ${SIGNS[as]}) в ${SIGNS[sgn(cq.lon)]}, ${cq.house} дом. Това е планетата, която най-силно описва човека. Сферата на ${KW.houses[cq.house-1].area[0]} е важна в живота на човека.</dd>`];
+  lines.push('',`Управител на картата: ${pn(cr)} в ${SIGNS[sgn(cq.lon)]}, ${cq.house} дом.`);
+  // диспозитори
+  const PL = trad ? TRAD7 : ['Sun','Moon','Mercury','Venus','Mars','Jupiter','Saturn','Uranus','Neptune','Pluto'];
+  const disp = k => R[sgn(pos(k).lon)];
+  const finals=new Set(); let loops=false;
+  PL.forEach(k=>{ let c=k; const seen=new Set(); while(!seen.has(c)){ seen.add(c); const d=disp(c); if(d===c){ finals.add(c); return; } c=d; } loops=true; });
+  let ft;
+  if (finals.size===1 && !loops){ const f=[...finals][0]; ft=`${pn(f)} в ${SIGNS[sgn(pos(f).lon)]}. Всички планети по веригата от управители стигат до нея. Тя е главната сила в картата.`; }
+  else if (finals.size) ft=`Няма единствен. Веригите от управители стигат до ${[...finals].map(f=>`${pn(f)} в ${SIGNS[sgn(pos(f).lon)]}`).join(', ')}${loops?', а част от тях се въртят в кръг':''}. Картата има няколко центъра.`;
+  else ft='Няма. Веригите от управители се въртят в кръг. Картата няма една водеща планета.';
+  info.push(`<dt>Краен диспозитор</dt><dd style="font-family:var(--f-body)">${ft}</dd>`);
+  lines.push(`Краен диспозитор: ${ft}`);
+  const mr=[];
+  for (let i=0;i<PL.length;i++) for (let j=i+1;j<PL.length;j++){ const a=PL[i], b=PL[j]; if(disp(a)===b && disp(b)===a) mr.push(`${pn(a)} в ${SIGNS[sgn(pos(a).lon)]} и ${pn(b)} в ${SIGNS[sgn(pos(b).lon)]}`); }
+  const mt = mr.length ? mr.join('; ')+'. Двете планети си помагат: всяка стои в знака на другата и могат да си разменят ролите.' : 'Няма.';
+  info.push(`<dt>Взаимна рецепция</dt><dd style="font-family:var(--f-body)">${mt}</dd>`);
+  lines.push(`Взаимна рецепция: ${mt}`);
+  $('hrInfo').innerHTML=info.join('');
+  $('hrHead').textContent=`Управители на домовете: ${p.name}`;
+  hrText=lines.join('\n');
+}
+$('hrSys').onchange=hrRender;
+$('hrCopy').onclick=()=>{ hrRender(); copyText(hrText); };
+
+// =============== СИНАСТРИЯ ===============
+const SYN_KEYS=['Sun','Moon','Mercury','Venus','Mars','Jupiter','Saturn','Chiron','Uranus','Neptune','Pluto','Node'];
+const SLOWG=['Uranus','Neptune','Pluto'];
+const PERS=['Sun','Moon','Mercury','Venus','Mars','ASC'];
+const SYN_W={Sun:3,Moon:3,ASC:3,Venus:2.5,Mars:2.5,Mercury:2,MC:1.5,Jupiter:1.5,Saturn:1.5,Chiron:1,Uranus:1,Neptune:1,Pluto:1,Node:1};
+const KW_ANG={ASC:{fn:['личността','първото впечатление'],note:'Асцендент'},MC:{fn:['целите','общественият образ'],note:'MC'}};
+const kfn = k => (KW.planets[k]||KW_ANG[k]).fn[0];
+const SYN_PH={0:'се слива с',60:'лесно си сътрудничи с',90:'влиза в напрежение с',120:'се подкрепя хармонично от',180:'търси баланс с'};
+const fname = p => ((p.name||'').trim().split(/\s+/)[0]) || 'Без име';
+function synPts(n){ return n.pts.filter(x=>SYN_KEYS.includes(x.k)).map(x=>({k:x.k,lon:x.lon,spd:x.spd,house:x.house})).concat([{k:'ASC',lon:n.hs.asc,spd:0},{k:'MC',lon:n.hs.mc,spd:0}]); }
+function synOrb(i,j){ if(i==='Node'||j==='Node') return 3; if([i,j].some(k=>['Sun','Moon','ASC'].includes(k))) return 6; if([i,j].some(k=>['Mercury','Venus','Mars','MC'].includes(k))) return 5; return 3; }
+function synAspects(nA,nB){
+  const A=synPts(nA), B=synPts(nB), out=[];
+  B.forEach(b=>A.forEach(a=>{
+    if (SLOWG.includes(a.k)&&SLOWG.includes(b.k)) return;
+    const d=Math.abs(dif(a.lon,b.lon)), om=synOrb(a.k,b.k);
+    [0,60,90,120,180].forEach(x=>{ const o=Math.abs(d-x); if(o>om) return; if((a.k==='Node'||b.k==='Node')&&x!==0) return;
+      out.push({a:a.k,b:b.k,asp:x,orb:o,w:(SYN_W[a.k]+SYN_W[b.k])*(1-o/(om+1))}); });
+  }));
+  return out.sort((x,y)=>y.w-x.w);
+}
+const SYN_RULES=[
+  {p:'Sun',q:'Moon',t:'Слънце и Луна',e:'Една от най-важните връзки за съвместен живот. Единият дава посока, другият дава емоционална опора.',h:'Нуждите на двамата се различават и трябва да се договарят.'},
+  {p:'Venus',q:'Mars',t:'Венера и Марс',e:'Привличане, романтика и страст.',h:'Привличането е силно, но понякога бурно.'},
+  {p:'Moon',q:'Moon',t:'Луна и Луна',e:'Сходен емоционален ритъм. Лесно си създават уют.',h:'Различни емоционални нужди. Нужно е търпение към реакциите на другия.'},
+  {p:'Sun',q:'Sun',t:'Слънце и Слънце',e:'Сходни цели и стил на живот.',h:'Две силни воли. Може да има съперничество.'},
+  {p:'Venus',q:'Moon',t:'Венера и Луна',e:'Нежност, грижа и привързаност.',h:'Обич има, но изразът ѝ е различен.'},
+  {p:'Venus',q:'Venus',t:'Венера и Венера',e:'Сходни вкусове и ценности.',h:'Различни представи за любов и удоволствие.'},
+  {p:'Mercury',q:'Mercury',t:'Меркурий и Меркурий',e:'Лесно се разбират и говорят.',h:'Различен начин на мислене. Спорове заради думи.'},
+  {p:'Mercury',q:'*',t:'Общуване',e:'Разговорите вървят и се учат един от друг.',h:'Думите лесно предизвикват реакция. Важно е как се казват нещата.'},
+  {p:'Saturn',q:'*',t:'Сатурн: стабилност',e:'Стабилност, ангажимент и чувство за отговорност. Такива връзки често са дълги.',h:'Връзката носи сериозност, но и критика и ограничения. Изисква търпение.'},
+  {p:'Jupiter',q:'*',t:'Юпитер: подкрепа',e:'Подкрепа, оптимизъм и щедрост. Двамата се развиват заедно.',h:'Подкрепа има, но и склонност към преувеличаване и прекаляване.'},
+  {p:'Uranus',q:'*',t:'Уран: вълнение',e:'Вълнение, свобода и нови идеи.',h:'Силно вълнение, но и нестабилност и нужда от свобода.'},
+  {p:'Neptune',q:'*',t:'Нептун: романтика',e:'Романтика, съчувствие и духовна близост.',h:'Склонност към идеализиране. Важно е да се вижда другият такъв, какъвто е.'},
+  {p:'Pluto',q:'*',t:'Плутон: дълбочина',e:'Дълбоко, силно привличане, което променя и двамата.',h:'Силна връзка, но с риск от ревност и контрол.'},
+  {p:'Node',q:'*',t:'Възел: съдбовна среща',e:'Усещане за съдбовна среща. Връзката помага на развитието.',h:'Усещане за съдбовна среща.'},
+  {p:'Chiron',q:'*',t:'Хирон: лечение',e:'Връзката може да лекува стари рани.',h:'Връзката докосва стари рани. Нужна е деликатност.'},
+  {p:'ASC',q:'*',t:'Асцендент: първо впечатление',e:'Силно първо впечатление и естествено привличане.',h:'Силно първо впечатление, но и триене в начина на поведение.'}
+];
+function synTheme(x){
+  for (const r of SYN_RULES){
+    const ok = r.q==='*' ? ((x.a===r.p && PERS.includes(x.b) && x.b!==r.p) || (x.b===r.p && PERS.includes(x.a) && x.a!==r.p))
+                         : ((x.a===r.p&&x.b===r.q)||(x.a===r.q&&x.b===r.p));
+    if (ok) return {t:r.t, txt:[90,180].includes(x.asp)?r.h:r.e};
+  }
+  return null;
+}
+let synText='';
+function runSyn(){
+  const pA=active(), others=profiles.filter(p=>p.id!==pA.id);
+  $('synAName').textContent=pA.name;
+  if (!others.length){ $('synNone').hidden=false; $('synBody').hidden=true; return; }
+  $('synNone').hidden=true; $('synBody').hidden=false;
+  let bid=store.get('synB',null); if(!others.some(p=>p.id===bid)) bid=($('synB').value && others.some(p=>p.id===$('synB').value)) ? $('synB').value : others[0].id;
+  fillSelect($('synB'), others.map(p=>[p.id, p.name]), bid);
+  const pB=others.find(p=>p.id===bid), nA=natalOf(pA), nB=AC.chart(localToUTC(pB.date,pB.time,pB.tz,pB.off), +pB.lat, +pB.lon);
+  const A=fname(pA), B=fname(pB)===A ? pB.name : fname(pB);
+  $('synLgA').textContent=`Вътре: ${pA.name}`; $('synLgB').textContent=`Отвън: ${pB.name}`;
+  wheel($('synWheel'), nA, {outer:{pts:synPts(nB).filter(x=>x.k!=='Node')}, orb:3});
+  const asp=synAspects(nA,nB);
+  const lines=[`Синастрия: ${pA.name} и ${pB.name}`,''];
+  const easy=asp.filter(x=>[60,120].includes(x.asp)).length, hard=asp.filter(x=>[90,180].includes(x.asp)).length, conj=asp.filter(x=>x.asp===0).length;
+  $('synSum').innerHTML=`<dt>Хармонични</dt><dd>${easy}</dd><dt>Напрегнати</dt><dd>${hard}</dd><dt>Съвпади</dt><dd>${conj}</dd>`;
+  lines.push(`Хармонични аспекти: ${easy}, напрегнати: ${hard}, съвпади: ${conj}.`);
+  // теми
+  const seen=new Set(), th=[];
+  asp.filter(x=>x.orb<=4).forEach(x=>{ const t=synTheme(x); if(t && !seen.has(t.t)){ seen.add(t.t); th.push({...t,x}); } });
+  $('synThemes').innerHTML = th.slice(0,8).map(t=>`<li><time>${PN(t.x.b)} <span class="pg ${aspCls(t.x.asp)}">${g(aspOf(t.x.asp).g)}</span> ${PN(t.x.a)}</time><span><b>${t.t}.</b> ${t.txt}</span></li>`).join('') || '<li><span>Няма тесни връзки между личните планети.</span></li>';
+  lines.push('','Главни теми:'); th.slice(0,8).forEach(t=>lines.push(`${t.t} (${pn(t.x.b)} ${aspOf(t.x.asp).n} ${pn(t.x.a)}): ${t.txt}`));
+  // таблица
+  lines.push('','Аспекти между картите:');
+  $('synTable').innerHTML=`<thead><tr><th class="t l">${escapeHtml(B)}</th><th class="t l">Аспект</th><th class="t l">${escapeHtml(A)}</th><th class="t">Орбис</th><th class="t l">Изречение</th></tr></thead><tbody>`+asp.map(x=>{
+    const s=`${cap(kfn(x.b))} на ${B} (${pn(x.b)}) ${SYN_PH[x.asp]} ${kfn(x.a)} на ${A} (${pn(x.a)}).`;
+    lines.push(`${pn(x.b)} ${aspOf(x.asp).n} ${pn(x.a)} (${x.orb.toFixed(1)}°): ${s}`);
+    return `<tr><td class="l">${nameCell(x.b)}</td><td class="l">${aspCell(x.asp)}</td><td class="l">${nameCell(x.a)}</td><td>${x.orb.toFixed(1)}°</td><td class="l" style="font-family:var(--f-body);white-space:normal;min-width:18em">${s}</td></tr>`;
+  }).join('')+'</tbody>';
+  // наслагване в домовете
+  const ov=(from, to, nFrom, nTo, tbl, head)=>{
+    $(head).textContent=`Планетите на ${nFrom} в домовете на ${nTo}`;
+    lines.push('',`Планетите на ${nFrom} в домовете на ${nTo}:`);
+    $(tbl).innerHTML=`<thead><tr><th class="t l">Планета</th><th class="t">Дом</th><th class="t l">Какво означава</th></tr></thead><tbody>`+synPts(from).filter(x=>x.k!=='MC'&&x.k!=='ASC').map(x=>{
+      const h=AC.houseOf(x.lon,to.hs.cusp), s=`${cap(kfn(x.k))} на ${nFrom} докосва сферата на ${KW.houses[h-1].area[0]} на ${nTo}.`;
+      lines.push(`${pn(x.k)} в ${h} дом: ${s}`);
+      return `<tr><td class="l">${nameCell(x.k)}</td><td>${h}</td><td class="l" style="font-family:var(--f-body);white-space:normal">${s}</td></tr>`;
+    }).join('')+'</tbody>';
+  };
+  ov(nB,nA,B,A,'synOvB','synOvBH'); ov(nA,nB,A,B,'synOvA','synOvAH');
+  // композит
+  const pa=synPts(nA), pb=synPts(nB);
+  lines.push('','Композитна карта:');
+  $('synComp').innerHTML=`<thead><tr><th class="t l">Точка</th><th class="t">Позиция</th><th class="t l">Какво означава за връзката</th></tr></thead><tbody>`+pa.map(a=>{
+    const b=pb.find(x=>x.k===a.k), m=norm(a.lon+dif(b.lon,a.lon)/2), s=sgn(m);
+    const t=`${cap(kfn(a.k))} на връзката се проявява ${KW.signs[s].adv[0]} (${SIGNS[s]}).`;
+    lines.push(`${pn(a.k)} ${Ltxt(m)}: ${t}`);
+    return `<tr><td class="l">${nameCell(a.k)}</td><td>${L(m)}</td><td class="l" style="font-family:var(--f-body);white-space:normal">${t}</td></tr>`;
+  }).join('')+'</tbody>';
+  synText=lines.join('\n');
+}
+$('synB').onchange=()=>{ store.set('synB',$('synB').value); runSyn(); };
+$('synSwap').onclick=()=>{ const b=$('synB').value; if(!b) return; store.set('synB',activeId); activeId=b; saveProfiles(); renderProfileSel(); profileChanged(); runSyn(); };
+$('synCopy').onclick=()=>copyText(synText);
+
+// =============== ХОРАР ===============
+const TRAD7=['Sun','Moon','Mercury','Venus','Mars','Jupiter','Saturn'];
+const CHALD=['Saturn','Jupiter','Mars','Sun','Venus','Mercury','Moon'];
+const TRIP=[['Sun','Jupiter'],['Venus','Moon'],['Saturn','Mercury'],['Mars','Mars']]; // огън, земя, въздух, вода (ден, нощ)
+const TERMS=[
+  [[6,'Jupiter'],[12,'Venus'],[20,'Mercury'],[25,'Mars'],[30,'Saturn']],
+  [[8,'Venus'],[14,'Mercury'],[22,'Jupiter'],[27,'Saturn'],[30,'Mars']],
+  [[6,'Mercury'],[12,'Jupiter'],[17,'Venus'],[24,'Mars'],[30,'Saturn']],
+  [[7,'Mars'],[13,'Venus'],[19,'Mercury'],[26,'Jupiter'],[30,'Saturn']],
+  [[6,'Jupiter'],[11,'Venus'],[18,'Saturn'],[24,'Mercury'],[30,'Mars']],
+  [[7,'Mercury'],[17,'Venus'],[21,'Jupiter'],[28,'Mars'],[30,'Saturn']],
+  [[6,'Saturn'],[14,'Mercury'],[21,'Jupiter'],[28,'Venus'],[30,'Mars']],
+  [[7,'Mars'],[11,'Venus'],[19,'Mercury'],[24,'Jupiter'],[30,'Saturn']],
+  [[12,'Jupiter'],[17,'Venus'],[21,'Mercury'],[26,'Saturn'],[30,'Mars']],
+  [[7,'Mercury'],[14,'Jupiter'],[22,'Venus'],[26,'Saturn'],[30,'Mars']],
+  [[7,'Mercury'],[13,'Venus'],[20,'Jupiter'],[25,'Mars'],[30,'Saturn']],
+  [[12,'Venus'],[16,'Jupiter'],[19,'Mercury'],[28,'Mars'],[30,'Saturn']]
+];
+function essDig(k, lon, day){
+  const s=sgn(lon), d=norm(lon)-s*30, out=[]; let sc=0;
+  if (RUL_TRAD[s]===k){ out.push('обител +5'); sc+=5; }
+  if (EXALT[k]===s){ out.push('екзалтация +4'); sc+=4; }
+  if (TRIP[s%4][day?0:1]===k){ out.push('тригон +3'); sc+=3; }
+  if (TERMS[s].find(t=>d<t[0])[1]===k){ out.push('термин +2'); sc+=2; }
+  if (CHALD[(s*3+Math.floor(d/10)+2)%7]===k){ out.push('декан +1'); sc+=1; }
+  const pos=sc>0;
+  if (RUL_TRAD[(s+6)%12]===k){ out.push('изгнание −5'); sc-=5; }
+  if (EXALT[k]!=null && (EXALT[k]+6)%12===s){ out.push('падение −4'); sc-=4; }
+  if (!pos && !out.length){ out.push('перегрин −5'); sc-=5; }
+  return {sc, out};
+}
+const HOR_HOUSES=[
+  [1,'1 дом: аз, тялото, здравето ми'],[2,'2 дом: пари, вещи, загубена вещ'],[3,'3 дом: братя и сестри, съседи, документи, кратко пътуване'],
+  [4,'4 дом: жилище, имот, баща, семейство'],[5,'5 дом: дете, бременност, влюбване, забавление'],[6,'6 дом: работа като служител, болест, колеги, домашни любимци'],
+  [7,'7 дом: партньор, брак, договор, другата страна'],[8,'8 дом: чужди пари, кредит, наследство'],[9,'9 дом: далечно пътуване, учене, съд, чужбина'],
+  [10,'10 дом: кариера, нова работа, повишение, шеф, майка'],[11,'11 дом: приятели, надежди, помощ'],[12,'12 дом: скрити неща, болница, тайни врагове']
+];
+function perfs(k1,k2,from,to,step){
+  const out=[], A=[0,60,-60,90,-90,120,-120,180], ang=d=>dif(AC.lon(k1,AC.T(d)),AC.lon(k2,AC.T(d)));
+  let pd=from, pa=ang(from);
+  for (let ms=from.getTime()+step*864e5; ms<=to.getTime()+1; ms+=step*864e5){
+    const d=new Date(Math.min(ms,to.getTime())), a=ang(d);
+    A.forEach(x=>{ const v0=dif(pa,x), v1=dif(a,x); if (v0!==0 && (v0<0)!==(v1<0) && Math.abs(v0-v1)<90) out.push({d:AC.bisect(t=>dif(ang(t),x), pd, d, 1/1440), asp:Math.abs(x), k:k2}); });
+    pd=d; pa=a;
+  }
+  return out.sort((x,y)=>x.d-y.d);
+}
+const FSTEP={Moon:0.02,Mercury:0.25,Venus:0.25,Sun:0.5,Mars:0.5,Jupiter:1,Saturn:1};
+function signEdge(k,t0,dir){ // момент на влизане (dir<0) или излизане (dir>0) от текущия знак
+  const s=sgn(AC.lon(k,AC.T(t0))), tgt=dir>0?(s+1)*30:s*30, days=k==='Moon'?3:120;
+  const a=dir>0?t0:new Date(t0.getTime()-days*864e5), b=dir>0?new Date(t0.getTime()+days*864e5):t0;
+  const z=AC.scanZeros(d=>dif(AC.lon(k,AC.T(d)),tgt), a, b, k==='Moon'?0.02:0.5);
+  return z.length ? (dir>0?z[0]:z[z.length-1]) : null;
+}
+function planetHour(d, lat, lon){
+  try{
+    const obs=new Astronomy.Observer(lat,lon,0), B=Astronomy.Body.Sun;
+    const rs=(dir,from)=>Astronomy.SearchRiseSet(B,obs,dir,from,2);
+    let r=rs(+1,new Date(d.getTime()-1.5*864e5)); if(!r||r.date>d) return null;
+    for(;;){ const nx=rs(+1,new Date(r.date.getTime()+60e3)); if(!nx||nx.date>d) break; r=nx; }
+    const s=rs(-1,r.date); if(!s) return null;
+    let start, end, day=true;
+    if (d<s.date){ start=r.date; end=s.date; } else { const r1=rs(+1,s.date); if(!r1) return null; start=s.date; end=r1.date; day=false; }
+    const len=(end-start)/12, i=Math.min(11,Math.floor((d-start)/len));
+    const wd=new Date(r.date.getTime()+lon/15*3600e3).getUTCDay();
+    const dr=['Sun','Moon','Mars','Mercury','Jupiter','Venus','Saturn'][wd];
+    const n=(day?0:12)+i;
+    return {dayRuler:dr, hourRuler:CHALD[(CHALD.indexOf(dr)+n)%7], n:n+1, day, from:new Date(start.getTime()+i*len), to:new Date(start.getTime()+(i+1)*len)};
+  }catch(e){ return null; }
+}
+let horInit=false, horText='';
+function initHor(){
+  if (horInit) return; horInit=true;
+  fillSelect($('horH'), HOR_HOUSES, store.get('horH','7'));
+  fillSelect($('horTz'), ZONES.filter(z=>z[0]!=='manual'), 'Europe/Sofia');
+  const loc=store.get('horLoc',{city:'гр. София (обл. София (столица))',lat:42.6977,lon:23.3219,tz:'Europe/Sofia'});
+  $('horCity').value=loc.city||''; $('horLat').value=loc.lat; $('horLon').value=loc.lon; $('horTz').value=loc.tz||'Europe/Sofia';
+  horNow();
+}
+function horNow(){ const tz=$('horTz').value, n=new Date(), z=new Date(n.getTime()+tzOffsetMin(n,tz)*60000); $('horDate').value=z.toISOString().slice(0,10); $('horTime').value=z.toISOString().slice(11,16); }
+$('horNow').onclick=()=>{ horNow(); runHor(); };
+$('horRun').onclick=()=>runHor();
+$('horH').onchange=()=>{ store.set('horH',$('horH').value); runHor(); };
+$('horCity').onchange=()=>{ const f=findPlace($('horCity').value); if(f){ $('horCity').value=f.label; $('horLat').value=f.lat; $('horLon').value=f.lon; $('horTz').value=f.tz; $('horStatus').textContent=''; } else if($('horCity').value.trim()) $('horStatus').textContent='Не намирам мястото. Въведете ширина и дължина.'; };
+$('horCopy').onclick=()=>copyText(horText);
+const recv=(a,b,lonA)=>{ const s=sgn(lonA); return RUL_TRAD[s]===b ? 'обител' : EXALT[b]===s ? 'екзалтация' : ''; }; // b приема a
+const modal=s=>['кардинален','фиксиран','мутабилен'][s%3];
+function runHor(){
+  const lat=+$('horLat').value, lon=+$('horLon').value;
+  if (!$('horDate').value || !isFinite(lat) || !isFinite(lon) || Math.abs(lat)>89){ $('horStatus').textContent='Въведете дата, час и място.'; return; }
+  store.set('horLoc',{city:$('horCity').value,lat,lon,tz:$('horTz').value});
+  const t0=localToUTC($('horDate').value, $('horTime').value||'12:00', $('horTz').value, 0);
+  const c=AC.chart(t0,lat,lon), P=k=>c.pts.find(x=>x.k===k);
+  const H=+$('horH').value, sun=P('Sun'), day=sun.house>=7;
+  const q=$('horQ').value.trim();
+  const lines=[`Хорар${q?': '+q:''}`, `Момент: ${$('horDate').value} ${$('horTime').value} (${$('horTz').value}), ${lat.toFixed(4)}, ${lon.toFixed(4)}`, `Тема: ${HOR_HOUSES[H-1][1]}`, ''];
+  wheel($('horWheel'), c);
+  // значители
+  const ascS=sgn(c.hs.asc), q1=RUL_TRAD[ascS], hS=sgn(c.hs.cusp[H]), q2=RUL_TRAD[hS];
+  const same = q1===q2 && H!==1;
+  // проверки
+  const chk=[]; const ad=norm(c.hs.asc)-ascS*30;
+  const add=(ok,title,txt)=>{ chk.push(`<li><time><span class="chip ${ok?'easy':'hard'}" style="margin:0">${ok?'наред':'внимание'}</span></time><span><b>${title}.</b> ${txt}</span></li>`); lines.push(`${ok?'[наред]':'[внимание]'} ${title}. ${txt}`); };
+  lines.push('Проверки преди тълкуване:');
+  if (ad<3) add(false,'Ранен Асцендент',`${ad.toFixed(1)}° от знака. Въпросът може да е преждевременен: нещата още не са узрели.`);
+  else if (ad>27) add(false,'Късен Асцендент',`${ad.toFixed(1)}° от знака. Въпросът може да е закъснял: решението вече е взето или човекът знае отговора.`);
+  else add(true,'Асцендент',`${ad.toFixed(1)}° от знака. Картата става за тълкуване.`);
+  const mExit=signEdge('Moon',t0,1), mIn=signEdge('Moon',t0,-1);
+  const moonNext=(mExit?['Sun','Mercury','Venus','Mars','Jupiter','Saturn','Uranus','Neptune','Pluto'].flatMap(k=>perfs('Moon',k,t0,mExit,0.02)):[]).sort((a,b)=>a.d-b.d);
+  const moonPrev=(mIn?['Sun','Mercury','Venus','Mars','Jupiter','Saturn','Uranus','Neptune','Pluto'].flatMap(k=>perfs('Moon',k,mIn,t0,0.02)):[]).sort((a,b)=>a.d-b.d);
+  const voc=!moonNext.some(x=>TRAD7.includes(x.k));
+  const mS=sgn(P('Moon').lon);
+  if (voc) add(false,'Луната е „без курс“',`До края на знака не прави аспект с традиционна планета. Често значи „нищо няма да се промени“ или „няма да стане“.${[1,3,8,11].includes(mS)?' В '+SIGNS[mS]+' по традиция Луната все пак „работи“, затова това правило тук е по-слабо.':''}`);
+  else add(true,'Луната има курс','До края на знака прави аспекти. Нещата се движат.');
+  const ml=norm(P('Moon').lon);
+  if (ml>=195 && ml<=225) add(false,'Луната е в „изгорелия път“','Между 15° Везни и 15° Скорпион. По традиция ситуацията е объркана или напрегната. Тълкувайте внимателно.');
+  const sat=P('Saturn').house;
+  if (sat===1||sat===7) add(false,`Сатурн в ${sat} дом`, sat===7?'По традиция предупреждение към астролога: преценката може да е затруднена.':'Питащият може да е притеснен или ситуацията да е тежка.');
+  const ph=planetHour(t0,lat,lon);
+  if (ph){
+    const rad = ph.hourRuler===q1 || TRIP[ascS%4].includes(ph.hourRuler) || RUL_TRAD[ascS]===ph.hourRuler;
+    add(rad,'Планетен час',`Ден на ${pn(ph.dayRuler)}, час на ${pn(ph.hourRuler)} (${ph.n}. час, ${fmtDT(ph.from).slice(-5)}–${fmtDT(ph.to).slice(-5)}). ${rad?'Съвпада с Асцендента: по традиция картата е „радикална“.':'Не съвпада с Асцендента. По традиция това е предупреждение, но много съвременни астролози не държат на това правило.'}`);
+  }
+  $('horChecks').innerHTML=chk.join('');
+  // таблица на значителите
+  const sigRow=(k,role)=>{ const x=P(k), dg=essDig(k,x.lon,day), dd=Math.abs(dif(x.lon,sun.lon));
+    const acc = k==='Sun' ? '' : dd<=17/60 ? 'в сърцето на Слънцето (много силна)' : dd<=8.5 ? 'изгаря (отслабена)' : dd<=17 ? 'под лъчите (скрита)' : '';
+    const st=[x.spd<0?'ретроградна (връщане назад, забавяне)':'', acc].filter(Boolean).join(', ');
+    lines.push(`${role}: ${pn(k)} в ${SIGNS[sgn(x.lon)]} ${Ltxt(x.lon)}, ${x.house} дом. Сила ${dg.sc>0?'+':''}${dg.sc} (${dg.out.join(', ')})${st?'. '+st:''}.`);
+    return `<tr><td class="l" style="font-family:var(--f-body)">${role}</td><td class="l">${nameCell(k)}</td><td class="${x.spd<0?'rx':''}">${L(x.lon)}${x.spd<0?' R':''}</td><td>${x.house}</td><td>${dg.sc>0?'+':''}${dg.sc}</td><td class="l" style="font-family:var(--f-body);white-space:normal">${dg.out.join(', ')}${st?'<br>'+st:''}</td></tr>`; };
+  lines.push('','Значители:');
+  $('horSig').innerHTML=`<thead><tr><th class="t l">Роля</th><th class="t l">Планета</th><th class="t">Позиция</th><th class="t">Дом</th><th class="t">Сила</th><th class="t l">Подробно</th></tr></thead><tbody>`
+    + sigRow(q1,`Питащият (управител на 1 дом, ${SIGNS[ascS]})`) + (q1!=='Moon'&&q2!=='Moon' ? sigRow('Moon','Луната (втори значител на питащия)') : '')
+    + (H!==1 && !same ? sigRow(q2,`Въпросът (управител на ${H} дом, ${SIGNS[hS]})`) : '') + '</tbody>';
+  // аспект между значителите
+  let verdict='', asTxt='';
+  if (H===1){
+    verdict='Въпросът е за самия питащ. Гледайте силата на управителя на 1 дом и аспектите на Луната отдолу.';
+  } else if (same){
+    verdict=`Двата дома имат един и същ управител (${pn(q1)}). Гледайте Луната: към какво отива тя.`;
+  } else {
+    const fast = (FSTEP[q1]||1)<(FSTEP[q2]||1) ? q1 : q2, slow = fast===q1?q2:q1;
+    const horizon = (q1==='Moon'||q2==='Moon') ? (mExit? (mExit-t0)/864e5 : 3) : 400;
+    const pf=perfs(fast,slow,t0,new Date(t0.getTime()+horizon*864e5),Math.min(FSTEP[q1]||1,FSTEP[q2]||1));
+    const first=pf[0];
+    const sameSign = first && sgn(AC.lon(fast,AC.T(first.d)))===sgn(P(fast).lon) && sgn(AC.lon(slow,AC.T(first.d)))===sgn(P(slow).lon);
+    const sep=Math.abs(dif(P(fast).lon,P(slow).lon));
+    const rA=recv(q1,q2,P(q1).lon), rB=recv(q2,q1,P(q2).lon);
+    const recT = rA&&rB ? `Взаимна рецепция (${pn(q1)} е в ${rA} на ${pn(q2)}, а ${pn(q2)} в ${rB} на ${pn(q1)}): двете страни искат едно и също.` : rA ? `${pn(q2)} „приема“ ${pn(q1)} (${rA}): другата страна е благосклонна към питащия.` : rB ? `${pn(q1)} „приема“ ${pn(q2)} (${rB}): питащият силно иска това.` : '';
+    if (first && sameSign){
+      const deg=Math.abs(Math.abs(dif(P(fast).lon,P(slow).lon))-first.asp), A=aspOf(first.asp), s2=sgn(P(fast).lon), hf=P(fast).house;
+      const ang=[1,4,7,10].includes(hf)?'ъглов':[2,5,8,11].includes(hf)?'следващ':'падащ';
+      asTxt=`${pn(fast)} отива към ${A.n} с ${pn(slow)}. До точния аспект: ${deg.toFixed(1)}°. В ефемеридите той става на ${fmtD(first.d)}, преди някой от двамата да смени знака. Ориентир за времето: около ${Math.max(1,Math.round(deg))} ${Math.max(1,Math.round(deg))===1?'единица':'единици'} време. ${pn(fast)} е в ${modal(s2)} знак и ${ang} дом (кардиналният знак и ъгловият дом ускоряват: дни; мутабилният и следващият дом: седмици; фиксираният и падащият дом: месеци).`;
+      verdict = [0,60,120].includes(first.asp) ? (first.asp===0?'Да. Значителите се срещат: това, за което питате, по-скоро ще се случи.':'Да, с лекота. Значителите се сближават с хармоничен аспект.')
+        : first.asp===90 ? 'Да, но с усилие и забавяне. Значителите се сближават с квадрат.'
+        : 'Може да се случи, но с напрежение, или след това да има съжаление. Значителите се сближават с опозиция.';
+      if (P(fast).spd<0||P(slow).spd<0) verdict+=' Един от значителите е ретрограден: възможни са забавяне, преразглеждане или връщане към старото.';
+    } else {
+      verdict='Значителите не се сближават, преди да сменят знака. Отговорът по-скоро е „не“ или „не сега“.';
+      asTxt = first ? `Следващият аспект между ${pn(q1)} и ${pn(q2)} (${aspOf(first.asp).n}) става чак след смяна на знака (${fmtD(first.d)}).` : `Няма аспект между ${pn(q1)} и ${pn(q2)} в близкото време.`;
+      const prevSep=[0,60,90,120,180].find(a=>Math.abs(sep-a)<=3);
+      if (prevSep!=null) asTxt+=` Сега са на ${Math.abs(sep-prevSep).toFixed(1)}° от ${aspOf(prevSep).n}, но се раздалечават: това описва минало, не бъдеще.`;
+      // пренасяне на светлина от Луната
+      const last=moonPrev.filter(x=>TRAD7.includes(x.k)).pop(), next=moonNext.find(x=>TRAD7.includes(x.k));
+      if (last && next && q1!=='Moon' && q2!=='Moon' && new Set([last.k,next.k]).size===2 && [q1,q2].includes(last.k) && [q1,q2].includes(next.k)){
+        verdict='Да, с помощта на посредник. Луната пренася светлина: идва от '+pn(last.k)+' и отива към '+pn(next.k)+'. Трето лице или обстоятелство свързва двете страни.';
+      }
+    }
+    if (recT) asTxt+=' '+recT;
+  }
+  $('horVerdict').textContent=verdict;
+  $('horAsp').textContent=asTxt;
+  lines.splice(4,0,`Отговор накратко: ${verdict}`, asTxt, '');
+  // Луната
+  const mItems=[];
+  if (moonPrev.length){ const x=moonPrev[moonPrev.length-1]; mItems.push(`<li><time>${fmtDT(x.d)}</time><span>Последно: ${aspCell(x.asp)} с ${nameCell(x.k)}. Описва какво току-що се е случило.</span></li>`); }
+  moonNext.forEach(x=>mItems.push(`<li><time>${fmtDT(x.d)}</time><span>${aspCell(x.asp)} с ${nameCell(x.k)}${TRAD7.includes(x.k)?'':' <span class="chip">съвременна планета</span>'}</span></li>`));
+  if (mExit) mItems.push(`<li><time>${fmtDT(mExit)}</time><span>Луната влиза в ${SIGNS[(mS+1)%12]}</span></li>`);
+  $('horMoon').innerHTML=mItems.join('');
+  lines.push('','Пътят на Луната:'); moonNext.forEach(x=>lines.push(`${fmtDT(x.d)}: ${aspOf(x.asp).n} с ${pn(x.k)}`));
+  // достойнства на всички
+  $('horDig').innerHTML=`<thead><tr><th class="t l">Планета</th><th class="t">Позиция</th><th class="t">Сила</th><th class="t l">Подробно</th></tr></thead><tbody>`+TRAD7.map(k=>{ const x=P(k), dg=essDig(k,x.lon,day); return `<tr><td class="l">${nameCell(k)}</td><td>${L(x.lon)}</td><td class="${dg.sc>0?'':'rx'}">${dg.sc>0?'+':''}${dg.sc}</td><td class="l" style="font-family:var(--f-body);white-space:normal">${dg.out.join(', ')}</td></tr>`; }).join('')+'</tbody>';
+  $('horMeta').innerHTML=`<dt>Момент (UT)</dt><dd>${t0.toISOString().replace('T',' ').slice(0,16)}</dd><dt>Карта</dt><dd style="font-family:var(--f-body)">${day?'дневна':'нощна'}</dd><dt>Асцендент</dt><dd>${L(c.hs.asc)}</dd><dt>Връх на ${H} дом</dt><dd>${L(c.hs.cusp[H])}</dd>`;
+  $('horStatus').textContent='';
+  horText=lines.join('\n');
 }
 
 // =============== BACKUP ===============
