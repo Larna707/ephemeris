@@ -2,26 +2,27 @@
 <html lang="bg"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font-size:14px}img{max-width:100%}[hidden]{display:none!important}</style></head><body>
 <title>Ефемериди и транзити</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Prata&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+Symbols:wght@400;600&family=Noto+Sans+Symbols+2&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+Symbols:wght@400;600&family=Noto+Sans+Symbols+2&display=swap">
 <style>
 /* Layout: a working almanac. Narrow control strip on top, tabbed work area, data tables set like a printed ephemeris. */
 :root{
-  --bg:#f2f4f7; --panel:#ffffff; --ink:#1b2133; --muted:#5d6579; --line:#d9dde6; --soft:#e9ecf3;
-  --accent:#27389b; --accent-ink:#ffffff; --gold:#9a6d12; --gold-soft:#f6edd9;
+  --bg:#e8ebf5; --panel:#fbfbfe; --ink:#1c2048; --muted:#5a5f80; --line:#d2d6e8; --soft:#eceef7;
+  --accent:#2e3080; --accent-ink:#ffffff; --gold:#a2762a; --gold-soft:#f4ead6;
   --hard:#b23a3a; --easy:#2a62b8; --ok:#2f7a4d;
-  --f-display:"Prata", Georgia, "Times New Roman", serif;
+  --night:#0d1030; --night2:#1b1f52; --star:#f3e6c4;
+  --f-display:"Cormorant Garamond", Georgia, "Times New Roman", serif;
   --f-body:"IBM Plex Sans", "Segoe UI", Roboto, Arial, sans-serif;
   --f-data:"IBM Plex Mono", "Noto Sans Symbols", "Noto Sans Symbols 2", "Segoe UI Symbol", Consolas, monospace;
   --f-sym:"Noto Sans Symbols", "Noto Sans Symbols 2", "Segoe UI Symbol", "DejaVu Sans", sans-serif;
 }
 @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
-  --bg:#0f1320; --panel:#171c2c; --ink:#e4e7f0; --muted:#9aa2b8; --line:#2b3248; --soft:#1f2538;
-  --accent:#8fa0ff; --accent-ink:#0f1320; --gold:#e0b45a; --gold-soft:#2c2617;
-  --hard:#ff8a80; --easy:#86b3ff; --ok:#7fd3a0; color-scheme:dark }}
+  --bg:#0b0e24; --panel:#141938; --ink:#e9e6f2; --muted:#a0a5c8; --line:#2a305e; --soft:#1b2046;
+  --accent:#d6b25e; --accent-ink:#141938; --gold:#e2bd6a; --gold-soft:#2a2615;
+  --hard:#ff8c7a; --easy:#8fb4ff; --ok:#7fd3a0; color-scheme:dark }}
 :root[data-theme="dark"]{
-  --bg:#0f1320; --panel:#171c2c; --ink:#e4e7f0; --muted:#9aa2b8; --line:#2b3248; --soft:#1f2538;
-  --accent:#8fa0ff; --accent-ink:#0f1320; --gold:#e0b45a; --gold-soft:#2c2617;
-  --hard:#ff8a80; --easy:#86b3ff; --ok:#7fd3a0; color-scheme:dark }
+  --bg:#0b0e24; --panel:#141938; --ink:#e9e6f2; --muted:#a0a5c8; --line:#2a305e; --soft:#1b2046;
+  --accent:#d6b25e; --accent-ink:#141938; --gold:#e2bd6a; --gold-soft:#2a2615;
+  --hard:#ff8c7a; --easy:#8fb4ff; --ok:#7fd3a0; color-scheme:dark }
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5}
 .wrap{max-width:1180px;margin:0 auto;padding-inline:16px;padding-block:18px 48px}
@@ -100,15 +101,70 @@ select{max-width:100%}
 .kwtask{font-family:var(--f-display);font-size:20px;margin:12px 0}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:8px 14px;border-radius:8px;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none}
 .toast.on{opacity:1}
+
+/* ---- Небесен атлас: оформление ---- */
+body{background:
+  radial-gradient(1200px 500px at 85% -10%, color-mix(in srgb,var(--accent) 10%,transparent), transparent 70%),
+  var(--bg)}
+.wrap{padding-top:14px}
+header.top{--panel:#1a1f4c; --ink:#efe9d8; --muted:#b4b7da; --line:#3b4186; --soft:#262b63; --accent:#e2bd6a; --accent-ink:#141938;
+  color-scheme:dark; position:relative; overflow:hidden; color:var(--ink);
+  display:grid; grid-template-columns:minmax(0,1fr) auto; gap:14px 28px; align-items:center;
+  border:1px solid #2c3274; border-bottom:1px solid #2c3274; border-radius:18px; padding:26px 28px 22px;
+  background:
+    radial-gradient(1px 1px at 12% 22%, #fff 99%, transparent), radial-gradient(1px 1px at 27% 68%, #fff9 99%, transparent),
+    radial-gradient(1.5px 1.5px at 41% 30%, var(--star) 99%, transparent), radial-gradient(1px 1px at 56% 80%, #fff8 99%, transparent),
+    radial-gradient(1px 1px at 63% 14%, #fffa 99%, transparent), radial-gradient(1.5px 1.5px at 7% 84%, var(--star) 99%, transparent),
+    radial-gradient(1px 1px at 34% 47%, #fff7 99%, transparent), radial-gradient(1px 1px at 48% 9%, #fff 99%, transparent),
+    radial-gradient(1px 1px at 19% 50%, #fff6 99%, transparent), radial-gradient(1.5px 1.5px at 52% 56%, #fff9 99%, transparent),
+    radial-gradient(700px 300px at 15% 120%, #3a2d6e 0%, transparent 70%),
+    linear-gradient(160deg, var(--night2), var(--night) 70%)}
+header.top .brand{grid-column:1; min-width:0}
+header.top .sky{grid-column:2; grid-row:1 / span 2; display:flex; flex-direction:column; align-items:center; gap:6px}
+header.top .profilebar{grid-column:1; padding-top:12px; border-top:1px solid #ffffff1f}
+h1{font-weight:600;font-size:clamp(36px,5.2vw,58px);letter-spacing:.005em;color:#f6ecd2}
+h1 .sym{color:var(--accent);font-size:.62em;vertical-align:.18em;margin-right:.3em}
+.sub{font-size:14px;color:var(--muted);max-width:52ch;margin-top:6px}
+.profilebar label{text-transform:none;letter-spacing:0;font-size:13px;color:var(--muted)}
+#skyNow{width:170px;height:170px;display:block}
+#skyTxt{font-size:12.5px;color:var(--muted);text-align:center;max-width:15em;line-height:1.4}
+#skyTxt b{color:var(--ink);font-weight:500}
+@media (max-width:700px){
+  header.top{grid-template-columns:minmax(0,1fr);padding:20px 18px}
+  header.top .sky{grid-column:1;grid-row:auto;flex-direction:row;align-items:center;gap:14px}
+  #skyNow{width:110px;height:110px} #skyTxt{text-align:left}
+}
+nav.tabs{flex-wrap:wrap;gap:6px;margin:18px 0 20px;padding:6px;background:var(--panel);border:1px solid var(--line);border-radius:14px}
+nav.tabs button{padding:7px 13px;font-size:13.5px}
+nav.tabs button[aria-selected="true"]{background:var(--night);color:#f3e6c4;box-shadow:inset 0 0 0 1px var(--gold)}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) nav.tabs button[aria-selected="true"]{background:var(--gold);color:var(--night);box-shadow:none} }
+:root[data-theme="dark"] nav.tabs button[aria-selected="true"]{background:var(--gold);color:var(--night);box-shadow:none}
+@media (max-width:700px){ nav.tabs{flex-wrap:nowrap;overflow-x:auto} }
+.panel{border-radius:16px;box-shadow:0 1px 0 color-mix(in srgb,var(--ink) 4%,transparent),0 10px 30px -18px color-mix(in srgb,var(--accent) 35%,transparent)}
+section>.panel:first-child{border-top:3px solid var(--gold)}
+h2{font-weight:600;font-size:27px;line-height:1.15;letter-spacing:.005em}
+h2::before{content:"✦";font-family:var(--f-sym);color:var(--gold);font-size:.55em;vertical-align:.32em;margin-right:.45em}
+h3{text-transform:none;letter-spacing:.01em;font-size:15px;font-family:var(--f-display);font-weight:700;color:var(--ink);font-size:18px}
+button.primary{background:linear-gradient(180deg,color-mix(in srgb,var(--accent) 88%,#fff),var(--accent));box-shadow:0 4px 14px -6px var(--accent)}
+button,.btn,input,select{border-radius:10px}
+th{background:var(--panel)}
+.kwsentence{font-size:clamp(20px,2.4vw,25px);border-left-width:4px}
+.kwchip.on{background:var(--night);color:#f3e6c4;border-color:var(--night)}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .kwchip.on{background:var(--gold);color:var(--night);border-color:var(--gold)} }
+:root[data-theme="dark"] .kwchip.on{background:var(--gold);color:var(--night);border-color:var(--gold)}
+.wheel{filter:drop-shadow(0 8px 24px color-mix(in srgb,var(--accent) 18%,transparent))}
+@media (prefers-reduced-motion:no-preference){ #skyNow .pl{animation:skyin .9s ease-out both} }
+@keyframes skyin{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 
 <div class="wrap">
   <header class="top">
-    <div>
+    <div class="brand">
       <h1><span class="sym">☉︎</span>Ефемериди</h1>
-      <p class="sub">Геоцентрични позиции, тропически зодиак, Плацидус · 1900–2100 · изчислени в браузъра</p>
+      <p class="sub">Работен кабинет по прогностика: транзити, дирекции, прогресии, солари, синастрия и хорар. Тропически зодиак, домове Плацидус, години 1900–2100.</p>
     </div>
+    <div class="sky" aria-label="Небето в момента"><svg id="skyNow" viewBox="0 0 200 200" role="img" aria-label="Кръг с планетите в момента"></svg><div id="skyTxt"></div></div>
     <div class="profilebar">
       <label for="profSel">Натална карта</label>
       <select id="profSel"></select>
@@ -8481,6 +8537,26 @@ function runHor(){
   $('horStatus').textContent='';
   horText=lines.join('\n');
 }
+
+
+// =============== НЕБЕТО СЕГА (горе) ===============
+function skyNow(){
+  try{
+    const now=new Date(), c=AC.chart(now), cx=100, cy=100;
+    const P=(l,r)=>{ const a=(180+l)*Math.PI/180; return [(cx+r*Math.cos(a)).toFixed(1),(cy-r*Math.sin(a)).toFixed(1)]; };
+    let s=`<circle cx="100" cy="100" r="97" fill="none" stroke="#e2bd6a" stroke-opacity=".55"/><circle cx="100" cy="100" r="76" fill="none" stroke="#e2bd6a" stroke-opacity=".3"/><circle cx="100" cy="100" r="40" fill="#ffffff08" stroke="#ffffff22"/>`;
+    for (let i=0;i<12;i++){ const [x1,y1]=P(i*30,76),[x2,y2]=P(i*30,97),[tx,ty]=P(i*30+15,86.5); s+=`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#e2bd6a" stroke-opacity=".3"/><text x="${tx}" y="${ty}" text-anchor="middle" dominant-baseline="central" font-family="var(--f-sym)" font-size="11" fill="#cfd2f0">${SGg[i]}</text>`; }
+    const pts=c.pts.filter(p=>!['Lilith','Node','Chiron'].includes(p.k));
+    spread(pts,13).forEach((p,i)=>{ const [x,y]=P(p.d,60), [a,b]=P(p.lon,74), [e,f]=P(p.lon,69); const lum=p.k==='Sun'||p.k==='Moon';
+      s+=`<line x1="${a}" y1="${b}" x2="${e}" y2="${f}" stroke="#f3e6c4"/><text class="pl" style="animation-delay:${i*60}ms;transform-origin:${x}px ${y}px" x="${x}" y="${y}" text-anchor="middle" dominant-baseline="central" font-family="var(--f-sym)" font-size="${lum?15:12}" fill="${lum?'#f3d68a':'#eef0ff'}">${g(BY[p.k].g)}</text>`; });
+    const sun=c.pts.find(p=>p.k==='Sun'), moon=c.pts.find(p=>p.k==='Moon'), el=norm(moon.lon-sun.lon);
+    const [mx,my]=P(0,0); s+=`<text x="100" y="100" text-anchor="middle" dominant-baseline="central" font-family="var(--f-sym)" font-size="20" fill="#f3d68a">${el<180?'☽︎':'☾︎'}</text>`;
+    $('skyNow').innerHTML=s;
+    const f=l=>{ const x=AC.fmtLon(l); return `${x.deg}° ${SIGNS[x.s]}`; };
+    $('skyTxt').innerHTML=`Слънцето е в <b>${f(sun.lon)}</b>, Луната в <b>${f(moon.lon)}</b>. ${phaseName(el)}${el<180?', растяща':', намаляваща'}.`;
+  }catch(e){}
+}
+skyNow(); setInterval(skyNow, 10*60*1000);
 
 // =============== BACKUP ===============
 $('bkCopy').onclick=()=>{
