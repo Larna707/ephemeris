@@ -155,6 +155,30 @@ th{background:var(--panel)}
 .wheel{filter:drop-shadow(0 8px 24px color-mix(in srgb,var(--accent) 18%,transparent))}
 @media (prefers-reduced-motion:no-preference){ #skyNow .pl{animation:skyin .9s ease-out both} }
 @keyframes skyin{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:none}}
+:root{--moon-lit:#f3e6c4;--moon-dark:#2b2f63;--moon-rim:#8a8fbf}
+.moonhero{display:flex;gap:18px;align-items:center;margin:4px 0 16px;flex-wrap:wrap}
+.moonhero .mdisk{filter:drop-shadow(0 0 18px color-mix(in srgb,var(--moon-lit) 55%,transparent))}
+.mhead{font-family:var(--f-display);font-size:clamp(24px,3vw,32px);font-weight:600;line-height:1.15}
+.mcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(14.5em,1fr));gap:12px}
+.mcard{border:1px solid var(--line);border-radius:14px;padding:12px 14px;background:linear-gradient(180deg,color-mix(in srgb,var(--gold-soft) 55%,var(--panel)),var(--panel));min-width:0;display:flex;flex-direction:column;gap:4px}
+.mct{font-size:12.5px;color:var(--muted)}
+.mcv{font-family:var(--f-display);font-size:22px;font-weight:600;line-height:1.2;overflow-wrap:anywhere}
+.mcx{font-size:13px;color:var(--muted);line-height:1.45}
+.mcal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+.mch{font-size:12.5px;color:var(--muted);text-align:center;padding:2px 0}
+.mcd{border:1px solid var(--line);border-radius:10px;padding:6px 7px;min-height:7.2em;background:var(--panel);min-width:0;font-size:12px;line-height:1.35}
+.mcd.today{border-color:var(--gold);box-shadow:inset 0 0 0 1px var(--gold)}
+.mtop{display:flex;align-items:center;gap:5px;margin-bottom:4px}
+.mnum{font-family:var(--f-display);font-size:17px;font-weight:700;margin-right:auto}
+.msg{font-size:14px}.mwd{display:none;color:var(--muted)}
+.mev{overflow-wrap:anywhere}
+.mev.nf{color:var(--gold);font-weight:600} .mev.ecl{color:var(--hard)} .mev.voc{color:var(--muted);font-style:italic} .mev.aps{color:var(--easy)} .mev.ing{font-family:var(--f-data)}
+@media (max-width:700px){
+  .mcal{grid-template-columns:minmax(0,1fr)} .mch,.mce{display:none}
+  .mcd{min-height:0;display:grid;grid-template-columns:6.5em 1fr;gap:2px 10px;align-items:start}
+  .mtop{margin:0}.mwd{display:inline}
+  .mcd>.mev{grid-column:2}
+}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 
@@ -178,7 +202,9 @@ th{background:var(--panel)}
 
   <nav class="tabs" role="tablist" id="tabs">
     <button role="tab" data-tab="eph" aria-selected="true">Ефемериди за месеца</button>
+    <button role="tab" data-tab="moon">Луна</button>
     <button role="tab" data-tab="chart">Карта</button>
+    <button role="tab" data-tab="dh">Додекатемории и фази</button>
     <button role="tab" data-tab="an">Анализ на дата</button>
     <button role="tab" data-tab="tr">Транзити</button>
     <button role="tab" data-tab="pass">Тройно преминаване</button>
@@ -695,6 +721,61 @@ th{background:var(--panel)}
         <div class="scroll"><table id="horDig"></table></div>
         <p class="note">Обител +5, екзалтация +4, тригон +3, термин +2, декан +1. Изгнание −5, падение −4, перегрин (без достойнство) −5. Термините са египетските, тригонът е по Лили.</p>
       </div>
+    </div>
+  </section>
+
+  <!-- MOON -->
+  <section id="tab-moon" role="tabpanel" hidden>
+    <div class="panel">
+      <h2>Луната</h2>
+      <div class="controls">
+        <label class="field"><span>Дата</span><input id="mnDate" type="date" min="1900-01-01" max="2100-12-31"></label>
+        <label class="field"><span>Час</span><input id="mnTime" type="time" step="60"></label>
+        <label class="field" style="flex:1 1 15em"><span>Място (за изгрева и лунния ден)</span><input id="mnCity" type="text" list="placeList" autocomplete="off"></label>
+        <label class="field"><span>Ширина</span><input id="mnLat" type="number" step="0.0001"></label>
+        <label class="field"><span>Дължина</span><input id="mnLon" type="number" step="0.0001"></label>
+        <button type="button" id="mnNowB">Сега</button><button class="primary" type="button" id="mnRun">Покажи</button>
+      </div>
+      <div class="moonhero"><div id="mnDisk"></div><div><div class="mhead" id="mnHead"></div><p class="note" id="mnSub" style="margin:6px 0 0"></p></div></div>
+      <div class="mcards" id="mnCards"></div>
+    </div>
+    <div class="grid2" style="margin-top:18px">
+      <div class="panel"><h2 id="mnNatHead">Луната към вашата карта</h2><ul class="evlist" id="mnNat"></ul></div>
+      <div class="panel"><h2>Следващи събития</h2><ul class="evlist" id="mnNext"></ul></div>
+    </div>
+    <div class="panel" style="margin-top:18px">
+      <h2 id="mnCalHead">Лунен календар</h2>
+      <div class="flex" style="margin-bottom:10px"><button type="button" id="mnPrev" aria-label="Предишен месец">‹</button><input type="month" id="mnMonth" min="1900-01" max="2100-12"><button type="button" id="mnNext1" aria-label="Следващ месец">›</button><button type="button" id="mnToday">Този месец</button></div>
+      <p class="note">Всеки ден: фазата и знакът на Луната по обяд, влизане в нов знак (→), периоди на празна Луна, перигей и апогей, затъмнения. Часовете са в зоната, избрана горе. Календарът работи за всяка година от 1900 до 2100.</p>
+      <div class="mcal" id="mnCal"></div>
+    </div>
+    <div class="panel" style="margin-top:18px">
+      <h2 id="mnYearHead">Новолуния и пълнолуния за годината</h2>
+      <div class="controls"><label class="field"><span>Година</span><input type="number" id="mnYear" min="1900" max="2100"></label></div>
+      <div class="scroll"><table id="mnYearT"></table></div>
+    </div>
+  </section>
+
+  <!-- DODEKATEMORIA + HELIACAL -->
+  <section id="tab-dh" role="tabpanel" hidden>
+    <div class="panel">
+      <h2 id="dcHead">Додекатемории</h2>
+      <p class="note">Додекатеморият („дванадесетата част“) е хеленистична техника. Всеки знак се дели на 12 части по 2°30′ и всяка част отговаря на знак, като се започва от самия знак. На практика градусът в знака се умножава по 12 и се отброява от началото на знака. Додекатеморият показва скрития пласт на планетата: в какъв дух се проявява тя дълбоко. Важно е, когато попада върху друга натална планета или ъгъл.</p>
+      <div class="scroll"><table id="dcTable"></table></div>
+      <h3>Калкулатор</h3>
+      <div class="controls"><label class="field"><span>Знак</span><select id="dcSign"></select></label><label class="field"><span>Градус</span><input id="dcDeg" type="number" min="0" max="29" value="0"></label><label class="field"><span>Минути</span><input id="dcMin" type="number" min="0" max="59" value="0"></label></div>
+      <p id="dcOut"></p>
+    </div>
+    <div class="panel" style="margin-top:18px">
+      <h2 id="helHead">Хелиакални фази</h2>
+      <p class="note">Хелиакалната фаза показва отношението на планетата към Слънцето: дали се вижда на небето или е скрита в лъчите му. Класическото правило е 15° от Слънцето. Утринна звезда изгрява преди Слънцето, вечерна се вижда след залеза. Ако в рамките на 7 дни около раждането планетата излиза изпод лъчите, влиза под тях или спира (стационарна), това е „фазис“. Тогава тя е особено силна и „заявява“ темата си в живота. Действителната видимост зависи и от яркостта, мястото и времето.</p>
+      <div class="controls"><label class="field"><span>За</span><select id="dhSrc"><option value="natal">наталната карта (горе)</option><option value="date">друга дата</option></select></label><label class="field" id="dhDateW" hidden><span>Дата</span><input type="date" id="dhDate" min="1900-01-01" max="2100-12-31"></label></div>
+      <div class="scroll"><table id="helTable"></table></div>
+    </div>
+    <div class="panel" style="margin-top:18px">
+      <h2 id="helYearHead">Появи и изчезвания на планетите</h2>
+      <div class="controls"><label class="field"><span>Година</span><input type="number" id="dhYear" min="1900" max="2100"></label></div>
+      <ul class="evlist" id="helYear"></ul>
     </div>
   </section>
 
@@ -7557,7 +7638,7 @@ INTX.initUI();
 
 
 // =============== TABS ===============
-const TABS=['eph','chart','an','tr','pass','hs','sr','pd','kw','syn','hor','rect','cyc','jr'];
+const TABS=['eph','moon','chart','dh','an','tr','pass','hs','sr','pd','kw','syn','hor','rect','cyc','jr'];
 tab = store.get('tab','eph'); if (!TABS.includes(tab)) tab='eph';
 function showTab(t){
   tab=t; store.set('tab',t);
@@ -7578,6 +7659,8 @@ function render(){
   else if (tab==='kw') { kwRender(); refRender(); hrRender(); }
   else if (tab==='syn') runSyn();
   else if (tab==='hor') { initHor(); runHor(); }
+  else if (tab==='moon') runMoon();
+  else if (tab==='dh') runDh();
   else if (tab==='cyc') INTX.runCyc();
   else if (tab==='jr') INTX.renderJr();
 }
@@ -8342,7 +8425,7 @@ function runSyn(){
   lines.push('','Композитна карта:');
   $('synComp').innerHTML=`<thead><tr><th class="t l">Точка</th><th class="t">Позиция</th><th class="t l">Какво означава за връзката</th></tr></thead><tbody>`+pa.map(a=>{
     const b=pb.find(x=>x.k===a.k), m=norm(a.lon+dif(b.lon,a.lon)/2), s=sgn(m);
-    const t=`${cap(kfn(a.k))} на връзката се проявява ${KW.signs[s].adv[0]} (${SIGNS[s]}).`;
+    const t=`Във връзката темата за ${kfn(a.k)} се проявява ${KW.signs[s].adv[0]} (${SIGNS[s]}).`;
     lines.push(`${pn(a.k)} ${Ltxt(m)}: ${t}`);
     return `<tr><td class="l">${nameCell(a.k)}</td><td>${L(m)}</td><td class="l" style="font-family:var(--f-body);white-space:normal">${t}</td></tr>`;
   }).join('')+'</tbody>';
@@ -8539,6 +8622,236 @@ function runHor(){
   horText=lines.join('\n');
 }
 
+
+// =============== ЛУНА ===============
+const MPH=[
+  {n:'Новолуние', r:'Новолуние', s:'Ново начало. Време за намерения, тихо планиране и посяване на идеи.'},
+  {n:'Растящ сърп', r:'Сърп', s:'Първи стъпки. Идеята среща съпротива и има нужда от смелост и упоритост.'},
+  {n:'Първа четвърт', r:'Първа четвърт', s:'Криза на действието. Време за решения и активни действия.'},
+  {n:'Растяща Луна', r:'Изпъкнала Луна', s:'Усъвършенстване. Време за доизкусуряване, анализ и подготовка за резултата.'},
+  {n:'Пълнолуние', r:'Пълнолуние', s:'Кулминация и яснота. Резултатите и емоциите излизат наяве. Важни са отношенията.'},
+  {n:'Намаляваща Луна', r:'Разсейваща Луна', s:'Споделяне. Време да се предаде наученото и да се оцени постигнатото.'},
+  {n:'Последна четвърт', r:'Последна четвърт', s:'Криза на съзнанието. Време за преосмисляне и освобождаване от излишното.'},
+  {n:'Намаляващ сърп', r:'Балсамна Луна', s:'Завършване. Почивка, прочистване и подготовка за новия цикъл.'}
+];
+const mphOf = e => MPH[Math.floor(norm(e+22.5)/45)%8];   // популярно: центрирано около събитието
+const AUKM=149597870.7, MOON_AVG=13.176;
+function moonDiskSvg(e, r){
+  const cx=r, cy=r, c=Math.cos(e*Math.PI/180), wax=norm(e)<180, rx=(r*Math.abs(c)).toFixed(2);
+  const o=wax?1:0, i=wax?(c>0?0:1):(c>0?1:0);
+  return `<svg viewBox="0 0 ${2*r} ${2*r}" width="${2*r}" height="${2*r}" class="mdisk" aria-hidden="true"><circle cx="${cx}" cy="${cy}" r="${r-0.5}" fill="var(--moon-dark)" stroke="var(--moon-rim)"/><path d="M${cx},${cy-r+0.5} A${r-0.5},${r-0.5} 0 0 ${o} ${cx},${cy+r-0.5} A${rx},${r-0.5} 0 0 ${i} ${cx},${cy-r+0.5}Z" fill="var(--moon-lit)"/></svg>`;
+}
+const mElong = d => norm(AC.lon('Moon',AC.T(d)) - AC.lon('Sun',AC.T(d)));
+function moonDec(d){ const eq=Astronomy.Equator(Astronomy.Body.Moon, d, new Astronomy.Observer(0,0,0), true, true); return eq.dec; }
+function moonLat(d){ return Astronomy.EclipticGeoMoon(AC.T(d)).lat; }
+function moonDist(d){ return Astronomy.GeoMoon(d).Length()*AUKM; }
+const OBL=23.44;
+function voidFor(tIn, tOut){ // последен мажорен аспект на Луната в знака
+  let last=null;
+  ['Sun','Mercury','Venus','Mars','Jupiter','Saturn','Uranus','Neptune','Pluto'].forEach(k=>{ const p=perfs('Moon',k,tIn,tOut,0.02); if(p.length && (!last||p[p.length-1].d>last.d)) last=p[p.length-1]; });
+  return last;
+}
+function lunarDay(d, lat, lon){
+  try{
+    const nm=Astronomy.SearchMoonPhase(0, new Date(d.getTime()-30*864e5), 31); if(!nm) return null;
+    let n0=nm; for(;;){ const nx=Astronomy.SearchMoonPhase(0, n0.AddDays(1), 31); if(!nx||nx.date>d) break; n0=nx; }
+    const obs=new Astronomy.Observer(lat,lon,0); let cnt=1, t=n0.date, lastStart=n0.date;
+    for(;;){ const r=Astronomy.SearchRiseSet(Astronomy.Body.Moon,obs,+1,t,2); if(!r||r.date>d) break; cnt++; lastStart=r.date; t=new Date(r.date.getTime()+60e3); }
+    const nr=Astronomy.SearchRiseSet(Astronomy.Body.Moon,obs,+1,d,2);
+    return {n:cnt, from:lastStart, to:nr?nr.date:null, newMoon:n0.date};
+  }catch(e){ return null; }
+}
+function moonRiseSet(d, lat, lon){
+  try{ const obs=new Astronomy.Observer(lat,lon,0), s=dayStartUTC(isoDay(d));
+    const r=Astronomy.SearchRiseSet(Astronomy.Body.Moon,obs,+1,s,1), t=Astronomy.SearchRiseSet(Astronomy.Body.Moon,obs,-1,s,1);
+    const e=new Date(s.getTime()+864e5); return {rise:r&&r.date<e?r.date:null, set:t&&t.date<e?t.date:null}; }catch(e){ return {}; }
+}
+const tOnly = d => d ? fmtDT(d).slice(-5) : '—';
+let mnInit=false;
+function initMoon(){
+  if (mnInit) return; mnInit=true;
+  const loc=store.get('horLoc',{city:'гр. София (обл. София (столица))',lat:42.6977,lon:23.3219});
+  $('mnCity').value=loc.city||''; $('mnLat').value=loc.lat; $('mnLon').value=loc.lon;
+  mnNow(); $('mnMonth').value=isoDay(new Date()).slice(0,7); $('mnYear').value=new Date().getFullYear();
+}
+function mnNow(){ const n=new Date(), z=new Date(n.getTime()+tzOffsetMin(n,dispTz==='manual'?'UTC':dispTz)*60000); $('mnDate').value=z.toISOString().slice(0,10); $('mnTime').value=z.toISOString().slice(11,16); }
+$('mnNowB').onclick=()=>{ mnNow(); runMoon(); };
+$('mnRun').onclick=()=>runMoon();
+['mnDate','mnTime','mnLat','mnLon'].forEach(id=>$(id).addEventListener('change',()=>runMoon()));
+$('mnCity').onchange=()=>{ const f=findPlace($('mnCity').value); if(f){ $('mnCity').value=f.label; $('mnLat').value=f.lat; $('mnLon').value=f.lon; runMoon(); } };
+function mnCard(title, value, txt){ return `<div class="mcard"><div class="mct">${title}</div><div class="mcv">${value}</div><div class="mcx">${txt}</div></div>`; }
+function runMoon(){
+  initMoon();
+  const d=localToUTC($('mnDate').value, $('mnTime').value||'12:00', dispTz==='manual'?'UTC':dispTz, 0);
+  if (!(d instanceof Date) || isNaN(d)) return;
+  const lat=+$('mnLat').value, lon=+$('mnLon').value;
+  const ml=AC.lon('Moon',AC.T(d)), e=mElong(d), ph=mphOf(e), wax=e<180, ill=Astronomy.Illumination(Astronomy.Body.Moon,d).phase_fraction*100;
+  const spd=AC.speed('Moon',AC.T(d)), dec=moonDec(d), lt=moonLat(d), lt2=moonLat(new Date(d.getTime()+3600e3)), dist=moonDist(d);
+  const s=sgn(ml), tIn=signEdge('Moon',d,-1), tOut=signEdge('Moon',d,1), vo=tIn&&tOut?voidFor(tIn,tOut):null;
+  const ld=lunarDay(d,lat,lon), rs=moonRiseSet(d,lat,lon);
+  const ap=Astronomy.SearchLunarApsis(d), apP=Astronomy.SearchLunarApsis(new Date(d.getTime()-15*864e5));
+  const node=AC.lon('Node',AC.T(d)), dn=Math.min(Math.abs(dif(ml,node)),Math.abs(dif(ml,node+180)));
+  const sunNode=Math.min(Math.abs(dif(AC.lon('Sun',AC.T(d)),node)),Math.abs(dif(AC.lon('Sun',AC.T(d)),node+180)));
+  $('mnDisk').innerHTML=moonDiskSvg(e,64);
+  $('mnHead').innerHTML=`Луната е в ${L(ml)} ${SIGNS[s]}`;
+  $('mnSub').textContent=`${ph.n}, ${wax?'растяща':'намаляваща'}, осветена ${ill.toFixed(0)}%. ${ph.s}`;
+  const spdTxt = spd>MOON_AVG+0.6 ? 'Бърза Луна: нещата се развиват бързо, реакциите са живи.' : spd<MOON_AVG-0.6 ? 'Бавна Луна: нещата вървят по-бавно и по-обмислено.' : 'Средна скорост.';
+  const cards=[
+    mnCard('Знак', `<span class="sg">${SGg[s]}</span> ${SIGNS[s]}, ${AC.fmtLon(ml).deg}°`, `${KW.signs[s].adv.slice(0,3).join(', ')}. ${tOut?`Влиза в ${SIGNS[(s+1)%12]} на ${fmtDT(tOut)}.`:''}`),
+    mnCard('Фаза', ph.n, `${wax?'Растяща':'Намаляваща'} Луна, на ${e.toFixed(0)}° от Слънцето. Фаза по Ръдхиър: ${phaseName(e)}.`),
+    mnCard('Осветеност', `${ill.toFixed(0)}%`, `Каква част от диска се вижда осветена. Възраст: ${ld?((d-ld.newMoon)/864e5).toFixed(1):'—'} дни от новолунието.`),
+    mnCard('Лунен ден', ld?`${ld.n}-ти`:'—', ld?`От ${fmtDT(ld.from)} до ${ld.to?fmtDT(ld.to):'—'}. Лунният ден започва с изгрева на Луната (за избраното място).`:'Не може да се изчисли за това място.'),
+    mnCard('Скорост', `${spd.toFixed(2)}°/ден`, `${spdTxt} Средната е 13,2°, границите са около 11,8° и 15,4°.`),
+    mnCard('Деклинация', `${Math.abs(dec).toFixed(2)}° ${dec>=0?'северна':'южна'}`, Math.abs(dec)>OBL ? 'Луната е извън граници (по-далеч от Слънцето може да стигне). Емоциите са по-необичайни и непредвидими.' : `Разстояние от небесния екватор. ${dec>=0?'Северна Луна стои по-високо в небето в България.':'Южна Луна стои ниско в небето в България.'}`),
+    mnCard('Ширина', `${Math.abs(lt).toFixed(2)}° ${lt>=0?'северна':'южна'}`, `Отклонение от еклиптиката. Луната ${lt2>lt?'се изкачва на север (към възходящия възел или след него)':'слиза на юг'}. До най-близкия възел: ${dn.toFixed(1)}°.`),
+    mnCard('Разстояние', `${Math.round(dist).toLocaleString('bg-BG')} км`, `${dist<362000?'Близо до перигея (суперлуние, ако съвпадне с новолуние или пълнолуние). ':dist>404000?'Близо до апогея (Луната изглежда по-малка). ':''}${ap?`Следващ ${ap.kind===0?'перигей':'апогей'}: ${fmtDT(ap.time.date)}.`:''}`),
+    mnCard('Празна Луна', vo && d>=vo.d ? 'Празна' : 'Активна', vo ? (d>=vo.d ? `От ${fmtDT(vo.d)} (последен аспект: ${aspOf(vo.asp).n} с ${pn(vo.k)}) до ${fmtDT(tOut)}. Не е добро време за нови начинания.` : `Последният аспект в този знак е ${aspOf(vo.asp).n} с ${pn(vo.k)} в ${fmtDT(vo.d)}. След него Луната е празна до ${fmtDT(tOut)}.`) : 'Не намирам аспекти в този знак.'),
+    mnCard('Изгрев и залез', `${tOnly(rs.rise)} / ${tOnly(rs.set)}`, 'Изгрев и залез на Луната за избраното място и ден.'),
+    mnCard('Възли', `${dn.toFixed(1)}° от възел`, sunNode<18 ? 'Сезон на затъмненията: Слънцето е близо до лунните възли.' : 'Извън сезона на затъмненията.'),
+    (()=>{ const pa=active(), nn=natalOf(pa), en=norm(nn.pts.find(x=>x.k==='Moon').lon-nn.pts.find(x=>x.k==='Sun').lon), pp=mphOf(en); return mnCard('Луна при раждане', pp.n, `${pa.name}: ${en<180?'растяща':'намаляваща'} Луна, ${en.toFixed(0)}° от Слънцето (по Ръдхиър: ${phaseName(en)}). ${pp.s}`); })()
+  ];
+  $('mnCards').innerHTML=cards.join('');
+  // към наталната карта
+  const p=active(), n=natalOf(p), hs=AC.houseOf(ml,n.hs.cusp), ds=dayStartUTC(isoDay(d)), de=new Date(ds.getTime()+864e5);
+  const hits=[]; n.points.filter(x=>x.k!=='Lilith').forEach(np=>[0,60,90,120,180].forEach(a=>AC.transitHits('Moon',np.lon,a,ds,de).forEach(h=>hits.push({d:h.date,k:np.k,a}))));
+  hits.sort((a,b)=>a.d-b.d);
+  $('mnNatHead').textContent=`Луната към картата на ${p.name}`;
+  $('mnNat').innerHTML=`<li><time>${fmtD(d)}</time><span>Луната минава през <b>${hs} дом</b>: вниманието отива към ${KW.houses[hs-1].area.slice(0,2).join(' и ')}.</span></li>`+
+    (hits.length?hits.map(h=>`<li><time>${fmtDT(h.d).slice(-5)}</time><span>${aspCell(h.a)} с натален ${nameCell(h.k)}: ${cap(KW.planets.Moon.tr[0])} около темата за ${(KW.planets[h.k]||KW_ANG[h.k]).fn[0]}.</span></li>`).join(''):'<li><time></time><span>Този ден Луната не прави точни аспекти към натални точки.</span></li>');
+  // следващи събития
+  const ev=[]; const to=new Date(d.getTime()+35*864e5);
+  AC.lunations(d,to).forEach(x=>ev.push({d:x.date, t: x.kind==='phase' ? `${['Новолуние','Първа четвърт','Пълнолуние','Последна четвърт'][x.q]} в ${Ltxt(x.lon)}` : `${x.kind==='solEcl'?'Слънчево':'Лунно'} затъмнение (${ECL_BG[x.type]||x.type}) в ${Ltxt(x.lon)}`}));
+  if (tOut) ev.push({d:tOut, t:`Луната влиза в ${SIGNS[(s+1)%12]}`});
+  if (vo && vo.d>d) ev.push({d:vo.d, t:'Луната става празна (без курс)'});
+  let a2=ap; for(let i=0;i<2&&a2;i++){ ev.push({d:a2.time.date, t:a2.kind===0?`Перигей (${Math.round(a2.dist_km).toLocaleString('bg-BG')} км)`:`Апогей (${Math.round(a2.dist_km).toLocaleString('bg-BG')} км)`}); a2=Astronomy.NextLunarApsis(a2); }
+  ev.sort((a,b)=>a.d-b.d);
+  $('mnNext').innerHTML=ev.slice(0,10).map(x=>`<li><time>${fmtDT(x.d)}</time><span>${x.t}</span></li>`).join('');
+  renderMoonCal(); renderMoonYear();
+}
+// ---------- календар ----------
+const calCache={};
+function moonMonthData(y,m){
+  const key=y+'-'+m+'|'+dispTz; if (calCache[key]) return calCache[key];
+  const ds=s=>dayStartUTC(s), pad=x=>String(x).padStart(2,'0');
+  const from=ds(`${y}-${pad(m)}-01`), to=ds(m===12?`${y+1}-01-01`:`${y}-${pad(m+1)}-01`);
+  const ev={}; const add=(dt,html,cls)=>{ const k=isoDay(dt); (ev[k]=ev[k]||[]).push({dt,html,cls}); };
+  AC.lunations(from,to).forEach(x=>{
+    if (x.kind==='phase') add(x.date, `<b>${['Новолуние','Първа четвърт','Пълнолуние','Последна четвърт'][x.q]}</b> ${tOnly(x.date)} <span class="sg">${SGg[sgn(x.lon)]}</span>`, x.q%2?'':'nf');
+    else add(x.date, `<b>${x.kind==='solEcl'?'Слънчево':'Лунно'} затъмнение</b> ${tOnly(x.date)}`, 'ecl');
+  });
+  const ing=AC.ingresses('Moon', new Date(from.getTime()-3*864e5), to).sort((a,b)=>a.date-b.date);
+  ing.forEach((x,i)=>{
+    if (x.date>=from) add(x.date, `→ <span class="sg">${SGg[x.sign]}</span> ${tOnly(x.date)}`, 'ing');
+    if (i>0){ const vo=voidFor(ing[i-1].date, x.date); if (vo && x.date>=from){ add(vo.d>=from?vo.d:from, vo.d<from ? `Празна до ${tOnly(x.date)}` : isoDay(vo.d)===isoDay(x.date) ? `Празна ${tOnly(vo.d)}–${tOnly(x.date)}` : `Празна от ${tOnly(vo.d)}`, 'voc'); } }
+  });
+  let a=Astronomy.SearchLunarApsis(from); while(a.time.date<to){ add(a.time.date, a.kind===0?`Перигей ${tOnly(a.time.date)}`:`Апогей ${tOnly(a.time.date)}`, 'aps'); a=Astronomy.NextLunarApsis(a); }
+  return calCache[key]={from,to,ev};
+}
+$('mnMonth').onchange=()=>renderMoonCal();
+$('mnPrev').onclick=()=>shiftMonth(-1); $('mnNext1').onclick=()=>shiftMonth(1);
+$('mnToday').onclick=()=>{ $('mnMonth').value=isoDay(new Date()).slice(0,7); renderMoonCal(); };
+function shiftMonth(k){ let [y,m]=$('mnMonth').value.split('-').map(Number); m+=k; if(m<1){m=12;y--;} if(m>12){m=1;y++;} if(y<1900||y>2100) return; $('mnMonth').value=`${y}-${String(m).padStart(2,'0')}`; renderMoonCal(); }
+function renderMoonCal(){
+  const [y,m]=($('mnMonth').value||'').split('-').map(Number); if(!y||y<1900||y>2100) return;
+  const {ev}=moonMonthData(y,m), days=new Date(Date.UTC(y,m,0)).getUTCDate(), first=(new Date(Date.UTC(y,m-1,1)).getUTCDay()+6)%7, today=isoDay(new Date());
+  $('mnCalHead').textContent=`Лунен календар: ${MONTHS[m-1]} ${y}`;
+  let h=['Пн','Вт','Ср','Чт','Пт','Сб','Нд'].map(x=>`<div class="mch">${x}</div>`).join('');
+  for(let i=0;i<first;i++) h+='<div class="mce"></div>';
+  for(let dd=1; dd<=days; dd++){
+    const k=`${y}-${String(m).padStart(2,'0')}-${String(dd).padStart(2,'0')}`, noon=localToUTC(k,'12:00',dispTz==='manual'?'UTC':dispTz,0);
+    const e=mElong(noon), ml=AC.lon('Moon',AC.T(noon));
+    const list=(ev[k]||[]).sort((a,b)=>a.dt-b.dt).map(x=>`<div class="mev ${x.cls}">${x.html}</div>`).join('');
+    h+=`<div class="mcd${k===today?' today':''}"><div class="mtop"><span class="mnum">${dd}</span>${moonDiskSvg(e,9)}<span class="sg msg">${SGg[sgn(ml)]}</span><span class="mwd">${['Пн','Вт','Ср','Чт','Пт','Сб','Нд'][(first+dd-1)%7]}</span></div>${list}</div>`;
+  }
+  $('mnCal').innerHTML=h;
+}
+// ---------- годишна таблица ----------
+$('mnYear').onchange=()=>renderMoonYear();
+function renderMoonYear(){
+  const y=+$('mnYear').value; if(!(y>=1900&&y<=2100)) return;
+  const p=active(), n=natalOf(p);
+  const list=AC.lunations(dayStartUTC(`${y}-01-01`), dayStartUTC(`${y+1}-01-01`)).filter(x=>x.kind!=='phase'||x.q%2===0).sort((a,b)=>a.date-b.date);
+  $('mnYearHead').textContent=`Новолуния, пълнолуния и затъмнения за ${y}`;
+  $('mnYearT').innerHTML=`<thead><tr><th class="t l">Дата и час</th><th class="t l">Събитие</th><th class="t">Позиция</th><th class="t">Дом в картата на ${escapeHtml(fname(p))}</th><th class="t l">Аспекти към картата (до 3°)</th></tr></thead><tbody>`+list.map(x=>{
+    const t = x.kind==='phase' ? (x.q===0?'Новолуние':'Пълнолуние') : `${x.kind==='solEcl'?'Слънчево':'Лунно'} затъмнение (${ECL_BG[x.type]||x.type})`;
+    const hs=AC.houseOf(x.lon,n.hs.cusp), asp=[];
+    n.points.filter(q=>q.k!=='Lilith').forEach(q=>[0,90,180].forEach(a=>{ const o=Math.abs(Math.abs(dif(x.lon,q.lon))-a); if(o<=3) asp.push(`${aspCell(a)} ${nameCell(q.k)} ${o.toFixed(1)}°`); }));
+    return `<tr${x.kind!=='phase'?' class="today"':''}><td class="l">${fmtDT(x.date)}</td><td class="l" style="font-family:var(--f-body)">${x.kind==='phase'?moonDiskSvg(x.q===0?0:180,7)+' ':''}${t}</td><td>${L(x.lon)}</td><td>${hs}</td><td class="l">${asp.join('<br>')}</td></tr>`;
+  }).join('')+'</tbody>';
+}
+
+// =============== ДОДЕКАТЕМОРИИ И ХЕЛИАКАЛНИ ФАЗИ ===============
+const dodek = l => { const s=sgn(l), d=norm(l)-s*30; return norm(s*30 + d*12); };
+const DH_KEYS=['Sun','Moon','Mercury','Venus','Mars','Jupiter','Saturn','Uranus','Neptune','Pluto','Node'];
+let dhInit=false;
+function initDh(){ if(dhInit) return; dhInit=true; fillSelect($('dcSign'), SIGNS.map((n,i)=>[i,SGg[i]+' '+n]), '0'); $('dhYear').value=new Date().getFullYear(); $('dhDate').value=isoDay(new Date()); }
+function runDh(){
+  initDh();
+  const p=active(), n=natalOf(p);
+  $('dcHead').textContent=`Додекатемории: ${p.name}`;
+  const pts=n.points.filter(x=>DH_KEYS.includes(x.k)||x.k==='ASC'||x.k==='MC');
+  $('dcTable').innerHTML=`<thead><tr><th class="t l">Точка</th><th class="t">Позиция</th><th class="t">Додекатеморий</th><th class="t">Дом</th><th class="t l">Попада върху (до 3°)</th><th class="t l">Значение</th></tr></thead><tbody>`+pts.map(x=>{
+    const dd=dodek(x.lon), s=sgn(dd), hs=AC.houseOf(dd,n.hs.cusp);
+    const on=n.points.filter(q=>q.k!=='Lilith' && Math.abs(dif(q.lon,dd))<=3).map(q=>nameCell(q.k)).join(', ');
+    const fn=(KW.planets[x.k]||KW_ANG[x.k]).fn[0];
+    return `<tr><td class="l">${nameCell(x.k)}</td><td>${L(x.lon)}</td><td>${L(dd)}</td><td>${hs}</td><td class="l">${on}</td><td class="l" style="font-family:var(--f-body);white-space:normal;min-width:16em">В по-дълбок пласт темата за ${fn} се проявява ${KW.signs[s].adv[0]} (${SIGNS[s]}, управител ${pn(RUL_TRAD[s])}).</td></tr>`;
+  }).join('')+'</tbody>';
+  dcCalc();
+  runHel();
+}
+function dcCalc(){ const s=+$('dcSign').value, d=+$('dcDeg').value||0, m=+$('dcMin').value||0; if(!(d>=0&&d<30&&m>=0&&m<60)){ $('dcOut').textContent='Градусът трябва да е от 0 до 29, минутите от 0 до 59.'; return; } const r=dodek(s*30+d+m/60); $('dcOut').innerHTML=`Додекатеморият на ${d}°${String(m).padStart(2,'0')}′ ${SIGNS[s]} е <b>${L(r)} ${SIGNS[sgn(r)]}</b>.`; }
+['dcSign','dcDeg','dcMin'].forEach(id=>$(id).addEventListener('input',dcCalc));
+$('dhSrc').onchange=()=>{ $('dhDateW').hidden=$('dhSrc').value!=='date'; runHel(); };
+$('dhDate').onchange=()=>runHel(); $('dhYear').onchange=()=>runHelYear();
+const HEL_KEYS=['Moon','Mercury','Venus','Mars','Jupiter','Saturn'];
+const BEAMS=15;
+const elong=(k,d)=>dif(AC.lon(k,AC.T(d)), AC.lon('Sun',AC.T(d)));
+function synPhase(k,e,spd){
+  const ae=Math.abs(e), m=e<0;
+  if (k==='Moon') return m ? 'намаляваща, утринна (вижда се сутрин преди изгрев)' : 'растяща, вечерна (вижда се вечер след залез)';
+  if (k==='Mercury'||k==='Venus'){
+    if (ae<BEAMS) return spd<0 ? 'около долното съединение със Слънцето (между Земята и Слънцето), ретроградна' : 'около горното съединение със Слънцето (зад Слънцето)';
+    return (m?'утринна звезда':'вечерна звезда') + (spd<0?', ретроградна':'');
+  }
+  if (ae<BEAMS) return e>0 ? 'приближава съединение със Слънцето' : 'току-що след съединение със Слънцето';
+  if (ae>165) return 'опозиция със Слънцето: вижда се цяла нощ, най-ярка';
+  if (m) return spd<0 ? 'ретроградна, преди опозицията' : 'утринна звезда, директна';
+  return spd<0 ? 'ретроградна, след опозицията' : 'вечерна звезда, директна, приближава залеза';
+}
+function runHel(){
+  const p=active(), nat=$('dhSrc').value!=='date';
+  const d = nat ? natalOf(p).date : localToUTC($('dhDate').value||isoDay(new Date()),'12:00',dispTz==='manual'?'UTC':dispTz,0);
+  $('helHead').textContent = nat ? `Хелиакални фази: ${p.name}` : `Хелиакални фази на ${fmtD(d)}`;
+  const d7=new Date(d.getTime()-7*864e5), d7b=new Date(d.getTime()+7*864e5);
+  $('helTable').innerHTML=`<thead><tr><th class="t l">Планета</th><th class="t">От Слънцето</th><th class="t l">Видимост</th><th class="t l">Фаза в цикъла</th><th class="t l">Фазис (±7 дни)</th></tr></thead><tbody>`+HEL_KEYS.map(k=>{
+    const e=elong(k,d), spd=AC.speed(k,AC.T(d)), ae=Math.abs(e), dd=Math.abs(dif(AC.lon(k,AC.T(d)),AC.lon('Sun',AC.T(d))));
+    const vis = dd<=17/60 ? '<span class="chip gold" style="margin:0">в сърцето на Слънцето</span> много силна' : ae<BEAMS ? '<span class="chip hard" style="margin:0">под лъчите</span> скрита, действа „зад кулисите“' : `<span class="chip easy" style="margin:0">видима</span> ${e<0?'утринна':'вечерна'}`;
+    const ea=Math.abs(elong(k,d7)), eb=Math.abs(elong(k,d7b)), s1=AC.speed(k,AC.T(d7)), s2=AC.speed(k,AC.T(d7b));
+    const ph=[];
+    if (ea<BEAMS && eb>=BEAMS) ph.push(`излиза изпод лъчите (${elong(k,d7b)<0?'хелиакален изгрев, утринна поява':'вечерна поява'})`);
+    if (ea>=BEAMS && eb<BEAMS) ph.push(`влиза под лъчите (${elong(k,d7)>0?'хелиакален залез, вечерно изчезване':'утринно изчезване'})`);
+    if (k!=='Moon' && (s1<0)!==(s2<0)) ph.push(s2<0?'стационарна, става ретроградна':'стационарна, става директна');
+    return `<tr><td class="l">${nameCell(k)}</td><td>${e>=0?'+':'−'}${ae.toFixed(1)}°</td><td class="l" style="font-family:var(--f-body)">${vis}</td><td class="l" style="font-family:var(--f-body);white-space:normal">${synPhase(k,e,spd)}</td><td class="l" style="font-family:var(--f-body);white-space:normal">${ph.length?'<b>Да:</b> '+ph.join('; ')+'. Планетата „заявява“ темата си особено силно.':'—'}</td></tr>`;
+  }).join('')+'</tbody>';
+  runHelYear();
+}
+function runHelYear(){
+  const y=+$('dhYear').value; if(!(y>=1900&&y<=2100)) return;
+  const from=dayStartUTC(`${y}-01-01`), to=dayStartUTC(`${y+1}-01-01`), out=[];
+  ['Mercury','Venus','Mars','Jupiter','Saturn'].forEach(k=>{
+    const f=d=>Math.abs(elong(k,d))-BEAMS;
+    AC.scanZeros(f, from, to, k==='Mercury'?0.5:1).forEach(d=>{
+      const after=Math.abs(elong(k,new Date(d.getTime()+864e5)))>BEAMS, e=elong(k,d);
+      let t;
+      if (after) t = e<0 ? 'хелиакален изгрев: появява се сутрин като утринна звезда' : 'появява се вечер като вечерна звезда';
+      else t = e>0 ? 'хелиакален залез: изчезва вечер в лъчите на Слънцето' : 'изчезва сутрин в лъчите на Слънцето';
+      out.push({d,k,t,lon:AC.lon(k,AC.T(d))});
+    });
+  });
+  out.sort((a,b)=>a.d-b.d);
+  $('helYearHead').textContent=`Появи и изчезвания на планетите през ${y}`;
+  $('helYear').innerHTML=out.map(x=>`<li><time>${fmtD(x.d)}</time><span>${nameCell(x.k)} в ${L(x.lon)}: ${x.t}</span></li>`).join('') || '<li><span>Няма.</span></li>';
+}
 
 // =============== НЕБЕТО СЕГА (горе) ===============
 function skyNow(){
