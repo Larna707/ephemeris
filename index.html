@@ -184,6 +184,20 @@ th{background:var(--panel)}
 .skypanel{background:#0b0e2c;border-color:#2c3274}
 .skypanel .wheel{max-width:640px;filter:none}
 .sklegend{display:flex;flex-wrap:wrap;gap:6px 14px;color:#b4b7da;max-width:none}
+.ntgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,22em),1fr));gap:12px;align-items:stretch}
+.ntcard{border:1px solid var(--line);border-radius:14px;padding:12px 14px;background:linear-gradient(180deg,color-mix(in srgb,var(--gold-soft) 45%,var(--panel)),var(--panel));min-width:0}
+.ntt{margin:0 0 6px;font-family:var(--f-display);font-size:20px;font-weight:700;color:var(--ink);text-transform:none;letter-spacing:0;display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline}
+.ntpos{font-family:var(--f-data);font-size:13px;font-weight:400;color:var(--muted)}
+.ntchips{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px}.ntchips .chip{margin-left:0}
+.ntkw{margin:2px 0;font-size:13.5px;color:var(--ink)}
+.ntcard details{border-top:1px solid var(--soft);padding:6px 0}
+.ntcard summary{font-size:13.5px;font-weight:500}
+.ntx{font-size:13.5px;line-height:1.55;margin-top:6px;overflow-wrap:anywhere;max-width:70ch}
+.ntgrid2{grid-template-columns:repeat(2,minmax(0,1fr))}@media (max-width:760px){.ntgrid2{grid-template-columns:minmax(0,1fr)}}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;align-items:start}
+@media (max-width:1000px){.grid3{grid-template-columns:minmax(0,1fr)}}
+.ntlist li{grid-template-columns:7.5em 1fr}
+.ntlist time{font-family:var(--f-body);font-size:12.5px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 
@@ -209,6 +223,7 @@ th{background:var(--panel)}
     <button role="tab" data-tab="eph" aria-selected="true">Ефемериди за месеца</button>
     <button role="tab" data-tab="moon">Луна</button>
     <button role="tab" data-tab="chart">Карта</button>
+    <button role="tab" data-tab="nt">Бележки и показатели</button>
     <button role="tab" data-tab="dh">Додекатемории и фази</button>
     <button role="tab" data-tab="sky">Небесна карта</button>
     <button role="tab" data-tab="an">Анализ на дата</button>
@@ -638,7 +653,7 @@ th{background:var(--panel)}
       </div>
       <div class="panel">
         <h2>Справочник</h2>
-        <div class="controls"><label class="field"><span>Покажи</span><select id="refType"><option value="planets">Планети</option><option value="signs">Знаци</option><option value="houses">Домове</option><option value="aspects">Аспекти</option><option value="dign">Достойнства на планетите</option></select></label></div>
+        <div class="controls"><label class="field"><span>Покажи</span><select id="refType"><option value="planets">Планети</option><option value="signs">Знаци</option><option value="houses">Домове</option><option value="aspects">Аспекти</option><option value="dign">Достойнства на планетите</option></select></label><label class="field"><span>Схема на достойнствата</span><select id="dgScheme2"><option value="cl">Класическа</option><option value="st">Кирил Стойчев (по курса)</option></select></label></div>
         <div class="scroll"><table id="refTable"></table></div>
       </div>
     </div>
@@ -824,6 +839,44 @@ th{background:var(--panel)}
       </div>
     </div>
     <p class="note" style="margin-top:10px">Звездите и съзвездията: каталог Hipparcos, линии и данни от d3-celestial (Olaf Frohn, лиценз BSD).</p>
+  </section>
+
+  <!-- NOTES FROM THE COURSE -->
+  <section id="tab-nt" role="tabpanel" hidden>
+    <div class="panel">
+      <h2 id="ntHead">Бележки и показатели</h2>
+      <p class="note">Тук картата се чете с вашите бележки от курса: всяка планета в знак и дом, върховете на домовете, аспектите по орбисите от курса, семейните показатели и родовата задача. Текстовете от курса не са в публичния код на сайта. Пазят се в браузъра и в тайния ви файл в GitHub.</p>
+      <div class="controls">
+        <label class="field"><span>Схема на достойнствата</span><select id="dgScheme"><option value="cl">Класическа</option><option value="st">Кирил Стойчев (по курса)</option></select></label>
+        <label class="field"><span>Картата е на</span><select id="ntSex"><option value="f">жена</option><option value="m">мъж</option></select></label>
+        <label class="btn" for="ntFile" id="ntLoad" style="cursor:pointer">Зареди бележките от файл</label><input type="file" id="ntFile" accept=".json,application/json" hidden>
+      </div>
+      <p class="status" id="ntStatus"></p>
+    </div>
+    <div class="panel" style="margin-top:18px">
+      <h2>Планетите</h2>
+      <div class="ntgrid" id="ntPlanets"></div>
+    </div>
+    <div class="panel" style="margin-top:18px">
+      <h2>Домовете</h2>
+      <div class="ntgrid" id="ntHouses"></div>
+    </div>
+    <div class="panel" style="margin-top:18px">
+      <h2>Аспекти по правилата на курса</h2>
+      <p class="note">Орбисите са по курса: Слънце и Луна 12°, Меркурий, Венера и Марс 7°, Юпитер и Сатурн 9°, Уран, Нептун, Плутон и останалите 5°. За двойка планети се събират половините. Към Асцендента и MC: съвпад до 5°, другите аспекти до 3°. Сходящият аспект се засилва с годините, разходящият е бил по-силен в детството.</p>
+      <div class="scroll"><table id="ntAsp"></table></div>
+    </div>
+    <div class="grid3" style="margin-top:18px">
+      <div class="panel"><h2>Братя и сестри</h2><ul class="evlist ntlist" id="ntSib"></ul></div>
+      <div class="panel"><h2>Деца</h2><ul class="evlist ntlist" id="ntKids"></ul></div>
+      <div class="panel"><h2>Партньор</h2><ul class="evlist ntlist" id="ntPartner"></ul></div>
+    </div>
+    <p class="note" style="margin-top:8px">Показателите са по правилата от курса. Те описват тенденции и ги проверявате с живота на човека. Не са присъда.</p>
+    <div class="panel" style="margin-top:18px">
+      <h2>Родова задача</h2>
+      <p class="note">Слънцето показва задачите от рода на бащата, Луната — от рода на майката. IC е родовата карма, MC е личната задача, която родът ни поставя.</p>
+      <div class="ntgrid ntgrid2" id="ntRod"></div>
+    </div>
   </section>
 
   <!-- RECTIFICATION -->
@@ -7685,7 +7738,7 @@ INTX.initUI();
 
 
 // =============== TABS ===============
-const TABS=['eph','moon','chart','dh','sky','an','tr','pass','hs','sr','pd','kw','syn','hor','rect','cyc','jr'];
+const TABS=['eph','moon','chart','nt','dh','sky','an','tr','pass','hs','sr','pd','kw','syn','hor','rect','cyc','jr'];
 tab = store.get('tab','eph'); if (!TABS.includes(tab)) tab='eph';
 function showTab(t){
   tab=t; store.set('tab',t);
@@ -7708,6 +7761,7 @@ function render(){
   else if (tab==='hor') { initHor(); runHor(); }
   else if (tab==='moon') runMoon();
   else if (tab==='dh') runDh();
+  else if (tab==='nt') runNotes();
   else if (tab==='sky') runSky();
   else if (tab==='cyc') INTX.runCyc();
   else if (tab==='jr') INTX.renderJr();
@@ -8215,13 +8269,6 @@ const KW = {
 };
 const DOMICILE={Sun:[4],Moon:[3],Mercury:[2,5],Venus:[1,6],Mars:[0,7],Jupiter:[8,11],Saturn:[9,10],Uranus:[10],Neptune:[11],Pluto:[7]};
 const EXALT={Sun:0,Moon:1,Mercury:5,Venus:11,Mars:9,Jupiter:3,Saturn:6};
-function dignity(k,s){
-  if (DOMICILE[k]&&DOMICILE[k].includes(s)) return {t:'обител',c:'easy',d:'планетата е силна, действа естествено'};
-  if (EXALT[k]===s) return {t:'екзалтация',c:'easy',d:'планетата е издигната, проявява най-доброто си'};
-  if (DOMICILE[k]&&DOMICILE[k].map(x=>(x+6)%12).includes(s)) return {t:'изгнание',c:'hard',d:'планетата е в чужда среда, трябва повече усилие'};
-  if (EXALT[k]!=null && (EXALT[k]+6)%12===s) return {t:'падение',c:'hard',d:'планетата е отслабена, проявява се трудно'};
-  return null;
-}
 const KW_PLANETS=['Sun','Moon','Mercury','Venus','Mars','Jupiter','Saturn','Chiron','Uranus','Neptune','Pluto','Node','Lilith'];
 const KW_TRANSIT=['Sun','Mercury','Venus','Mars','Jupiter','Saturn','Chiron','Uranus','Neptune','Pluto','Node'];
 const kwSel={};
@@ -8333,7 +8380,7 @@ function refRender(){
   else if (t==='signs') h=`<thead><tr><th class="t l">Знак</th><th class="t l">Стихия · кръст · управител</th><th class="t l">Как</th></tr></thead><tbody>`+SIGNS.map((n,i)=>`<tr><td class="l"><span class="sg">${SGg[i]}</span> <span style="font-family:var(--f-body)">${n}</span></td><td class="l" style="font-family:var(--f-body)">${signInfo(i)}</td><td class="l" style="font-family:var(--f-body);white-space:normal">${KW.signs[i].adv.join(', ')}</td></tr>`).join('');
   else if (t==='houses') h=`<thead><tr><th class="t l">Дом</th><th class="t l">Сфера</th></tr></thead><tbody>`+KW.houses.map((x,i)=>`<tr><td class="l" style="font-family:var(--f-body)">${i+1} · ${x.name}</td><td class="l" style="font-family:var(--f-body);white-space:normal">${x.area.join(', ')}</td></tr>`).join('');
   else if (t==='aspects') h=`<thead><tr><th class="t l">Аспект</th><th class="t l">Смисъл</th><th class="t l">Свързващи думи</th></tr></thead><tbody>`+[0,60,90,120,180,150].map(a=>`<tr><td class="l">${aspCell(a)} ${a}°</td><td class="l" style="font-family:var(--f-body);white-space:normal">${KW.aspects[a].nature}</td><td class="l" style="font-family:var(--f-body);white-space:normal">${KW.aspects[a].ph.join(' / ')}</td></tr>`).join('');
-  else h=`<thead><tr><th class="t l">Планета</th><th class="t l">Обител</th><th class="t l">Екзалтация</th><th class="t l">Изгнание</th><th class="t l">Падение</th></tr></thead><tbody>`+Object.keys(DOMICILE).map(k=>`<tr><td class="l">${nameCell(k)}</td><td class="l" style="font-family:var(--f-body)">${DOMICILE[k].map(s=>SIGNS[s]).join(', ')}</td><td class="l" style="font-family:var(--f-body)">${EXALT[k]!=null?SIGNS[EXALT[k]]:'—'}</td><td class="l" style="font-family:var(--f-body)">${DOMICILE[k].map(s=>SIGNS[(s+6)%12]).join(', ')}</td><td class="l" style="font-family:var(--f-body)">${EXALT[k]!=null?SIGNS[(EXALT[k]+6)%12]:'—'}</td></tr>`).join('');
+  else { const T=DG[DGS], nm=(k,x)=>(T[x][k]||[]).map(s=>SIGNS[s]).join(', ')||'—'; h=`<thead><tr><th class="t l">Планета (${T.name})</th><th class="t l">Обител</th><th class="t l">Екзалтация</th><th class="t l">Изгнание</th><th class="t l">Падение</th></tr></thead><tbody>`+Object.keys(T.dom).map(k=>`<tr><td class="l">${nameCell(k)}</td>${['dom','exa','det','fall'].map(x=>`<td class="l" style="font-family:var(--f-body);white-space:normal">${nm(k,x)}</td>`).join('')}</tr>`).join(''); }
   $('refTable').innerHTML=h+'</tbody>';
 }
 
@@ -9048,6 +9095,174 @@ function fixedStars(c){
   $('skAng').innerHTML = ang.length ? ang.map(a=>`<li><time>${a.st.n}</time><span>${a.t}, на ${a.o.toFixed(1)}°. ${STAR_MEAN[a.st.n]||''}</span></li>`).join('') : '<li><time>—</time><span>Няма важни звезди точно на хоризонта или меридиана.</span></li>';
 }
 
+// =============== СХЕМА НА ДОСТОЙНСТВАТА (класическа / Кирил Стойчев) ===============
+const DG = {
+  cl:{name:'Класическа', dom:DOMICILE, exa:Object.fromEntries(Object.entries(EXALT).map(([k,v])=>[k,[v]])),
+      det:Object.fromEntries(Object.entries(DOMICILE).map(([k,v])=>[k,v.map(x=>(x+6)%12)])), fall:Object.fromEntries(Object.entries(EXALT).map(([k,v])=>[k,[(v+6)%12]]))},
+  st:{name:'Кирил Стойчев',
+      dom:{Sun:[4],Moon:[3],Mercury:[2,5],Venus:[1,6],Mars:[0,7],Jupiter:[8,11],Saturn:[9,10],Uranus:[10],Neptune:[11],Pluto:[7,0]},
+      det:{Sun:[10],Moon:[9],Mercury:[8,11],Venus:[7,0],Mars:[6,1],Jupiter:[2,5],Saturn:[3,4],Uranus:[4],Neptune:[5],Pluto:[1,6]},
+      exa:{Sun:[0],Moon:[1],Mercury:[11,2],Venus:[10,3],Mars:[9,4],Jupiter:[5,8],Saturn:[6,7],Uranus:[7],Neptune:[8],Pluto:[4,9]},
+      fall:{Sun:[6],Moon:[7],Mercury:[5,8],Venus:[4,9],Mars:[3,10],Jupiter:[11,2],Saturn:[0,1],Uranus:[1],Neptune:[2],Pluto:[10,3]}}
+};
+let DGS = store.get('dignScheme','cl'); if (!DG[DGS]) DGS='cl';
+const DG_TXT={dom:['обител','easy','планетата е на трон: силна, действа естествено, но носи и цялата отговорност'],exa:['екзалтация','easy','планетата е издигната, проявява висшата си природа'],det:['изгнание','hard','планетата е в чужда среда, опитва се да компенсира'],fall:['падение','hard','планетата е отслабена, трудно изразява потенциала си']};
+function dignity(k,s){
+  const T=DG[DGS], hit=['dom','exa','det','fall'].filter(x=>T[x][k]&&T[x][k].includes(s));
+  if (!hit.length) return null;
+  if (hit.length===1){ const [t,c,d]=DG_TXT[hit[0]]; return {t,c,d}; }
+  return {t:hit.map(x=>DG_TXT[x][0]).join(' и '), c:'gold', d:hit.map(x=>DG_TXT[x][2]).join('; ')};
+}
+function setDGS(v){ DGS=DG[v]?v:'cl'; store.set('dignScheme',DGS); ['dgScheme','dgScheme2'].forEach(id=>{ const e=$(id); if(e) e.value=DGS; }); render(); }
+
+// =============== БЕЛЕЖКИ ОТ КУРСА ===============
+const NOTES_FILE='ephemeris-notes.json';
+let NOTES = (window.EMBED_NOTES && window.EMBED_NOTES.notes) || (store.get('notes',null)||{}).notes || null;
+function setNotes(obj, push){
+  if (!obj || obj.app!=='ephemeris-notes' || !obj.notes) throw new Error('bad');
+  NOTES=obj.notes; if (!window.EMBED_NOTES) store.set('notes', obj);
+  if (push && typeof gist!=='undefined' && gist && gist.id) gh('/gists/'+gist.id,{method:'PATCH', body:JSON.stringify({files:{[NOTES_FILE]:{content:JSON.stringify(obj)}}})}).then(()=>{ $('ntStatus').textContent='Бележките са заредени и изпратени в GitHub. Ще се появят и на другите ви устройства.'; }).catch(()=>{ $('ntStatus').textContent='Бележките са заредени тук, но не успях да ги изпратя в GitHub.'; });
+}
+async function notesPullFromGist(g){
+  try{ const f=g.files&&g.files[NOTES_FILE]; if(!f) return;
+    let txt=f.content; if (f.truncated) txt=await (await fetch(f.raw_url,{cache:'no-store'})).text();
+    const obj=JSON.parse(txt), cur=store.get('notes',null);
+    if (!cur || cur.updated!==obj.updated){ setNotes(obj,false); if (tab==='nt') render(); }
+  }catch(e){}
+}
+$('ntFile').onchange=async()=>{
+  const f=$('ntFile').files[0]; if(!f) return;
+  try{ const obj=JSON.parse(await f.text()); setNotes(obj,true); if(!(gist&&gist.id)) $('ntStatus').textContent='Бележките са заредени в този браузър.'; render(); }
+  catch(e){ $('ntStatus').textContent='Това не е файлът с бележките. Изберете ephemeris-notes.json.'; }
+  $('ntFile').value='';
+};
+const ORB_C={Sun:12,Moon:12,Mercury:7,Venus:7,Mars:7,Jupiter:9,Saturn:9,Uranus:5,Neptune:5,Pluto:5,Chiron:5,Lilith:5,Node:5};
+const NT_KEYS=['Sun','Moon','Mercury','Venus','Mars','Jupiter','Saturn','Chiron','Uranus','Neptune','Pluto','Lilith','Node'];
+const MASC = s => s%2===0;
+const gen = s => MASC(s) ? 'мъжки' : 'женски';
+const P_GEN={Sun:'м',Mars:'м',Jupiter:'м',Saturn:'м',Uranus:'м',Pluto:'м',Moon:'ж',Venus:'ж',Neptune:'ж',Lilith:'ж',Mercury:'неутрален',Chiron:'м',Node:'неутрален'};
+const FERT=['силно плодовит','силно плодовит','плодовит','силно плодовит','плодовит','плодовит','умерено плодовит (1–2 деца)','слабо плодовит (0–1 дете)','слабо плодовит (0–1 дете)','безплоден','безплоден','най-безплоден'];
+const MODAL=['кардинален','фиксиран','мутабилен'];
+function courseAspects(n){
+  const pts=n.pts.filter(p=>NT_KEYS.includes(p.k)).map(p=>({k:p.k,lon:p.lon,spd:p.spd})).concat([{k:'ASC',lon:n.hs.asc,spd:0},{k:'MC',lon:n.hs.mc,spd:0}]);
+  const out=[];
+  for (let i=0;i<pts.length;i++) for (let j=i+1;j<pts.length;j++){
+    const A=pts[i], B=pts[j]; if ((A.k==='ASC'||A.k==='MC')&&(B.k==='ASC'||B.k==='MC')) continue;
+    const ax=['ASC','MC'].includes(A.k)||['ASC','MC'].includes(B.k);
+    const d=Math.abs(dif(A.lon,B.lon));
+    [0,60,90,120,180].forEach(a=>{
+      const lim = ax ? (a===0?5:3) : (ORB_C[A.k]+ORB_C[B.k])/2, o=Math.abs(d-a);
+      if (o>lim) return;
+      const d2=Math.abs(dif(A.lon+A.spd/24, B.lon+B.spd/24)), app=Math.abs(d2-a)<o;
+      const partile = Math.floor(norm(A.lon)%30)===Math.floor(norm(B.lon)%30);
+      const str = partile ? 'партилен, най-силен' : o<1 ? 'много силен' : o<=3 ? 'силен' : o<=5 ? 'среден' : 'слаб, фонов';
+      out.push({a:A.k,b:B.k,asp:a,o,app,str,partile});
+    });
+  }
+  return out.sort((x,y)=>x.o-y.o);
+}
+const det = (t, body, open) => body ? `<details><summary>${t}</summary><div class="ntx">${escapeHtml(body).replace(/\n/g,'<br>')}</div></details>` : '';
+function ntGet(path){ try{ return path.reduce((o,k)=>o&&o[k], NOTES)||''; }catch(e){ return ''; } }
+function runNotes(){
+  const p=active(), n=natalOf(p), Nn=!!NOTES;
+  $('dgScheme').value=DGS;
+  const sexKey='sex_'+p.id; $('ntSex').value=store.get(sexKey,'f'); $('ntSex').onchange=()=>{ store.set(sexKey,$('ntSex').value); runNotes(); };
+  const female=$('ntSex').value==='f';
+  $('ntHead').textContent=`Бележки и показатели: ${p.name}`;
+  $('ntLoad').hidden = !!window.EMBED_NOTES;
+  if (!$('ntStatus').textContent) $('ntStatus').textContent = window.EMBED_NOTES ? 'Бележките от курса са вградени в тази версия.' : Nn ? 'Бележките от курса са заредени.' : 'Бележките от курса още не са заредени. Изберете файла ephemeris-notes.json. Правилата отдолу работят и без него.';
+  const P=k=>n.pts.find(x=>x.k===k), sun=P('Sun');
+  const asp=courseAspects(n);
+  const R = RUL_MOD;
+  // ---------- планети ----------
+  const near1=n.pts.filter(x=>x.house===1&&x.k!=='Node'&&x.k!=='Lilith').sort((a,b)=>Math.abs(dif(a.lon,n.hs.asc))-Math.abs(dif(b.lon,n.hs.asc)))[0];
+  $('ntPlanets').innerHTML=NT_KEYS.filter(k=>P(k)).map(k=>{
+    const x=P(k), s=sgn(x.lon), h=x.house, dg=dignity(k,s), rx=x.spd<0&&k!=='Node'&&k!=='Lilith';
+    const ds=k==='Sun'?99:Math.abs(dif(x.lon,sun.lon));
+    const comb = ds<=17/60 ? ['казими: в сърцето на Слънцето, много силна','gold'] : ds<=8.5 ? ['изгоряла от Слънцето','hard'] : ds<=17 ? ['под лъчите (по-слабо изгаряне)','hard'] : null;
+    const ang = {1:'изгряваща (1 дом)',7:'залязваща (7 дом)',10:'в 10 дом (MC)',4:'в 4 дом (IC)'}[h];
+    const unasp = !asp.some(a=>(a.a===k||a.b===k));
+    const chips=[dg?`<span class="chip ${dg.c}">${dg.t}</span>`:'', rx?'<span class="chip hard">ретроградна</span>':'', comb?`<span class="chip ${comb[1]}">${comb[0]}</span>`:'', ang?`<span class="chip gold">${ang}</span>`:'', unasp?'<span class="chip">неаспектирана</span>':''].join('');
+    const pm=(NOTES&&NOTES.planet&&NOTES.planet[k])||{};
+    let body='';
+    body+=`<p class="ntkw">${(KW.planets[k]||{fn:[]}).fn.slice(0,3).join(', ')}</p>`;
+    if (dg) body+=`<p class="note" style="margin:4px 0">${cap(dg.d)} (схема: ${DG[DGS].name}).</p>`;
+    if (Nn){
+      body+=det(`${pn(k)} в ${SIGNS[s]}`, ntGet(['sp',String(s),k]), true);
+      const hp=ntGet(['hp',String(h),k]);
+      body+=det(`${pn(k)} в ${h} дом`, hp || ntGet(['hpGen',k]) , !!hp);
+      if (ang) body+=det(`Планета ${ang}`, ntGet(['ang',String(h),k]), true);
+      if (near1 && near1.k===k){ const rh=[]; for(let i=1;i<=12;i++) if (R[sgn(n.hs.cusp[i])]===k) rh.push(i); rh.forEach(i=>{ body+=det(`Изгряващата планета управлява ${i} дом`, ntGet(['riseRule',String(i)]), false); }); }
+      if (rx) body+=det('Ретроградност', pm['Ретрогадност'], false);
+      if (unasp) body+=det('Неаспектирана планета', pm['Неаспектиран'], false);
+      if (comb && comb[1]==='hard') body+=det('Изгаряне', ntGet(['combust',k]), true);
+      body+=det('Основна дума и ключови думи от курса', [pm['Основна дума'],pm['Ключови думи']].filter(Boolean).join('\n\n'), false);
+    }
+    return `<article class="ntcard"><h3 class="ntt">${nameCell(k)} <span class="ntpos">${L(x.lon)} ${SIGNS[s]}, ${h} дом${rx?' R':''}</span></h3><div class="ntchips">${chips}</div>${body}</article>`;
+  }).join('');
+  // ---------- домове ----------
+  $('ntHouses').innerHTML=Array.from({length:12},(_,i)=>i+1).map(h=>{
+    const s=sgn(n.hs.cusp[h]), r=R[s], q=P(r), inH=n.pts.filter(x=>x.house===h&&NT_KEYS.includes(x.k)).map(x=>pn(x.k));
+    const hm=ntGet(['house',String(h)])||{};
+    let body=`<p class="ntkw">${KW.houses[h-1].area.join(', ')}</p><p class="note" style="margin:4px 0">Управител: ${pn(r)} в ${SIGNS[sgn(q.lon)]}, ${q.house} дом.${inH.length?' В дома: '+inH.join(', ')+'.':' Празен дом.'}</p>`;
+    if (Nn){
+      if (h===1){ const sm=ntGet(['sign',String(s)])||{}; body+=det(`Асцендент в ${SIGNS[s]}`, [sm['Психични и умствени качества'],sm['Походка, жестове и излъчване']].filter(Boolean).join('\n\n'), true); }
+      else body+=det(`${h} дом в ${SIGNS[s]}`, ntGet(['hs',String(h),String(s)]), true);
+      body+=det('За дома (от курса)', [hm['Отговаря за'],hm['Ключова дума']].filter(Boolean).join('\n\n'), false);
+    }
+    return `<article class="ntcard"><h3 class="ntt">${h} дом <span class="ntpos"><span class="sg">${SGg[s]}</span> ${SIGNS[s]} · ${L(n.hs.cusp[h])}</span></h3>${body}</article>`;
+  }).join('');
+  // ---------- аспекти ----------
+  const aspNote=(a,b,x)=>ntGet(['asp',String(x),a,b])||ntGet(['asp',String(x),b,a]);
+  $('ntAsp').innerHTML=`<thead><tr><th class="t l">Аспект</th><th class="t">Орбис</th><th class="t l">Сила</th><th class="t l">Посока</th><th class="t l">Бележка</th></tr></thead><tbody>`+asp.map(x=>{
+    const nt=Nn?aspNote(x.a,x.b,x.asp):'';
+    return `<tr><td class="l">${PN(x.a)} <span class="pg ${aspCls(x.asp)}">${g(aspOf(x.asp).g)}</span> ${PN(x.b)} <span style="font-family:var(--f-body)">${shortN(x.a)} ${aspOf(x.asp).n} ${shortN(x.b)}</span></td><td>${x.o.toFixed(1)}°</td><td class="l" style="font-family:var(--f-body)">${x.str}</td><td class="l" style="font-family:var(--f-body)">${x.app?'сходящ: засилва се с годините':'разходящ: по-силен в детството'}</td><td class="l" style="font-family:var(--f-body);white-space:normal;min-width:14em">${nt?`<details><summary>Бележка</summary><div class="ntx">${escapeHtml(nt).replace(/\n/g,'<br>')}</div></details>`:''}</td></tr>`;
+  }).join('')+'</tbody>';
+  // ---------- семейни показатели ----------
+  const li=(t,v,c)=>`<li><time>${t}</time><span>${c?`<span class="chip ${c}" style="margin:0 6px 0 0">${c==='easy'?'да':c==='hard'?'внимание':'инфо'}</span>`:''}${v}</span></li>`;
+  // братя и сестри
+  const c3=sgn(n.hs.cusp[3]), r3=R[c3], q3=P(r3), s3=sgn(q3.lon), in3=n.pts.filter(x=>x.house===3&&NT_KEYS.includes(x.k)&&x.k!=='Node');
+  const m3=[MASC(c3),MASC(s3)].filter(Boolean).length;
+  let sib=[li('3 дом',`Върхът е в ${SIGNS[c3]}: ${gen(c3)} знак.`), li('Управител',`${pn(r3)} е в ${SIGNS[s3]} (${gen(s3)} знак), ${q3.house} дом.`)];
+  sib.push(li('Планети в 3 дом', in3.length? in3.map(x=>`${pn(x.k)} (${P_GEN[x.k]==='м'?'мъжка':P_GEN[x.k]==='ж'?'женска':'неутрална'} планета, в ${gen(sgn(x.lon))} знак)`).join(', ')+'.' : 'няма.'));
+  sib.push(li('Извод', m3===2?'Върхът и управителят са в мъжки знаци: показател за брат.':m3===0?'Върхът и управителят са в женски знаци: показател за сестра.':'Смесени показатели: брат и сестра или неясен пол. Гледайте планетите в дома.', 'gold'));
+  if (c3===9) sib.push(li('Възраст','Козирог на 3 дом: показател за по-голям брат или сестра.'));
+  if (c3===10) sib.push(li('Възраст','Водолей на 3 дом: показател за по-малък брат или сестра.'));
+  if (q3.house===1) sib.push(li('Единствено дете','Управителят на 3 дом е в 1 дом: класически показател за първородно или единствено дете.','hard'));
+  if (P('Saturn').house===3) sib.push(li('Сатурн в 3 дом','Класически показател за липса на братя и сестри или за самота в детството.','hard'));
+  $('ntSib').innerHTML=sib.join('');
+  // деца
+  const c5=sgn(n.hs.cusp[5]), r5=R[c5], q5=P(r5), s5=sgn(q5.lon), in5=n.pts.filter(x=>x.house===5&&NT_KEYS.includes(x.k)&&x.k!=='Node'), moon=P('Moon'), md=dignity('Moon',sgn(moon.lon));
+  let ch=[li('5 дом',`Върхът е в ${SIGNS[c5]}: ${FERT[c5]} знак.`, c5<=6?'easy':c5>=9?'hard':null), li('Управител',`${pn(r5)} в ${SIGNS[s5]} (${FERT[s5]}), ${q5.house} дом${q5.spd<0&&r5!=='Node'?', ретрограден: възможно забавяне':''}.`, q5.house===5?'easy':null)];
+  if (q5.house===5) ch.push(li('Силна позиция','Управителят на 5 дом е в самия 5 дом: плюс за деца.','easy'));
+  ch.push(li('Планети в 5 дом', in5.length? in5.map(x=>pn(x.k)).join(', ')+'.' : 'няма.'));
+  ch.push(li('Луната',`В ${SIGNS[sgn(moon.lon)]}${md?`, ${md.t}`:''}. ${female?'В женска карта Луната е самата жена и майчинският инстинкт.':'В мъжка карта Луната може да описва съпругата.'}`, md? (md.c==='easy'?'easy':'hard') : null));
+  const mr5=asp.filter(a=>(a.a==='Moon'&&a.b===r5)||(a.b==='Moon'&&a.a===r5));
+  if (mr5.length) ch.push(li('Луна и управител на 5', mr5.map(a=>`${aspOf(a.asp).n} (${a.o.toFixed(1)}°)`).join(', ')+'.', [90,180].includes(mr5[0].asp)?'hard':'easy'));
+  const r11=R[sgn(n.hs.cusp[11])];
+  if (q5.house===11 || P(r11).house===5) ch.push(li('5 и 11 дом','Връзка между 5 и 11 дом: по бележките е показател за осиновени или „чужди“ деца, за които човек се грижи.'));
+  $('ntKids').innerHTML=ch.join('');
+  // партньор
+  const c7=sgn(n.hs.cusp[7]), r7=R[c7], q7=P(r7), md7=c7%3;
+  let pr=[li('7 дом',`Върхът е в ${SIGNS[c7]} (${MODAL[md7]} знак). ${md7===1?'Фиксиран: стабилност, трудно се разделят.':md7===0?'Кардинален: стабилност, но с повече действие и промени.':'Мутабилен: по-голяма вероятност за повече от един сериозен партньор.'}`, md7===2?'hard':'easy')];
+  pr.push(li('Реалният партньор',`Управителят ${pn(r7)} е в ${SIGNS[sgn(q7.lon)]}, ${q7.house} дом: партньорът се проявява ${KW.signs[sgn(q7.lon)].adv.slice(0,3).join(', ')}.`));
+  if (female) pr.push(li('Идеалният тип',`Марс в ${SIGNS[sgn(P('Mars').lon)]}: привлича я мъж, който действа ${KW.signs[sgn(P('Mars').lon)].adv.slice(0,3).join(', ')}.`));
+  else pr.push(li('Идеалният тип',`Венера в ${SIGNS[sgn(P('Venus').lon)]}: привлича го жена, която се проявява ${KW.signs[sgn(P('Venus').lon)].adv.slice(0,3).join(', ')}.`));
+  const hardTo=(a,b)=>asp.find(x=>[0,90,180].includes(x.asp)&&((x.a===a&&x.b===b)||(x.a===b&&x.b===a)));
+  if (P('Uranus').house===7) pr.push(li('Уран в 7 дом','Основен показател за нужда от свобода в брака или за раздяла. Помага връзка с много лично пространство.','hard'));
+  const uv=hardTo('Uranus','Venus'); if (uv) pr.push(li('Уран към Венера',`${aspOf(uv.asp).n} (${uv.o.toFixed(1)}°): силен показател за внезапни промени в любовта.`,'hard'));
+  if (r7!=='Uranus'){ const ur=hardTo('Uranus',r7); if (ur) pr.push(li('Уран към управителя на 7',`${aspOf(ur.asp).n} (${ur.o.toFixed(1)}°): показател за промени във връзката.`,'hard')); }
+  if (P('Saturn').house===7 || hardTo('Saturn',r7)) pr.push(li('Сатурн','Сатурн в 7 дом или към управителя му: трудности, но и дълготрайност. Хората остават заедно въпреки трудностите.'));
+  const c10=sgn(n.hs.cusp[10]); if (c10===9||c10===10) pr.push(li('Възраст на съпруга',`По бележките: ${SIGNS[c10]} на 10 дом дава ${c10===9?'по-голям':'по-малък'} съпруг.`));
+  $('ntPartner').innerHTML=pr.join('');
+  // родова задача
+  const rod=k=>{ const s=k==='IC'?sgn(n.hs.cusp[4]):k==='MC'?sgn(n.hs.mc):sgn(P(k).lon); return [s, ntGet(['sign',String(s),'Родова Астрология'])]; };
+  $('ntRod').innerHTML=[['Sun','Слънце: задачите от рода на бащата'],['Moon','Луна: задачите от рода на майката'],['IC','IC: родовата карма'],['MC','MC: личната задача, която родът поставя']].map(([k,t])=>{ const [s,tx]=rod(k);
+    return `<article class="ntcard"><h3 class="ntt">${t} <span class="ntpos"><span class="sg">${SGg[s]}</span> ${SIGNS[s]}</span></h3>${Nn?(tx?`<div class="ntx">${escapeHtml(tx).replace(/\n/g,'<br>')}</div>`:'<p class="note">Няма бележка за този знак.</p>'):'<p class="note">Заредете бележките, за да видите текста.</p>'}</article>`; }).join('');
+}
+$('dgScheme').onchange=()=>setDGS($('dgScheme').value);
+$('dgScheme2').value=DGS; $('dgScheme2').onchange=()=>setDGS($('dgScheme2').value);
+
 // =============== НЕБЕТО СЕГА (горе) ===============
 function skyNow(){
   try{
@@ -9114,6 +9329,7 @@ async function gistPull(first){
   const before=JSON.stringify(profiles.filter(p=>!p.example));
   if (JSON.stringify(merged)!==before) applyRemote(merged);
   if (push) await gistWrite();
+  notesPullFromGist(g);
   setCloudStat('gist');
 }
 async function gistWrite(){
