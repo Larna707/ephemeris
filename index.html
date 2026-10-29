@@ -9507,25 +9507,31 @@ function housesOfPoint(lon, cusp){ // с граничния ефект от ле
   if (next===1 ? toNext<=5 : toNext<=3) out.push(next);
   return out;
 }
+function placeTxt(lon, cusp){
+  const h=AC.houseOf(lon,cusp), next=h%12+1, toNext=norm(cusp[next]-lon);
+  if (next===1 ? toNext<=5 : toNext<=3) return `в ${h} дом, но на ${toNext.toFixed(1)}° преди ${next===1?'Асцендента':'върха на '+next+' дом'}, затова действа и в ${next} дом`;
+  return `в ${h} дом`;
+}
+function placeShort(lon, cusp){ const h=AC.houseOf(lon,cusp), next=h%12+1, d=norm(cusp[next]-lon); return (next===1?d<=5:d<=3) ? `${h} дом, ${d.toFixed(1)}° до ${next===1?'Асц':'върха на '+next} → и ${next} дом` : `${h} дом`; }
 function houseLinks(n){
   const R=RUL_MOD, PL=['Sun','Moon','Mercury','Venus','Mars','Jupiter','Saturn','Uranus','Neptune','Pluto'], P=k=>n.pts.find(x=>x.k===k);
-  const links={}; const add=(a,b,sign,why)=>{ const k=Math.min(a,b)+'-'+Math.max(a,b); const L=links[k]=links[k]||{a:Math.min(a,b),b:Math.max(a,b),plus:0,minus:0,why:[]}; if(sign>0) L.plus++; else L.minus++; L.why.push(why); };
+  const links={}; const add=(a,b,sign,why)=>{ const k=Math.min(a,b)+'-'+Math.max(a,b); const L=links[k]=links[k]||{a:Math.min(a,b),b:Math.max(a,b),plus:0,minus:0,why:[]}; if (L.why.includes(why)) return; if(sign>0) L.plus++; else L.minus++; L.why.push(why); };
   // 1) управителят на дом X е в дом Y
-  for (let h=1;h<=12;h++){ const r=R[sgn(n.hs.cusp[h])], q=P(r); const dg=dignity(r,sgn(q.lon));
+  for (let h=1;h<=12;h++){ const r=R[sgn(n.hs.cusp[h])], q=P(r); const dg=dignity(r,sgn(q.lon)), pt=placeTxt(q.lon,n.hs.cusp);
     housesOfPoint(q.lon,n.hs.cusp).forEach(y=>{ const neg = BAD_H.includes(h)||BAD_H.includes(y) || (dg&&dg.c==='hard');
-      add(h,y, neg?-1:1, `управителят на ${h} дом (${pn(r)}) е в ${y} дом${dg?`, ${dg.t}`:''}`); }); }
+      add(h,y, neg?-1:1, `управителят на ${h} дом (${pn(r)}) е ${pt}${dg?` (${dg.t})`:''}`); }); }
   // 2) аспекти между планети в различни домове
   const asp=courseAspects(n).filter(x=>PL.includes(x.a)&&PL.includes(x.b)&&x.asp!==150);
-  asp.forEach(x=>{ const A=P(x.a), B=P(x.b);
+  asp.forEach(x=>{ const A=P(x.a), B=P(x.b), w=`${pn(x.a)} (${placeShort(A.lon,n.hs.cusp)}) ${aspOf(x.asp).n} ${pn(x.b)} (${placeShort(B.lon,n.hs.cusp)})`;
     housesOfPoint(A.lon,n.hs.cusp).forEach(ha=>housesOfPoint(B.lon,n.hs.cusp).forEach(hb=>{
       const neg = x.asp===90 || x.asp===180 || (x.asp===0 && (BAD_H.includes(ha)||BAD_H.includes(hb)));
-      add(ha,hb, neg?-1:1, `${pn(x.a)} в ${ha} дом ${aspOf(x.asp).n} ${pn(x.b)} в ${hb} дом`); })); });
+      add(ha,hb, neg?-1:1, w); })); });
   return Object.values(links).sort((p,q)=>((q.a===1)-(p.a===1)) || (q.plus+q.minus)-(p.plus+p.minus));
 }
 function runLinks(n){
   const L=houseLinks(n), C=(NOTES&&NOTES.conn)||null;
   $('ntLinks').innerHTML=L.map(x=>{ const key=x.a+'-'+x.b, tx=C&&C[key], net=x.plus-x.minus, cls=net>0?'easy':net<0?'hard':'gold', lab=net>0?'положителна':net<0?'отрицателна':'смесена';
-    return `<article class="ntcard"><h3 class="ntt">${x.a}–${x.b} <span class="chip ${cls}" style="margin:0">${lab}</span><span class="ntpos">${x.plus}+ / ${x.minus}−</span></h3><p class="note" style="margin:2px 0 6px">${x.why.slice(0,4).join('; ')}${x.why.length>4?'; …':''}.</p>${tx?(net>=0?`<p class="ntx" style="margin:0"><b>+</b> ${escapeHtml(tx[0])}</p>`:'')+(net<=0?`<p class="ntx" style="margin:4px 0 0"><b>−</b> ${escapeHtml(tx[1])}</p>`:''):''}</article>`; }).join('');
+    return `<article class="ntcard"><h3 class="ntt">${x.a}–${x.b} <span class="chip ${cls}" style="margin:0">${lab}</span><span class="ntpos">${x.plus}+ / ${x.minus}−</span></h3><ul class="ntul note" style="margin:2px 0 6px">${x.why.map(w=>`<li>${cap(w)}</li>`).join('')}</ul>${tx?(net>=0?`<p class="ntx" style="margin:0"><b>+</b> ${escapeHtml(tx[0])}</p>`:'')+(net<=0?`<p class="ntx" style="margin:4px 0 0"><b>−</b> ${escapeHtml(tx[1])}</p>`:''):''}</article>`; }).join('');
 }
 
 // =============== АСПЕКТНИ ФИГУРИ ===============
