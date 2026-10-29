@@ -867,6 +867,11 @@ th{background:var(--panel)}
       <p class="note">Орбисите са по курса: Слънце и Луна 12°, Меркурий, Венера и Марс 7°, Юпитер и Сатурн 9°, Уран, Нептун, Плутон и останалите 5°. За двойка планети се събират половините. Към Асцендента и MC: съвпад до 5°, другите аспекти до 3°. Сходящият аспект се засилва с годините, разходящият е бил по-силен в детството.</p>
       <div class="scroll"><table id="ntAsp"></table></div>
     </div>
+    <div class="panel" style="margin-top:18px">
+      <h2>Връзки между домовете</h2>
+      <p class="note">Връзка има, когато управителят на един дом стои в друг дом, или когато планети от два дома си правят аспект. Връзките с 6, 8 и 12 дом и квадратите са по-скоро отрицателни. Планета до 5° преди Асцендента действа и в 1 дом, а до 3° преди следващия връх действа и в него. Най-важни са връзките с 1 дом, затова са първи.</p>
+      <div class="ntgrid" id="ntLinks"></div>
+    </div>
     <div class="grid3" style="margin-top:18px">
       <div class="panel"><h2>Братя и сестри</h2><ul class="evlist ntlist" id="ntSib"></ul></div>
       <div class="panel"><h2>Деца</h2><ul class="evlist ntlist" id="ntKids"></ul></div>
@@ -889,6 +894,13 @@ th{background:var(--panel)}
     <div class="grid2" style="margin-top:18px">
       <div class="panel"><svg class="wheel" id="prWheel" viewBox="0 0 400 400" role="img" aria-label="Сектори на Гоклен"></svg><p class="note">Изгревът е вляво, кулминацията горе. Златно: плюс зоните. Бледо: вторичните зони след залеза и след долната кулминация.</p></div>
       <div class="panel"><h2>Секторите на Гоклен</h2><div class="scroll"><table id="prGq"></table></div></div>
+    </div>
+    <div class="panel" style="margin-top:18px">
+      <h2>Призвание по метода от курса</h2>
+      <p class="note">Гледат се 6 фактора: знакът на Слънцето, на Асцендента, на управителя на Асцендента, на управителя на 10 дом, знаците на планетите в 10 дом и стелиумът (3 и повече планети в един знак). Ако 3–4 от знаците съвпадат с водещите знаци за дадена сфера, човек има качества за нея. Призванието понякога идва след първото завръщане на Сатурн (28–30 г.).</p>
+      <ul class="evlist ntlist" id="prVocF"></ul>
+      <h3>Сфери на дейност с поне 2 съвпадащи фактора</h3>
+      <div class="ntgrid" id="prVoc"></div>
     </div>
     <div class="panel" style="margin-top:18px">
       <h2>Най-силните насоки</h2>
@@ -9195,6 +9207,7 @@ function runNotes(){
   const sexKey='sex_'+p.id; $('ntSex').value=store.get(sexKey,'f'); $('ntSex').onchange=()=>{ store.set(sexKey,$('ntSex').value); runNotes(); };
   const female=$('ntSex').value==='f';
   $('ntHead').textContent=`Бележки и показатели: ${p.name}`;
+  runLinks(n);
   $('ntLoad').hidden = !!window.EMBED_NOTES;
   if (!$('ntStatus').textContent) $('ntStatus').textContent = window.EMBED_NOTES ? 'Бележките от курса са вградени в тази версия.' : Nn ? 'Бележките от курса са заредени.' : 'Бележките от курса още не са заредени. Изберете файла ephemeris-notes.json. Правилата отдолу работят и без него.';
   const P=k=>n.pts.find(x=>x.k===k), sun=P('Sun');
@@ -9345,6 +9358,7 @@ const GQ_TXT={plus1:'плюс зона: току-що изгряла',plus2:'п�
 function runProf(){
   const p=active(), n=natalOf(p), d=n.date, lat=+p.lat, lon=+p.lon, P=k=>n.pts.find(x=>x.k===k);
   $('prHead').textContent=`Професия и Локус Фортуна: ${p.name}`;
+  runVocation(n);
   const G=['Sun','Moon','Mercury','Venus','Mars','Jupiter','Saturn','Uranus','Neptune','Pluto'].map(k=>({k, ...gauquelin(k,d,lat,lon)}));
   // диаграма: 36 сектора, 1 започва от изгрева (вляво), по часовниковата стрелка
   const cx=200, cy=200, R=180, r0=60, ang=s=>Math.PI-(s-1)*10*Math.PI/180; // сектор 1 при ASC вляво, движение по часовниковата стрелка (горе = кулминация)
@@ -9399,6 +9413,54 @@ function runProf(){
   $('prFort').innerHTML=fl.join('');
 }
 $('prFormula').onchange=()=>runProf();
+
+// =============== ПРИЗВАНИЕ ПО МЕТОДА ОТ КУРСА ===============
+function vocation(n){
+  const P=k=>n.pts.find(x=>x.k===k), R=RUL_MOD, PL10=['Sun','Moon','Mercury','Venus','Mars','Jupiter','Saturn','Uranus','Neptune','Pluto'];
+  const f=[['Знакът на Слънцето', sgn(P('Sun').lon)], ['Знакът на Асцендента', sgn(n.hs.asc)], [`Знакът на управителя на Асцендента (${pn(R[sgn(n.hs.asc)])})`, sgn(P(R[sgn(n.hs.asc)]).lon)], [`Знакът на управителя на 10 дом (${pn(R[sgn(n.hs.mc)])})`, sgn(P(R[sgn(n.hs.mc)]).lon)]];
+  n.pts.filter(x=>x.house===10&&PL10.includes(x.k)).forEach(x=>f.push([`${pn(x.k)} в 10 дом`, sgn(x.lon)]));
+  const cnt={}; n.pts.filter(x=>PL10.includes(x.k)).forEach(x=>{ const s=sgn(x.lon); cnt[s]=(cnt[s]||0)+1; });
+  Object.keys(cnt).forEach(s=>{ if (cnt[s]>=3) f.push([`Стелиум в ${SIGNS[s]} (${cnt[s]} планети)`, +s]); });
+  return f;
+}
+function runVocation(n){
+  const f=vocation(n), fs=f.map(x=>x[1]);
+  const freq={}; fs.forEach(s=>freq[s]=(freq[s]||0)+1);
+  $('prVocF').innerHTML=f.map(([t,s])=>`<li><time>${SGg[s]} ${SIGNS[s]}</time><span>${t}</span></li>`).join('')+`<li><time>Най-често</time><span>${Object.keys(freq).sort((a,b)=>freq[b]-freq[a]).filter((s,i,a)=>freq[s]===freq[a[0]]).map(s=>SIGNS[s]).join(', ')} (${Math.max(...Object.values(freq))} пъти)</span></li>`;
+  if (!NOTES||!NOTES.voc){ $('prVoc').innerHTML='<p class="note">Заредете бележките от курса (раздел „Бележки и показатели“), за да видите сферите на дейност.</p>'; return; }
+  const res=NOTES.voc.map(([name,signs,note])=>({name,note,signs,hit:fs.filter(s=>signs.includes(s)).length, which:[...new Set(fs.filter(s=>signs.includes(s)))]})).filter(x=>x.hit>=2).sort((a,b)=>b.hit-a.hit);
+  $('prVoc').innerHTML = res.length ? res.map(x=>`<article class="ntcard"><h3 class="ntt">${escapeHtml(x.name)} <span class="ntpos">${x.hit} от ${fs.length} фактора</span></h3><div class="ntchips">${x.signs.map(s=>`<span class="chip ${x.which.includes(s)?'gold':''}">${SIGNS[s]}</span>`).join('')}</div>${x.note?`<p class="note" style="margin:4px 0 0">${escapeHtml(x.note)}</p>`:''}</article>`).join('')
+    : '<p class="note">Няма сфера с поне 2 съвпадащи фактора.</p>';
+}
+
+// =============== ВРЪЗКИ МЕЖДУ ДОМОВЕТЕ ===============
+const BAD_H=[6,8,12];
+function housesOfPoint(lon, cusp){ // с граничния ефект от лекцията
+  const h=AC.houseOf(lon,cusp), out=[h], next=h%12+1;
+  const toNext=norm(cusp[next]-lon);
+  if (next===1 ? toNext<=5 : toNext<=3) out.push(next);
+  return out;
+}
+function houseLinks(n){
+  const R=RUL_MOD, PL=['Sun','Moon','Mercury','Venus','Mars','Jupiter','Saturn','Uranus','Neptune','Pluto'], P=k=>n.pts.find(x=>x.k===k);
+  const links={}; const add=(a,b,sign,why)=>{ const k=Math.min(a,b)+'-'+Math.max(a,b); const L=links[k]=links[k]||{a:Math.min(a,b),b:Math.max(a,b),plus:0,minus:0,why:[]}; if(sign>0) L.plus++; else L.minus++; L.why.push(why); };
+  // 1) управителят на дом X е в дом Y
+  for (let h=1;h<=12;h++){ const r=R[sgn(n.hs.cusp[h])], q=P(r); const dg=dignity(r,sgn(q.lon));
+    housesOfPoint(q.lon,n.hs.cusp).forEach(y=>{ const neg = BAD_H.includes(h)||BAD_H.includes(y) || (dg&&dg.c==='hard');
+      add(h,y, neg?-1:1, `управителят на ${h} дом (${pn(r)}) е в ${y} дом${dg?`, ${dg.t}`:''}`); }); }
+  // 2) аспекти между планети в различни домове
+  const asp=courseAspects(n).filter(x=>PL.includes(x.a)&&PL.includes(x.b));
+  asp.forEach(x=>{ const A=P(x.a), B=P(x.b);
+    housesOfPoint(A.lon,n.hs.cusp).forEach(ha=>housesOfPoint(B.lon,n.hs.cusp).forEach(hb=>{
+      const neg = x.asp===90 || x.asp===180 || (x.asp===0 && (BAD_H.includes(ha)||BAD_H.includes(hb)));
+      add(ha,hb, neg?-1:1, `${pn(x.a)} в ${ha} дом ${aspOf(x.asp).n} ${pn(x.b)} в ${hb} дом`); })); });
+  return Object.values(links).sort((p,q)=>((q.a===1)-(p.a===1)) || (q.plus+q.minus)-(p.plus+p.minus));
+}
+function runLinks(n){
+  const L=houseLinks(n), C=(NOTES&&NOTES.conn)||null;
+  $('ntLinks').innerHTML=L.map(x=>{ const key=x.a+'-'+x.b, tx=C&&C[key], net=x.plus-x.minus, cls=net>0?'easy':net<0?'hard':'gold', lab=net>0?'положителна':net<0?'отрицателна':'смесена';
+    return `<article class="ntcard"><h3 class="ntt">${x.a}–${x.b} <span class="chip ${cls}" style="margin:0">${lab}</span><span class="ntpos">${x.plus}+ / ${x.minus}−</span></h3><p class="note" style="margin:2px 0 6px">${x.why.slice(0,4).join('; ')}${x.why.length>4?'; …':''}.</p>${tx?(net>=0?`<p class="ntx" style="margin:0"><b>+</b> ${escapeHtml(tx[0])}</p>`:'')+(net<=0?`<p class="ntx" style="margin:4px 0 0"><b>−</b> ${escapeHtml(tx[1])}</p>`:''):''}</article>`; }).join('');
+}
 
 // =============== НЕБЕТО СЕГА (горе) ===============
 function skyNow(){
