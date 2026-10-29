@@ -224,6 +224,7 @@ th{background:var(--panel)}
     <button role="tab" data-tab="moon">Луна</button>
     <button role="tab" data-tab="chart">Карта</button>
     <button role="tab" data-tab="nt">Бележки и показатели</button>
+    <button role="tab" data-tab="pr">Професия и Фортуна</button>
     <button role="tab" data-tab="dh">Додекатемории и фази</button>
     <button role="tab" data-tab="sky">Небесна карта</button>
     <button role="tab" data-tab="an">Анализ на дата</button>
@@ -876,6 +877,30 @@ th{background:var(--panel)}
       <h2>Родова задача</h2>
       <p class="note">Слънцето показва задачите от рода на бащата, Луната — от рода на майката. IC е родовата карма, MC е личната задача, която родът ни поставя.</p>
       <div class="ntgrid ntgrid2" id="ntRod"></div>
+    </div>
+  </section>
+
+  <!-- PROFESSION -->
+  <section id="tab-pr" role="tabpanel" hidden>
+    <div class="panel">
+      <h2 id="prHead">Професия и Локус Фортуна</h2>
+      <p class="note">Мишел Гоклен е изследвал хиляди карти на известни хора. Той открил, че определени планети често стоят току-що след изгрева или след кулминацията си (златните зони на кръга) при хора от определени професии. Секторите се смятат по реалното денонощно движение на планетата, а не по домовете. Насоките отдолу събират и класическите показатели: MC, управителя му, 10, 6 и 2 дом.</p>
+    </div>
+    <div class="grid2" style="margin-top:18px">
+      <div class="panel"><svg class="wheel" id="prWheel" viewBox="0 0 400 400" role="img" aria-label="Сектори на Гоклен"></svg><p class="note">Изгревът е вляво, кулминацията горе. Златно: плюс зоните. Бледо: вторичните зони след залеза и след долната кулминация.</p></div>
+      <div class="panel"><h2>Секторите на Гоклен</h2><div class="scroll"><table id="prGq"></table></div></div>
+    </div>
+    <div class="panel" style="margin-top:18px">
+      <h2>Най-силните насоки</h2>
+      <p class="note">Планетите с най-много показатели за професия: плюс зона по Гоклен, 10 дом, на MC, управител на MC, на Асцендента, 6 дом.</p>
+      <div class="ntgrid" id="prTop"></div>
+      <h3>Класически показатели</h3>
+      <ul class="evlist ntlist" id="prInd"></ul>
+    </div>
+    <div class="panel" style="margin-top:18px">
+      <h2>Локус Фортуна: откъде идват парите</h2>
+      <div class="controls"><label class="field"><span>Формула</span><select id="prFormula"><option value="day">Винаги дневна (по лекцията)</option><option value="trad">Дневна или нощна според раждането</option></select></label></div>
+      <ul class="evlist ntlist" id="prFort"></ul>
     </div>
   </section>
 
@@ -7738,7 +7763,7 @@ INTX.initUI();
 
 
 // =============== TABS ===============
-const TABS=['eph','moon','chart','nt','dh','sky','an','tr','pass','hs','sr','pd','kw','syn','hor','rect','cyc','jr'];
+const TABS=['eph','moon','chart','nt','pr','dh','sky','an','tr','pass','hs','sr','pd','kw','syn','hor','rect','cyc','jr'];
 tab = store.get('tab','eph'); if (!TABS.includes(tab)) tab='eph';
 function showTab(t){
   tab=t; store.set('tab',t);
@@ -7762,6 +7787,7 @@ function render(){
   else if (tab==='moon') runMoon();
   else if (tab==='dh') runDh();
   else if (tab==='nt') runNotes();
+  else if (tab==='pr') runProf();
   else if (tab==='sky') runSky();
   else if (tab==='cyc') INTX.runCyc();
   else if (tab==='jr') INTX.renderJr();
@@ -9187,6 +9213,7 @@ function runNotes(){
     let body='';
     body+=`<p class="ntkw">${(KW.planets[k]||{fn:[]}).fn.slice(0,3).join(', ')}</p>`;
     if (dg) body+=`<p class="note" style="margin:4px 0">${cap(dg.d)} (схема: ${DG[DGS].name}).</p>`;
+    { const dc=decanOf(x.lon); body+=`<p class="note" style="margin:4px 0">${dc.n} деканат: ${pn(dc.course)} по курса, ${pn(dc.chald)} по халдейската схема.</p>`; }
     if (Nn){
       body+=det(`${pn(k)} в ${SIGNS[s]}`, ntGet(['sp',String(s),k]), true);
       const hp=ntGet(['hp',String(h),k]);
@@ -9265,6 +9292,113 @@ function runNotes(){
 }
 $('dgScheme').onchange=()=>setDGS($('dgScheme').value);
 $('dgScheme2').value=DGS; $('dgScheme2').onchange=()=>setDGS($('dgScheme2').value);
+
+// =============== ДЕКАНАТИ ===============
+const DEC_COURSE=[['Mars','Sun','Jupiter'],['Venus','Mercury','Saturn'],['Mercury','Venus','Uranus'],['Moon','Pluto','Neptune'],['Sun','Jupiter','Mars'],['Mercury','Saturn','Venus'],['Venus','Uranus','Mercury'],['Pluto','Neptune','Moon'],['Jupiter','Mars','Sun'],['Saturn','Venus','Mercury'],['Uranus','Mercury','Venus'],['Neptune','Moon','Pluto']];
+function decanOf(lon){ const s=sgn(lon), d=Math.floor((norm(lon)-s*30)/10); return {n:d+1, course:DEC_COURSE[s][d], chald:CHALD[(s*3+d+2)%7]}; }
+
+// =============== ПРОФЕСИЯ, ГОКЛЕН, ЛОКУС ФОРТУНА ===============
+const PROF_P={
+  Sun:'ръководител, мениджър, политик, актьор, творец, организатор, работа с деца, бижутер',
+  Moon:'грижа за хора (медицина, педагогика, социална работа), хотелиерство и храни, недвижими имоти, история, работа с публиката, психология',
+  Mercury:'журналист, писател, преводач, учител, търговец, посредник, PR и реклама, IT, счетоводство, анализи, транспорт и логистика',
+  Venus:'изкуство, музика, дизайн, мода, красота, бижута, дипломация, финанси, работа с хора (HR, консултиране)',
+  Mars:'спорт, армия, полиция, хирургия, инженерство, техника, предприемачество, спасителни служби',
+  Jupiter:'право, висше образование, политика, издателство, туризъм, банково дело, консултиране, духовна дейност',
+  Saturn:'наука и изследвания, архитектура, строителство, държавна администрация, управление, контрол и одит, геология, земеделие',
+  Uranus:'IT и технологии, изобретателство, авиация, електроника, астрология, иновации, социални проекти',
+  Neptune:'изкуство, кино, фотография, музика, медицина и фармация, психология, благотворителност, морско дело, духовни практики',
+  Pluto:'психотерапия, хирургия, разследване, финанси (кредити, застраховане, инвестиции), кризисно управление, политика, екология',
+  Chiron:'лечение, терапия, наставничество, преподаване, рехабилитация'
+};
+const PROF_S=['спорт, армия, предприемачество, хирургия, инженерство, всичко, което започва нещо ново',
+  'финанси и банки, изкуство и дизайн, земеделие, кулинария, недвижими имоти, красота',
+  'медии, търговия, преподаване, писане, транспорт, комуникации, посредничество',
+  'грижа за хора, образование, хотелиерство, храни, недвижими имоти, история, семеен бизнес',
+  'управление, сцена и развлечения, политика, творчество, работа с деца, престижни позиции',
+  'медицина и здраве, анализ, счетоводство, редактиране, услуги, контрол на качеството',
+  'право, дипломация, изкуство, дизайн, мода, консултиране, работа с партньори',
+  'психология, медицина и хирургия, финанси и застраховане, разследване, изследователска работа',
+  'право, висше образование, туризъм, издателство, международен бизнес, религия, спорт',
+  'управление, администрация, държавна служба, строителство, архитектура, финанси',
+  'технологии и IT, наука, иновации, социални каузи, авиация, астрология, свободни професии',
+  'изкуство, музика, кино, медицина, психология, благотворителност, духовни професии, морско дело'];
+const GQ_P={Moon:'писатели, политици',Venus:'художници, музиканти',Mars:'спортисти, военни, лекари, ръководители',Jupiter:'актьори, политици, военни, журналисти, драматурзи',Saturn:'учени, лекари'};
+const FORT_S=['сам си изкарва парите, собствен бизнес','рисуване, изкуство, заможен партньор','свободни професии, търговия, транспорт, учител, журналист, преводач','подкрепа от семейството, грижа за другите, семеен бизнес, печалба от имоти, художник','работа с деца, спорт, подкрепа от бащата, печели от популярността си, творческа или престижна работа, сцена','занаяти, счетоводство, медицина, преподаване','благодарение на партньора, консултантска дейност, юрист','лекар, финанси, пари от наследство','от чужбина, работа за чужди компании, преподаване','тежка работа, занаяти, администрация, банкова и съдебна система, инженер, счетоводител, програмист, строител','свободни, нестандартни и рядко срещани професии, програмист','психология'];
+const FORT_EL=['Огън: печели от дейността си, от активност и предприемачество, бързо.','Земя: печалба от производство и от земята, по-бавно и с повече усилия.','Въздух: печалба от интелектуална дейност, наука, посредничество, търговия и комуникация, лесно.','Вода: печалба от общуване с другите и щастливи обстоятелства (имоти, наследство), като по вода.'];
+function gauquelin(k, d, lat, lon){
+  try{
+    const obs=new Astronomy.Observer(lat,lon,0), B=Astronomy.Body[k];
+    const eq=Astronomy.Equator(B,d,obs,true,true), dec=eq.dec;
+    let H=Astronomy.HourAngle(B,d,obs)*15; if (H>180) H-=360;
+    const x=-Math.tan(lat*Math.PI/180)*Math.tan(dec*Math.PI/180);
+    if (x<=-1) return {sector:null, circ:'up'}; if (x>=1) return {sector:null, circ:'down'};
+    const SA=Math.acos(x)*180/Math.PI, NSA=180-SA;
+    let sec, f;
+    if (Math.abs(H)<=SA){ f=(H+SA)/(2*SA); sec=1+Math.min(17,Math.floor(f*18)); }
+    else { f=norm(H-SA)/(2*NSA); sec=19+Math.min(17,Math.floor(f*18)); }
+    return {sector:sec, H, SA};
+  }catch(e){ return {sector:null}; }
+}
+const gqZone = s => s==null ? '' : [36,1,2,3].includes(s) ? 'plus1' : [9,10,11,12].includes(s) ? 'plus2' : [18,19,20,21].includes(s)||[27,28,29,30].includes(s) ? 'minor' : '';
+const GQ_TXT={plus1:'плюс зона: току-що изгряла',plus2:'плюс зона: току-що кулминирала',minor:'вторична зона'};
+function runProf(){
+  const p=active(), n=natalOf(p), d=n.date, lat=+p.lat, lon=+p.lon, P=k=>n.pts.find(x=>x.k===k);
+  $('prHead').textContent=`Професия и Локус Фортуна: ${p.name}`;
+  const G=['Sun','Moon','Mercury','Venus','Mars','Jupiter','Saturn','Uranus','Neptune','Pluto'].map(k=>({k, ...gauquelin(k,d,lat,lon)}));
+  // диаграма: 36 сектора, 1 започва от изгрева (вляво), по часовниковата стрелка
+  const cx=200, cy=200, R=180, r0=60, ang=s=>Math.PI-(s-1)*10*Math.PI/180; // сектор 1 при ASC вляво, движение по часовниковата стрелка (горе = кулминация)
+  const pt=(a,r)=>[cx+r*Math.cos(a), cy-r*Math.sin(a)];
+  let s=`<circle cx="${cx}" cy="${cy}" r="${R}" fill="var(--panel)" stroke="var(--line)"/>`;
+  for (let i=1;i<=36;i++){ const z=gqZone(i), a1=ang(i), a2=ang(i+1), [x1,y1]=pt(a1,R),[x2,y2]=pt(a2,R),[x3,y3]=pt(a2,r0),[x4,y4]=pt(a1,r0);
+    const fill = z==='plus1'||z==='plus2' ? 'color-mix(in srgb,var(--gold) 34%,transparent)' : z==='minor' ? 'color-mix(in srgb,var(--gold) 12%,transparent)' : 'transparent';
+    s+=`<path d="M${x1.toFixed(1)},${y1.toFixed(1)} A${R},${R} 0 0 1 ${x2.toFixed(1)},${y2.toFixed(1)} L${x3.toFixed(1)},${y3.toFixed(1)} A${r0},${r0} 0 0 0 ${x4.toFixed(1)},${y4.toFixed(1)}Z" fill="${fill}" stroke="var(--line)" stroke-width=".6"/>`;
+    const [tx,ty]=pt(ang(i+0.5),R-11); s+=`<text x="${tx.toFixed(1)}" y="${ty.toFixed(1)}" text-anchor="middle" dominant-baseline="central" font-size="8" fill="var(--muted)" font-family="var(--f-body)">${i}</text>`; }
+  [['изгрев',1],['кулминация',10],['залез',19],['долна кулм.',28]].forEach(([t,i])=>{ const a=ang(i), [x1,y1]=pt(a,r0), [x2,y2]=pt(a,R+4); s+=`<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="var(--ink)" stroke-width="1.4"/>`; });
+  s+=`<text x="${cx}" y="${cy-6}" text-anchor="middle" font-size="12" fill="var(--muted)" font-family="var(--f-body)">сектори</text><text x="${cx}" y="${cy+10}" text-anchor="middle" font-size="12" fill="var(--muted)" font-family="var(--f-body)">на Гоклен</text>`;
+  const cnt={}; G.filter(x=>x.sector).forEach(x=>{ const c=cnt[x.sector]=(cnt[x.sector]||0)+1; const a=ang(x.sector+0.5), [px,py]=pt(a,R-28-(c-1)*20); const pl=GQ_P[x.k]&&gqZone(x.sector).startsWith('plus');
+    s+=`<text x="${px.toFixed(1)}" y="${py.toFixed(1)}" text-anchor="middle" dominant-baseline="central" font-size="${pl?20:16}" fill="${pl?'var(--gold)':'var(--ink)'}" font-family="var(--f-sym)">${g(BY[x.k].g)}</text>`; });
+  $('prWheel').innerHTML=s;
+  $('prGq').innerHTML=`<thead><tr><th class="t l">Планета</th><th class="t">Сектор</th><th class="t l">Зона</th><th class="t l">Професии по Гоклен</th></tr></thead><tbody>`+G.map(x=>{ const z=gqZone(x.sector);
+    return `<tr><td class="l">${nameCell(x.k)}</td><td>${x.sector||'—'}</td><td class="l" style="font-family:var(--f-body)">${z?`<span class="chip ${z==='minor'?'':'gold'}" style="margin:0">${GQ_TXT[z]}</span>`:x.sector?'':'не изгрява или не залязва'}</td><td class="l" style="font-family:var(--f-body);white-space:normal">${GQ_P[x.k]?(z.startsWith('plus')?'<b>'+GQ_P[x.k]+'</b>':GQ_P[x.k]):'<span class="note">Гоклен не изследва тази планета</span>'}</td></tr>`; }).join('')+'</tbody>';
+  // насоки: точкуване на планетите
+  const R_=RUL_MOD, mcS=sgn(n.hs.mc), mcR=R_[mcS], ascR=R_[sgn(n.hs.asc)], c6=sgn(n.hs.cusp[6]), c2=sgn(n.hs.cusp[2]);
+  const score={}, why={}; const add=(k,v,t)=>{ if(!PROF_P[k]) return; score[k]=(score[k]||0)+v; (why[k]=why[k]||[]).push(t); };
+  G.forEach(x=>{ const z=gqZone(x.sector); if (z.startsWith('plus')) add(x.k,3,GQ_TXT[z]); });
+  n.pts.forEach(x=>{ if(x.house===10) add(x.k,2,'в 10 дом'); if(x.house===6) add(x.k,1,'в 6 дом'); if(Math.abs(dif(x.lon,n.hs.mc))<=5) add(x.k,2,'на MC'); if(Math.abs(dif(x.lon,n.hs.asc))<=5) add(x.k,1,'на Асцендента'); });
+  add(mcR,2,'управител на MC'); add(ascR,1,'управител на Асцендента'); add(R_[c6],1,'управител на 6 дом');
+  const top=Object.keys(score).sort((a,b)=>score[b]-score[a]).slice(0,4);
+  $('prTop').innerHTML=top.map(k=>`<article class="ntcard"><h3 class="ntt">${nameCell(k)} <span class="ntpos">${why[k].join(', ')}</span></h3><p class="ntx" style="margin:0">${PROF_P[k]}</p></article>`).join('');
+  const li=(t,v)=>`<li><time>${t}</time><span>${v}</span></li>`;
+  const in10=n.pts.filter(x=>x.house===10&&PROF_P[x.k]).map(x=>pn(x.k)), in6=n.pts.filter(x=>x.house===6&&PROF_P[x.k]).map(x=>pn(x.k));
+  const mq=P(mcR);
+  let ind=[li('MC',`${SIGNS[mcS]}: ${PROF_S[mcS]}.`), li('Управител на MC',`${pn(mcR)} в ${SIGNS[sgn(mq.lon)]}, ${mq.house} дом: кариерата се осъществява чрез ${KW.houses[mq.house-1].area.slice(0,2).join(' и ')}.`),
+    li('10 дом', in10.length?`Планети: ${in10.join(', ')}.`:'Празен: гледайте управителя на MC.'), li('6 дом (ежедневна работа)',`${SIGNS[c6]}: ${PROF_S[c6]}.${in6.length?' Планети: '+in6.join(', ')+'.':''}`),
+    li('2 дом (доходи)',`${SIGNS[c2]}: ${PROF_S[c2]}.`), li('Слънцето',`${SIGNS[sgn(P('Sun').lon)]}: ${PROF_S[sgn(P('Sun').lon)]}.`)];
+  if (NOTES){ const t1=ntGet(['hs','10',String(mcS)]); if (t1) ind.push(li('Бележка: 10 дом',`<details><summary>${SIGNS[mcS]}</summary><div class="ntx">${escapeHtml(t1).replace(/\n/g,'<br>')}</div></details>`)); }
+  $('prInd').innerHTML=ind.join('');
+  // Локус Фортуна
+  const sun=P('Sun').lon, moon=P('Moon').lon, day=P('Sun').house>=7;
+  const fDay=norm(n.hs.asc+moon-sun), fNight=norm(n.hs.asc+sun-moon), useNight=$('prFormula').value==='trad'&&!day, F=useNight?fNight:fDay;
+  const fs=sgn(F), fh=AC.houseOf(F,n.hs.cusp), dsp=R_[fs], dq=P(dsp);
+  const aspF=[]; n.pts.filter(x=>x.k!=='Lilith').forEach(x=>[0,60,90,120,180].forEach(a=>{ const o=Math.abs(Math.abs(dif(x.lon,F))-a); if(o<=(a===0?5:3)) aspF.push({k:x.k,a,o}); }));
+  aspF.sort((a,b)=>a.o-b.o);
+  const dA=[0,60,90,120,180].map(a=>({a,o:Math.abs(Math.abs(dif(dq.lon,F))-a)})).filter(x=>x.o<=5).sort((a,b)=>a.o-b.o)[0];
+  const fl=[li('Изчисление', `${useNight?'Нощна формула: Асц + Слънце − Луна':'Дневна формула: Асц + Луна − Слънце'}. Раждането е ${day?'дневно':'нощно'}. В лекцията дневната формула дава по-добри резултати и при нощно раждане.`),
+    li('Позиция',`${L(F)} ${SIGNS[fs]}, ${fh} дом.`), li('Стихия', FORT_EL[fs%4]), li('Знакът в практиката', cap(FORT_S[fs])+'.'),
+    li('Аспекти', aspF.length?aspF.map(x=>`${aspOf(x.a).n} с ${pn(x.k)} (${x.o.toFixed(1)}°)`).join(', ')+'.':'няма до 3° (съвпад до 5°).'),
+    li('Диспозитор',`${pn(dsp)} в ${SIGNS[sgn(dq.lon)]}, ${dq.house} дом.${dA?` Прави ${aspOf(dA.a).n} с Фортуна (${dA.o.toFixed(1)}°): по лекцията това е силен показател.`:' Няма аспект с Фортуна.'}`)];
+  // акценти
+  const fsigns=[fs, sgn(dq.lon)], withP=ks=>aspF.some(x=>ks.includes(x.k)) || [0,60,90,120,180].some(a=>ks.some(k=>Math.abs(Math.abs(dif(P(k).lon,dq.lon))-a)<=3&&k!==dsp));
+  const acc=[], chk=(title,items)=>{ const hit=items.filter(x=>x[0]).map(x=>x[1]); if (hit.length>=2) acc.push(`<b>${title}</b> (${hit.length} показателя): ${hit.join('; ')}.`); };
+  const inS=list=>fsigns.some(x=>list.includes(x));
+  chk('Заможен партньор',[[inS([6,4,3,1]),'Фортуна или диспозиторът в Везни, Лъв, Рак или Телец'],[withP(['Sun','Venus','Moon','Jupiter','Neptune']),'аспект със Слънце, Венера, Луна, Юпитер или Нептун'],[fh===7||fh===8,'Фортуна в '+fh+' дом']]);
+  chk('Фамилно богатство, наследство',[[inS([3,7]),'Фортуна или диспозиторът в Рак или Скорпион'],[withP(['Jupiter']),'аспект с Юпитер'],[withP(['Pluto']),'аспект с Плутон'],[fh===4||fh===8,'Фортуна в '+fh+' дом']]);
+  chk('Богатство чрез ума',[[inS([0,2,7,8,9,10]),'Фортуна или диспозиторът в Овен, Близнаци, Скорпион, Стрелец, Козирог или Водолей'],[withP(['Mercury','Saturn','Uranus','Pluto']),'аспект с Меркурий, Сатурн, Уран или Плутон'],[fh===3,'Фортуна в 3 дом']]);
+  if (acc.length) fl.push(li('Акценти от лекцията', acc.join('<br>')));
+  $('prFort').innerHTML=fl.join('');
+}
+$('prFormula').onchange=()=>runProf();
 
 // =============== НЕБЕТО СЕГА (горе) ===============
 function skyNow(){
