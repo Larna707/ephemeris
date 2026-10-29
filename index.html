@@ -6731,7 +6731,7 @@ $('trNowDate').onchange=renderTrNow; $('trOrb').onchange=renderTrNow;
 
 // =============== PASSES (single / triple crossings of a degree) ===============
 let psProf=null;
-fillSelect($('psBody'), ['Sun','Mercury','Venus','Mars','Jupiter','Saturn','Chiron','Uranus','Neptune','Pluto','Node'].map(k=>[k, g(BY[k].g)+' '+BY[k].n.replace(' (истински)','')]), 'Uranus');
+fillSelect($('psBody'), ['Sun','Mercury','Venus','Mars','Jupiter','Saturn','Chiron','Uranus','Neptune','Pluto','Node','Lilith'].map(k=>[k, g(BY[k].g)+' '+BY[k].n.replace(' (истински)','')]), 'Uranus');
 fillSelect($('psAsp'), ASPECTS.map(a=>[a.a, g(a.g)+' '+a.n]), '0');
 fillSelect($('psSign'), SIGNS.map((n,i)=>[i, SGg[i]+' '+n]), '11');
 function initPass(){
