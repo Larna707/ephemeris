@@ -1010,7 +1010,7 @@ th{background:var(--panel)}
       <h2>Попитай Claude</h2>
       <label class="field" style="display:block;margin:0 0 12px"><span>Какво се случва в живота ви сега (по желание)</span><textarea id="aiCtx" rows="3" placeholder="Например: работа, промени, решения, които обмисляте. Пази се само във вашия профил и помага на Claude да свърже астрологията с реалния ви живот."></textarea></label>
       <div class="controls" style="margin-bottom:10px">
-        <label class="field"><span>Прогноза за година</span><input type="number" id="aiYear" min="1900" max="2100" style="width:7em"></label>
+        <label class="field"><span>Година (минала или бъдеща)</span><input type="number" id="aiYear" min="1900" max="2100" style="width:7em"></label>
         <button class="primary" type="button" id="aiYearGo">Тълкувай годината</button>
         <button type="button" id="aiYearCopy">Копирай годината за Claude</button>
       </div>
@@ -10084,9 +10084,14 @@ $('aiStop').onclick=()=>aiCtl&&aiCtl.abort();
 $('aiNew').onclick=()=>{ aiTurns.length=0; $('aiLog').innerHTML=''; };
 $('aiYearGo').onclick=()=>{ const y=+$('aiYear').value; if(!(y>=1900&&y<=2100)) return; const p=active(), n=natalOf(p);
   $('aiStep').textContent=`Изчислявам ${y}…`;
-  setTimeout(()=>{ const data=yearText(n,p,y); const q=`Какво ме очаква астрологично през ${y}? Направи прогноза по тримесечия: основният фон от прогресиите, големите процеси, ключовите дати и как най-добре да използвам годината.`; aiAsk(q, 'ДАННИ ЗА ГОДИНАТА:\n'+data); },30); };
+  setTimeout(()=>{ const q=aiYearQ(p,y); aiAsk(q, 'ДАННИ ЗА ГОДИНАТА:\n'+yearText(n,p,y)+aiYearEvents(p,y)); },30); };
+function aiYearEvents(p,y){ const ev=(p.events||[]).filter(e=>String(e.date).startsWith(y+'-')).sort((a,b)=>a.date<b.date?-1:1); return ev.length ? '\nСЪБИТИЯ ОТ ТАЗИ ГОДИНА (от дневника ми):\n'+ev.map(e=>`${e.date}: ${e.text}`).join('\n') : ''; }
+function aiYearQ(p,y){ const now=new Date().getFullYear();
+  if (y<now) return `Направи астрологичен анализ на ${y} година назад във времето. Какви бяха основните теми по тримесечия: фонът от прогресиите, големите процеси, ключовите дати? Ако в данните има мои събития от тази година, свържи всяко с астрологията и обясни защо се е случило тогава. Какъв урок носи годината и какво от нея е важно за сега?`;
+  if (y===now) return `Направи астрологичен анализ на ${y} година: какво вече се е случило до днес и какво остава до края на годината. По тримесечия: фонът от прогресиите, големите процеси, ключовите дати и как да използвам остатъка от годината.`;
+  return `Какво ме очаква астрологично през ${y}? Направи прогноза по тримесечия: основният фон от прогресиите, големите процеси, ключовите дати и как най-добре да използвам годината.`; }
 $('aiCtx').onchange=()=>{ const p=active(); p.aiCtx=$('aiCtx').value; saveProfiles(); toast('Запазено'); };
-$('aiYearCopy').onclick=()=>{ const y=+$('aiYear').value, p=active(), n=natalOf(p); copyText(AI_RULES+'\n\nДАННИ:\n'+aiContext()+'\n\n'+yearText(n,p,y)+`\n\nВЪПРОС: Какво ме очаква астрологично през ${y}?`); };
+$('aiYearCopy').onclick=()=>{ const y=+$('aiYear').value, p=active(), n=natalOf(p); copyText(AI_RULES+'\n\nДАННИ:\n'+aiContext()+'\n\n'+yearText(n,p,y)+aiYearEvents(p,y)+'\n\nВЪПРОС: '+aiYearQ(p,y)); };
 document.querySelectorAll('[data-aiq]').forEach(b=>b.onclick=()=>{ const t=b.dataset.aiq==='dj' ? (djLast?`Сравни периода ${fmtD(djLast.C.A.d)} с ${fmtD(djLast.C.B.d)}. Имам усещане за дежавю: сходна ситуация тогава и сега. Има ли сходна планетарна ситуация и какво ми показва тя? Какъв урок се повтаря и как да подходя сега?`:'Първо направете сравнението горе.') : b.dataset.aiq; if(t.startsWith('Първо')){ toast(t); return; } aiAsk(t); });
 $('aiCopy').onclick=()=>copyText(AI_RULES+'\n\nДАННИ:\n'+aiContext()+'\n\nВЪПРОС: '+($('aiQ').value.trim()||'(напишете въпроса си тук)'));
 let aiInit=false;
