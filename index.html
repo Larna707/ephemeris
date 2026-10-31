@@ -1008,7 +1008,13 @@ th{background:var(--panel)}
     </div>
     <div class="panel" style="margin-top:18px">
       <h2>Попитай Claude</h2>
-      <p class="note" id="aiAvail">Claude получава вашата натална карта, днешните транзити и сравнението отгоре и отговаря с прости думи. Може сам да проверява небето за други дати.</p>
+      <label class="field" style="display:block;margin:0 0 12px"><span>Какво се случва в живота ви сега (по желание)</span><textarea id="aiCtx" rows="3" placeholder="Например: работа, промени, решения, които обмисляте. Пази се само във вашия профил и помага на Claude да свърже астрологията с реалния ви живот."></textarea></label>
+      <div class="controls" style="margin-bottom:10px">
+        <label class="field"><span>Прогноза за година</span><input type="number" id="aiYear" min="1900" max="2100" style="width:7em"></label>
+        <button class="primary" type="button" id="aiYearGo">Тълкувай годината</button>
+        <button type="button" id="aiYearCopy">Копирай годината за Claude</button>
+      </div>
+      <p class="note" id="aiAvail">Claude получава наталната карта с управителите на домовете, днешните транзити и прогресии, вашето описание и сравнението отгоре. Сам може да изчисли годишна прогноза, солар, прогресии и транзити за всяка дата.</p>
       <div class="flex" style="margin-bottom:10px">
         <button type="button" data-aiq="dj">Анализирай дежавюто</button>
         <button type="button" data-aiq="Какви са най-важните теми за мен през следващите 12 месеца и кои дати да следя? Дай практични насоки.">Какво ме очаква</button>
@@ -9828,6 +9834,17 @@ function yrTriggers(n, from, to, active, progHits){
   return out;
 }
 let yrText='';
+function yearData(n, y, mcMode, topN){
+  const from=dayStartUTC(`${y}-01-01`), to=dayStartUTC(`${y+1}-01-01`);
+  const PG=yrProgHits(n,from,to,mcMode), TR=yrTransits(n,from,to), LU=yrLunations(n,from,to).sort((a,b)=>a.d-b.d), TG=yrTriggers(n,from,to,PG.active,PG.hits);
+  PG.hits.sort((a,b)=>a.d-b.d); TR.sort((a,b)=>a.d-b.d);
+  const all=[...PG.hits,...TR,...LU,...TG].filter(e=>e.d>=from&&e.d<to).sort((a,b)=>a.d-b.d);
+  // ключови дати: групиране в прозорец от 5 дни
+  const groups=[]; all.forEach(e=>{ const g0=groups.find(g=>Math.abs(g.d-e.d)<=5*864e5); if(g0){ g0.items.push(e); g0.w+=e.w; } else groups.push({d:e.d, items:[e], w:e.w}); });
+  groups.forEach(g=>{ const layers=new Set(g.items.map(i=>i.layer)); g.w += (layers.size-1)*2 + (layers.has('tg')&&(layers.has('pg')||PG.active.length)?2:0); });
+  const top=groups.slice().sort((a,b)=>b.w-a.w).slice(0,topN||10).sort((a,b)=>a.d-b.d);
+  return {from,to,PG,TR,LU,TG,all,top};
+}
 function runYear(){
   const p=active(), n=natalOf(p), y=+$('yrYear').value; if(!(y>=1900&&y<=2100)) return;
   const from=dayStartUTC(`${y}-01-01`), to=dayStartUTC(`${y+1}-01-01`);
@@ -9835,9 +9852,7 @@ function runYear(){
   $('yrStatus').textContent='Изчислявам…';
   setTimeout(()=>{
     const t0=Date.now(), mcMode=$('yrMc').value;
-    const PG=yrProgHits(n,from,to,mcMode), TR=yrTransits(n,from,to), LU=yrLunations(n,from,to).sort((a,b)=>a.d-b.d), TG=yrTriggers(n,from,to,PG.active,PG.hits);
-    PG.hits.sort((a,b)=>a.d-b.d); TR.sort((a,b)=>a.d-b.d);
-    const all=[...PG.hits,...TR,...LU,...TG].filter(e=>e.d>=from&&e.d<to).sort((a,b)=>a.d-b.d);
+    const Y=yearData(n,y,mcMode,+$('yrTop').value), {PG,TR,LU,all,top}=Y;
     $('yrHead').textContent=`Прогноза за ${y}: ${p.name}`;
     // 1. активни прогресии
     $('yrPg').innerHTML = (PG.active.length? PG.active.map(x=>`<li><time>в орбис 1°</time><span>Прогр. ${yrPN(x.p)} ${yrAspN(x.a)} натален ${yrPN(x.t)} (${x.o.toFixed(2)}°). ${cap((KW.planets[x.p]||KW_ANG[x.p]).fn[0])} и ${(KW.planets[x.t]||KW_ANG[x.t]).fn[0]}: ${KW.aspects[x.a].nature.toLowerCase()}.</span></li>`).join(''):'')
@@ -9851,10 +9866,6 @@ function runYear(){
     $('yrTr').innerHTML=TR.filter(e=>e.layer==='tr').map(trRow).join('')||'<li><time>—</time><span>Няма точни аспекти на Уран, Нептун, Плутон и Хирон.</span></li>';
     $('yrJs').innerHTML=TR.filter(e=>e.layer==='js').sort((a,b)=>a.d-b.d).map(trRow).join('')||'<li><time>—</time><span>Няма.</span></li>';
     $('yrLu').innerHTML=LU.map(e=>`<li><time>${fmtD(e.d)}</time><span>${e.txt}</span></li>`).join('')||'<li><time>—</time><span>Няма лунации върху натални точки.</span></li>';
-    // 4. ключови дати: групиране в прозорец от 5 дни
-    const groups=[]; all.forEach(e=>{ const g0=groups.find(g=>Math.abs(g.d-e.d)<=5*864e5); if(g0){ g0.items.push(e); g0.w+=e.w; } else groups.push({d:e.d, items:[e], w:e.w}); });
-    groups.forEach(g=>{ const layers=new Set(g.items.map(i=>i.layer)); g.w += (layers.size-1)*2 + (layers.has('tg')&&(layers.has('pg')||PG.active.length)?2:0); });
-    const top=groups.slice().sort((a,b)=>b.w-a.w).slice(0,+$('yrTop').value).sort((a,b)=>a.d-b.d);
     const LN={pg:'прогресия',pm:'прогр. Луна',tr:'бавна планета',js:'Юпитер/Сатурн',lu:'лунация',tg:'спусък'};
     $('yrKey').innerHTML=top.map(g=>`<article class="ntcard"><h3 class="ntt">${fmtD(g.d)} <span class="ntpos">тежест ${g.w}</span></h3><div class="ntchips">${[...new Set(g.items.map(i=>i.layer))].map(l=>`<span class="chip gold">${LN[l]}</span>`).join('')}</div><ul class="ntul">${g.items.map(i=>`<li>${fmtD(i.d)}: ${i.txt}</li>`).join('')}</ul></article>`).join('')||'<p class="note">Няма отбелязани дати.</p>';
     yrText=[`Прогноза за ${y}: ${p.name}`,'','Ключови дати:',...top.map(g=>`${fmtD(g.d)} (тежест ${g.w}): `+g.items.map(i=>i.txt).join('; ')),'','Всички събития:',...all.map(e=>`${fmtD(e.d)}: ${e.txt}`)].join('\n');
@@ -9974,15 +9985,54 @@ function chartText(n,p){
   return lines.join('\n');
 }
 function skyText(n,d){ const S=skyAt(n,d); return `Към ${fmtD(d)} (възраст ${S.age.toFixed(1)} г.): транзитни позиции: ${S.tr.map(x=>`${yrPN(x.k)} ${Ltxt(x.lon)}${x.rx?' R':''} в ${x.house} натален дом`).join('; ')}. Транзити към натала: ${S.hits.filter(h=>h.p!=='Sun').map(hitTxt).join('; ')||'няма тесни'}. Прогресивна Луна ${Ltxt(S.pMoon.lon)} в ${S.pMoon.house} дом. Активни прогресии: ${S.pAsp.map(x=>`${yrPN(x.p)} ${aspOf(x.a).n} ${yrPN(x.t)} ${x.o.toFixed(2)}°`).join('; ')||'няма'}.`; }
+function rulersText(n){
+  const P=k=>n.pts.find(x=>x.k===k);
+  return 'Управители на домовете (модерни) и къде са: '+Array.from({length:12},(_,i)=>{ const h=i+1, r=RUL_MOD[sgn(n.hs.cusp[h])], q=P(r), dg=dignity(r,sgn(q.lon)); return `управител на ${h} дом (${SIGNS[sgn(n.hs.cusp[h])]}) е ${yrPN(r)}, ${placeTxt(q.lon,n.hs.cusp)}${dg?' ('+dg.t+')':''}`; }).join('; ')+'.\nПравило на курса: планета до 5° преди Асцендента или до 3° преди върха на следващия дом действа и в следващия дом. '+n.pts.filter(x=>YR_NAT.includes(x.k)).map(x=>{ const t=placeTxt(x.lon,n.hs.cusp); return t.includes('действа') ? `${yrPN(x.k)} е ${t}.` : ''; }).filter(Boolean).join(' ');
+}
+function progText(n,d){ const pr=progAt(n,d,'sa'); return `Прогресивни позиции към ${fmtD(d)}: `+pr.pts.filter(x=>['Sun','Moon','Mercury','Venus','Mars','ASC','MC'].includes(x.k)).map(x=>`${yrPN(x.k)} ${Ltxt(x.lon)} (${AC.houseOf(x.lon,n.hs.cusp)} натален дом)`).join('; ')+'.'; }
+function srText(n,p,y){
+  const sunN=n.pts.find(x=>x.k==='Sun').lon, when=AC.solarReturn(sunN,y,n.date); if(!when) return `Соларът за ${y}: Не намирам информация.`;
+  const c=AC.chart(when,+p.lat,+p.lon), nh=l=>AC.houseOf(l,n.hs.cusp);
+  return `Соларна карта за ${y} (момент ${fmtDT(when,true)}, за мястото на раждане): Асцендент ${Ltxt(c.hs.asc)} (в ${nh(c.hs.asc)} натален дом), MC ${Ltxt(c.hs.mc)} (в ${nh(c.hs.mc)} натален дом). Планети: `+c.pts.filter(x=>x.k!=='Lilith').map(x=>`${yrPN(x.k)} ${Ltxt(x.lon)} в ${AC.houseOf(x.lon,c.hs.cusp)} соларен дом (${nh(x.lon)} натален)${aspTxtTo(n,x.lon)}`).join('; ')+'.';
+}
+function aspTxtTo(n,lon){ const h=[]; yrNat(n).forEach(np=>[0,60,90,120,180].forEach(a=>{ const o=Math.abs(Math.abs(dif(lon,np.lon))-a); if(o<=2) h.push(`${aspOf(a).n} натален ${yrPN(np.k)} ${o.toFixed(1)}°`); })); return h.length?', '+h.join(', '):''; }
+function cyclesText(n,y){
+  const ref=new Date(Math.max(Date.now(), dayStartUTC(`${y}-01-01`).getTime()));
+  const C=bigCycles(n,y,1.5); if(!C.length) return `Големи транзитни цикли през ${y}: няма.`;
+  return `Големи транзитни цикли през ${y} (цял период в орбис 1,5°, всички точни докосвания, фаза): `+C.map(c=>`${yrPN(c.k)} ${aspOf(c.a).n} натален ${yrPN(c.t)}: ${fmtD(c.start)}–${fmtD(c.end)}, докосвания ${c.ex.map(e=>fmtD(e.d)+(e.rx?' R':'')).join(', ')||'няма точно'}, фаза: ${phaseNow(c,ref).t}`).join('; ')+'.';
+}
+function yearText(n,p,y){
+  const Y=yearData(n,y,'sa',10), pm0=progAt(n,Y.from,'sa').pts.find(x=>x.k==='Moon'), pm1=progAt(n,Y.to,'sa').pts.find(x=>x.k==='Moon');
+  return [`ГОДИШНА ПРОГНОЗА ЗА ${y} (слоеве по К. Ръшман; тежестта е колко слоя съвпадат).`,
+    'Активни прогресии (орбис 1°): '+(Y.PG.active.map(x=>`прогр. ${yrPN(x.p)} ${aspOf(x.a).n} натален ${yrPN(x.t)} ${x.o.toFixed(2)}°`).join('; ')||'няма')+'.',
+    `Прогресивна Луна: от ${Ltxt(pm0.lon)} (${AC.houseOf(pm0.lon,n.hs.cusp)} дом) до ${Ltxt(pm1.lon)} (${AC.houseOf(pm1.lon,n.hs.cusp)} дом).`,
+    'Ключови дати: '+Y.top.map(g=>`${fmtD(g.d)} (тежест ${g.w}): `+g.items.map(i=>i.txt+(i.rx?' R':'')).join('; ')).join(' | '),
+    'Всички събития: '+Y.all.map(e=>`${fmtD(e.d)} ${e.txt}${e.rx?' R':''}`).join('; ')+'.',
+    cyclesText(n,y), srText(n,p,y)].join('\n');
+}
 function aiContext(){
   const p=active(), n=natalOf(p), now=new Date();
-  const parts=[chartText(n,p), skyText(n,now)];
+  const parts=[chartText(n,p), rulersText(n), skyText(n,now), progText(n,now)];
+  if (p.aiCtx && p.aiCtx.trim()) parts.push('Какво се случва в живота ми сега (написано от мен):\n'+p.aiCtx.trim());
   if (djLast && djLast.p.id===p.id){ const C=djLast.C;
     parts.push(`Сравнение на два периода. Тогава: ${skyText(n,C.A.d)}\nСега: ${skyText(n,C.B.d)}\nОбщо: ${[...C.same.map(x=>`същият транзит ${yrPN(x.p)} към ${yrPN(x.t)}`),...C.point.map(x=>`същата натална точка ${yrPN(x.t)}`),...C.house.map(x=>`${yrPN(x.k)} в същия ${x.h} дом`),...C.echo.slice(0,6).map(x=>`сегашен ${yrPN(x.pB)} ${aspOf(x.a).n} с мястото на ${yrPN(x.pA)} тогава`)].join('; ')||'няма ясни общи теми'}.`); }
   const ev=(p.events||[]).slice(-15); if (ev.length) parts.push('Събития от живота (от дневника на картата): '+ev.map(e=>`${e.date}: ${e.text}`).join('; ')+'.');
   return parts.join('\n\n');
 }
-const AI_RULES=`Ти си опитен астролог-консултант и помагаш на студентка по астрология (втора година, прогностика). Отговаряй на български, ясно, структурирано и практично, без фатализъм и без плашене. Първо дай извода и конкретните насоки, после обясни логиката: коя планета, знак, дом и аспект води до извода и как се свързва с реалния живот. Пиши с прости думи, без излишни технически подробности. Ако данните не стигат, кажи го направо, не измисляй. Използвай САМО позициите и датите от данните отдолу или от инструментите; не изчислявай позиции наум. Не давай медицински, правни или финансови съвети.`;
+const AI_RULES=`Ти си опитен астролог-консултант. Помагаш на студентка по астрология (втора година, прогностика), която иска да разбира картата си, а не просто да получи отговор. Пиши на български, ясно, с прости думи, без емоджи, без фатализъм и без плашене.
+
+КАК ТЪЛКУВАШ
+1. Тежест на техниките: прогресиите (особено на Слънцето, Асцендента, MC и прогресивната Луна) показват основния фон; бавните транзити (Плутон, Нептун, Уран, Хирон) показват процесите; Сатурн и Юпитер дават ритъма и влизането в домове; затъмненията върху натални точки са силни отделни събития с действие около 6 месеца; Марс е спусък за вече активни теми. Тема, потвърдена от няколко техники едновременно, е най-важна.
+2. Всяка планета се тълкува чрез дома, в който е, и домовете, които управлява в наталната карта (виж управителите). Свързвай аспекта с конкретна област от живота: работа, пари, дом, отношения, здраве, вътрешно развитие.
+3. Многократните транзити са процес: първо докосване (темата се появява), ретроградно (преразглеждане), последно (решение и нова форма). Казвай в коя фаза е.
+4. Свързвай с реалния живот на човека, ако е описан в данните. Показвай кое подкрепя и кое изисква внимание, и как най-добре да се използва периодът.
+5. Не изчислявай позиции и дати наум. Използвай САМО данните отдолу или инструментите. Ако нещо липсва, кажи „Не намирам информация“.
+
+КАК ПИШЕШ
+- Започни с „Накратко:“ и 2–3 изречения с извода.
+- После теми или периоди (за прогноза по тримесечия) с конкретни дати. При всеки извод кажи логиката в една фраза: планета, аспект, дом, тоест област от живота.
+- Завърши с 2–4 конкретни практични насоки.
+- Без медицински, правни или финансови съвети; при здраве само „добро време за възстановяване“ и подобни.`;
 const aiTurns=[]; let aiCtl=null, aiCtxText='';
 function aiTools(n){
   return [
@@ -9999,18 +10049,26 @@ function aiTools(n){
         return AC.transitHits(k,np.lon,a,f,to).map(h=>isoDay(h.date)+(AC.speed(k,AC.T(h.date))<0?' R':'')); }}
   ];
 }
-async function aiAsk(q){
+function aiTools2(n,p){ return aiTools(n).concat([
+  {name:'year_forecast', description:'Връща пълната годишна прогноза за дадена година: активни прогресии, прогресивна Луна, ключови дати с тежест, всички транзити, лунации и затъмнения, големите транзитни цикли с фазите и соларната карта. Ползвай го за всеки въпрос за конкретна година.', inputSchema:{type:'object',properties:{year:{type:'number'}},required:['year']},
+    execute:(i)=>{ const y=Math.round(Number(i.year)); if(!(y>=1900&&y<=2100)) throw new Error('Година между 1900 и 2100'); $('aiStep').textContent=`Изчислявам ${y}…`; return yearText(n,p,y); }},
+  {name:'solar_return', description:'Соларната карта за дадена година: момент, Асцендент, MC, планетите в соларни и натални домове и аспекти към натала.', inputSchema:{type:'object',properties:{year:{type:'number'}},required:['year']},
+    execute:(i)=>{ const y=Math.round(Number(i.year)); if(!(y>=1900&&y<=2100)) throw new Error('Година между 1900 и 2100'); return srText(n,p,y); }},
+  {name:'progressions_at', description:'Прогресивните позиции (вторични, MC по слънчевата дъга) за дата YYYY-MM-DD.', inputSchema:{type:'object',properties:{date:{type:'string'}},required:['date']},
+    execute:(i)=>{ const s=String(i.date||''); if(!/^\d{4}-\d{2}-\d{2}$/.test(s)) throw new Error('Датата трябва да е YYYY-MM-DD'); return progText(n, localToUTC(s,'12:00','Europe/Sofia',0)); }}
+]); }
+async function aiAsk(q, extra, label){
   const sample = (window.claude&&window.claude.use) ? await window.claude.use('sample').catch(()=>null) : null;
   if (!sample){ $('aiOut').textContent='AI анализът работи само във версията на сайта в Claude. Тук използвайте „Копирай данните за Claude“ и ги поставете в разговор с Claude.'; return; }
   const p=active(), n=natalOf(p);
   if (!aiTurns.length) aiCtxText=AI_RULES+'\n\nДАННИ:\n'+aiContext()+'\n\nДнес е '+isoDay(new Date())+'.';
-  aiTurns.push({role:'user', content:q});
-  const box=document.createElement('div'); box.className='aimsg'; box.innerHTML=`<div class="aiq">${escapeHtml(q)}</div><div class="aia">Мисля…</div>`; $('aiLog').append(box); const out=box.querySelector('.aia');
+  aiTurns.push({role:'user', content:q+(extra?'\n\n'+extra:'')});
+  const box=document.createElement('div'); box.className='aimsg'; box.innerHTML=`<div class="aiq">${escapeHtml(label||q)}</div><div class="aia">Мисля…</div>`; $('aiLog').append(box); const out=box.querySelector('.aia');
   $('aiSend').disabled=true; $('aiStop').hidden=false; aiCtl=new AbortController();
   let lim=null; try{ lim=await sample.limits(); }catch(e){}
   try{
     const opts={signal:aiCtl.signal, cache:false, onText:({text})=>{ out.innerHTML=mdLite(text); }};
-    if (lim&&lim.tools){ delete opts.cache; opts.tools=aiTools(n); }
+    if (lim&&lim.tools){ delete opts.cache; opts.tools=aiTools2(n,p); }
     const r=await sample([{role:'user',content:aiCtxText}, ...aiTurns], opts);
     out.innerHTML=mdLite(r.text)+(r.truncated?'<p class="note">Отговорът е съкратен. Попитайте по-конкретно.</p>':'');
     aiTurns.push({role:'assistant', content:r.text});
@@ -10024,10 +10082,15 @@ function mdLite(t){ return escapeHtml(t).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').r
 $('aiSend').onclick=()=>{ const q=$('aiQ').value.trim(); if(!q) return; $('aiQ').value=''; aiAsk(q); };
 $('aiStop').onclick=()=>aiCtl&&aiCtl.abort();
 $('aiNew').onclick=()=>{ aiTurns.length=0; $('aiLog').innerHTML=''; };
+$('aiYearGo').onclick=()=>{ const y=+$('aiYear').value; if(!(y>=1900&&y<=2100)) return; const p=active(), n=natalOf(p);
+  $('aiStep').textContent=`Изчислявам ${y}…`;
+  setTimeout(()=>{ const data=yearText(n,p,y); const q=`Какво ме очаква астрологично през ${y}? Направи прогноза по тримесечия: основният фон от прогресиите, големите процеси, ключовите дати и как най-добре да използвам годината.`; aiAsk(q, 'ДАННИ ЗА ГОДИНАТА:\n'+data); },30); };
+$('aiCtx').onchange=()=>{ const p=active(); p.aiCtx=$('aiCtx').value; saveProfiles(); toast('Запазено'); };
+$('aiYearCopy').onclick=()=>{ const y=+$('aiYear').value, p=active(), n=natalOf(p); copyText(AI_RULES+'\n\nДАННИ:\n'+aiContext()+'\n\n'+yearText(n,p,y)+`\n\nВЪПРОС: Какво ме очаква астрологично през ${y}?`); };
 document.querySelectorAll('[data-aiq]').forEach(b=>b.onclick=()=>{ const t=b.dataset.aiq==='dj' ? (djLast?`Сравни периода ${fmtD(djLast.C.A.d)} с ${fmtD(djLast.C.B.d)}. Имам усещане за дежавю: сходна ситуация тогава и сега. Има ли сходна планетарна ситуация и какво ми показва тя? Какъв урок се повтаря и как да подходя сега?`:'Първо направете сравнението горе.') : b.dataset.aiq; if(t.startsWith('Първо')){ toast(t); return; } aiAsk(t); });
 $('aiCopy').onclick=()=>copyText(AI_RULES+'\n\nДАННИ:\n'+aiContext()+'\n\nВЪПРОС: '+($('aiQ').value.trim()||'(напишете въпроса си тук)'));
 let aiInit=false;
-function initAI(){ if(aiInit) return; aiInit=true; $('djB').value=isoDay(new Date()); if(!$('djA').value) $('djA').value='2020-12-21';
+function initAI(){ $('aiCtx').value=active().aiCtx||''; if(aiInit) return; aiInit=true; $('aiYear').value=new Date().getFullYear()+1; $('djB').value=isoDay(new Date()); if(!$('djA').value) $('djA').value='2020-12-21';
   if (!(window.claude&&window.claude.use)) { $('aiAvail').textContent='В тази версия AI отговорите не са достъпни. Работят във версията на сайта в Claude. Тук можете да копирате данните и да ги поставите в разговор с Claude.'; return; }
   window.claude.use('sample').then(s=>{ $('aiAvail').textContent = s ? 'Отговорите идват от вашия акаунт в Claude. Първият въпрос ще поиска разрешение.' : 'В тази версия AI отговорите не са достъпни. Работят във версията на сайта в Claude. Тук можете да копирате данните и да ги поставите в разговор с Claude.'; }).catch(()=>{}); }
 
