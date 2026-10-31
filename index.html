@@ -235,6 +235,7 @@ th{background:var(--panel)}
     <button role="tab" data-tab="hs">През домовете</button>
     <button role="tab" data-tab="sr">Солар и лунар</button>
     <button role="tab" data-tab="pd">Прогресии и дирекции</button>
+    <button role="tab" data-tab="yr">Годишна прогноза</button>
     <button role="tab" data-tab="kw">Ключови думи</button>
     <button role="tab" data-tab="syn">Синастрия</button>
     <button role="tab" data-tab="hor">Хорар</button>
@@ -951,6 +952,34 @@ th{background:var(--panel)}
       <div class="controls"><label class="field"><span>Картата е на</span><select id="psSex"><option value="f">жена</option><option value="m">мъж</option></select></label></div>
       <div class="ntgrid" id="psCx"></div>
     </div>
+  </section>
+
+  <!-- YEAR FORECAST -->
+  <section id="tab-yr" role="tabpanel" hidden>
+    <div class="panel">
+      <h2 id="yrHead">Годишна прогноза</h2>
+      <p class="note">Прогнозата се гради на слоеве, по метода на Каръл Ръшман („Изкуството на предсказателната астрология“). Прогресиите и бавните планети показват големите теми. Юпитер и Сатурн дават по-кратките цикли. Прогресивната Луна уточнява периода, а новолунията, пълнолунията и затъмненията дават конкретни дати. Най-важни са датите, на които транзит (най-често Марс) задейства активна прогресия. Затова страницата събира всичко по дати и показва тези, в които се срещат няколко слоя.</p>
+      <div class="controls">
+        <label class="field"><span>Година</span><input type="number" id="yrYear" min="1900" max="2100"></label>
+        <label class="field"><span>Прогресивен MC</span><select id="yrMc"><option value="sa">по слънчевата дъга</option><option value="nai">по Найбод</option></select></label>
+        <label class="field"><span>Ключови дати</span><select id="yrTop"><option>8</option><option selected>10</option><option>15</option></select></label>
+        <button class="primary" type="button" id="yrRun">Изчисли</button><button type="button" id="yrCopy">Копирай всичко</button><span class="status" id="yrStatus"></span>
+      </div>
+    </div>
+    <div class="panel" style="margin-top:18px">
+      <h2>Ключови дати</h2>
+      <p class="note">Събитията в рамките на 5 дни са събрани заедно. Тежестта расте, когато се срещат различни слоеве, и особено когато спусък задейства прогресия.</p>
+      <div class="ntgrid" id="yrKey"></div>
+    </div>
+    <div class="grid2" style="margin-top:18px">
+      <div class="panel"><h2>1. Прогресии</h2><ul class="evlist ntlist" id="yrPg"></ul></div>
+      <div class="panel"><h2>2. Бавните планети</h2><ul class="evlist ntlist" id="yrTr"></ul></div>
+    </div>
+    <div class="grid2" style="margin-top:18px">
+      <div class="panel"><h2>3. Юпитер и Сатурн</h2><ul class="evlist ntlist" id="yrJs"></ul></div>
+      <div class="panel"><h2>4. Прогресивната Луна</h2><ul class="evlist ntlist" id="yrPm"></ul></div>
+    </div>
+    <div class="panel" style="margin-top:18px"><h2>5. Лунации и затъмнения върху картата</h2><ul class="evlist ntlist" id="yrLu"></ul></div>
   </section>
 
   <!-- RECTIFICATION -->
@@ -7838,7 +7867,7 @@ INTX.initUI();
 
 
 // =============== TABS ===============
-const TABS=['eph','moon','chart','nt','pr','ps','dh','sky','an','tr','pass','hs','sr','pd','kw','syn','hor','rect','cyc','jr'];
+const TABS=['eph','moon','chart','nt','pr','ps','yr','dh','sky','an','tr','pass','hs','sr','pd','kw','syn','hor','rect','cyc','jr'];
 tab = store.get('tab','eph'); if (!TABS.includes(tab)) tab='eph';
 function showTab(t){
   tab=t; store.set('tab',t);
@@ -7864,6 +7893,7 @@ function render(){
   else if (tab==='nt') runNotes();
   else if (tab==='pr') runProf();
   else if (tab==='ps') runPsy();
+  else if (tab==='yr') { initYear(); runYear(); }
   else if (tab==='sky') runSky();
   else if (tab==='cyc') INTX.runCyc();
   else if (tab==='jr') INTX.renderJr();
@@ -9703,6 +9733,96 @@ function runPsy(){ const p=active(), n=natalOf(p), sexKey='sex_'+p.id; $('psSex'
 $('psSex').onchange=()=>{ store.set('sex_'+active().id,$('psSex').value); runPsy(); };
 fillSelect($('drFrom'), Array.from({length:12},(_,i)=>[i+1,`${i+1} дом`]), '5'); fillSelect($('drN'), Array.from({length:12},(_,i)=>[i+1,`${i+1}-ти`]), '3');
 $('drFrom').onchange=derivedCalc; $('drN').onchange=derivedCalc;
+
+// =============== ГОДИШНА ПРОГНОЗА: слоеве по метода на Каръл Ръшман ===============
+const YR_NAT=['Sun','Moon','Mercury','Venus','Mars','Jupiter','Saturn','Uranus','Neptune','Pluto','Chiron','Node','ASC','MC'];
+const YR_MAJ=[0,60,90,120,180];
+const yrAspN=a=>aspOf(a).n;
+const yrNat=(n)=>n.points.filter(x=>YR_NAT.includes(x.k));
+const yrPN=k=>k==='ASC'?'Асцендент':k==='MC'?'MC':shortN(k);
+function yrProgHits(n, from, to, mcMode, layer){
+  // прогресивни точки -> натални точки и прогресивни -> прогресивни
+  const movers=['Sun','Moon','Mercury','Venus','Mars','ASC','MC'], out=[];
+  const pos=(k,d)=>progAt(n,d,mcMode).pts.find(x=>x.k===k).lon;
+  movers.forEach(k=>{
+    const step=k==='Moon'?7:20, S=[]; for(let ms=from.getTime(); ms<=to.getTime()+1; ms+=step*864e5){ const d=new Date(Math.min(ms,to.getTime())); S.push({d,l:pos(k,d)}); }
+    yrNat(n).forEach(np=>YR_MAJ.forEach(a=>{
+      if (np.k===k && a!==0) return; if (np.k===k) return;
+      targetsOf(np.lon,a).forEach(t=>{ for(let i=1;i<S.length;i++){ const va=dif(S[i-1].l,t), vb=dif(S[i].l,t);
+        if (va!==0 && (va<0)!==(vb<0) && Math.abs(va-vb)<90){ const d=AC.bisect(x=>dif(pos(k,x),t),S[i-1].d,S[i].d,0.5); out.push({d, layer:k==='Moon'?'pm':'pg', w:k==='Moon'?2:5, p:k, a, t:np.k, tLon:np.lon, txt:`Прогр. ${yrPN(k)} ${yrAspN(a)} натален ${yrPN(np.k)}`}); } } });
+    }));
+  });
+  // активни (в орбис 1°) прогресии в началото на годината, без точен момент в годината
+  const pr=progAt(n,from,mcMode), act=[];
+  pr.pts.filter(x=>x.k!=='Moon'&&movers.includes(x.k)).forEach(x=>yrNat(n).forEach(np=>{ if(np.k===x.k) return; YR_MAJ.forEach(a=>{ const o=Math.abs(Math.abs(dif(x.lon,np.lon))-a); if(o<=1) act.push({p:x.k,a,t:np.k,o,pLon:x.lon,tLon:np.lon}); }); }));
+  return {hits:out, active:act};
+}
+function yrTransits(n, from, to){
+  const out=[];
+  [['Pluto',4,'tr'],['Neptune',4,'tr'],['Uranus',4,'tr'],['Saturn',3,'js'],['Jupiter',3,'js'],['Chiron',2,'tr']].forEach(([k,w,layer])=>{
+    yrNat(n).forEach(np=>YR_MAJ.forEach(a=>AC.transitHits(k,np.lon,a,from,to).forEach(h=>out.push({d:h.date, layer, w, p:k, a, t:np.k, tLon:np.lon, rx:AC.speed(k,AC.T(h.date))<0, txt:`Транзитен ${yrPN(k)} ${yrAspN(a)} натален ${yrPN(np.k)}`}))));
+  });
+  // Юпитер и Сатурн влизат в натален дом
+  ['Jupiter','Saturn'].forEach(k=>{ const ser=AC.series(k,from,to,1); for(let h=1;h<=12;h++) AC.crossings(k,ser,n.hs.cusp[h]).forEach(d=>out.push({d, layer:'js', w:2, p:k, txt:`${yrPN(k)} влиза в ${h} натален дом`, house:h})); });
+  return out;
+}
+function yrLunations(n, from, to){
+  const out=[], pts=yrNat(n);
+  AC.lunations(from,to).forEach(x=>{
+    const ecl=x.kind!=='phase'; if (!ecl && x.q%2) return;
+    const nm = ecl ? `${x.kind==='solEcl'?'Слънчево':'Лунно'} затъмнение` : (x.q===0?'Новолуние':'Пълнолуние');
+    const hits=[]; pts.forEach(np=>[0,90,180].forEach(a=>{ const o=Math.abs(Math.abs(dif(x.lon,np.lon))-a); if (o<=(ecl?3:2)) hits.push({k:np.k,a,o}); }));
+    if (!hits.length && !ecl) return;
+    out.push({d:x.date, layer:'lu', w: ecl?(hits.length?4:1):2, txt:`${nm} в ${Ltxt(x.lon)} (${AC.houseOf(x.lon,n.hs.cusp)} дом)`+(hits.length?': '+hits.map(h=>`${yrAspN(h.a)} ${yrPN(h.k)} ${h.o.toFixed(1)}°`).join(', '):''), hits, lon:x.lon});
+  });
+  return out;
+}
+function yrTriggers(n, from, to, active, progHits){
+  // Марс (и Слънцето) като спусък за активните прогресии: аспект към наталната или прогресивната точка
+  const tg=[]; active.forEach(x=>{ tg.push({lon:x.tLon, why:`прогр. ${yrPN(x.p)} ${yrAspN(x.a)} ${yrPN(x.t)}`}); tg.push({lon:x.pLon, why:`прогр. ${yrPN(x.p)} ${yrAspN(x.a)} ${yrPN(x.t)}`}); });
+  progHits.filter(h=>h.layer==='pg').forEach(h=>tg.push({lon:h.tLon, why:h.txt.replace('Прогр.','прогр.')}));
+  const out=[], seen=new Set();
+  tg.forEach(t=>['Mars'].forEach(k=>[0,90,180].forEach(a=>AC.transitHits(k,t.lon,a,from,to).forEach(h=>{ const key=k+a+Math.round(h.date/864e5)+t.why; if(seen.has(key)) return; seen.add(key);
+    out.push({d:h.date, layer:'tg', w:k==='Mars'?3:2, txt:`Транзитен ${yrPN(k)} ${yrAspN(a)} задейства: ${t.why}`}); }))));
+  return out;
+}
+let yrText='';
+function runYear(){
+  const p=active(), n=natalOf(p), y=+$('yrYear').value; if(!(y>=1900&&y<=2100)) return;
+  const from=dayStartUTC(`${y}-01-01`), to=dayStartUTC(`${y+1}-01-01`);
+  if (to<=n.date){ $('yrStatus').textContent='Годината е преди раждането.'; return; }
+  $('yrStatus').textContent='Изчислявам…';
+  setTimeout(()=>{
+    const t0=Date.now(), mcMode=$('yrMc').value;
+    const PG=yrProgHits(n,from,to,mcMode), TR=yrTransits(n,from,to), LU=yrLunations(n,from,to).sort((a,b)=>a.d-b.d), TG=yrTriggers(n,from,to,PG.active,PG.hits);
+    PG.hits.sort((a,b)=>a.d-b.d); TR.sort((a,b)=>a.d-b.d);
+    const all=[...PG.hits,...TR,...LU,...TG].filter(e=>e.d>=from&&e.d<to).sort((a,b)=>a.d-b.d);
+    $('yrHead').textContent=`Прогноза за ${y}: ${p.name}`;
+    // 1. активни прогресии
+    $('yrPg').innerHTML = (PG.active.length? PG.active.map(x=>`<li><time>в орбис 1°</time><span>Прогр. ${yrPN(x.p)} ${yrAspN(x.a)} натален ${yrPN(x.t)} (${x.o.toFixed(2)}°). ${cap((KW.planets[x.p]||KW_ANG[x.p]).fn[0])} и ${(KW.planets[x.t]||KW_ANG[x.t]).fn[0]}: ${KW.aspects[x.a].nature.toLowerCase()}.</span></li>`).join(''):'')
+      + PG.hits.filter(h=>h.layer==='pg').map(h=>`<li><time>${fmtD(h.d)}</time><span><b>Точно:</b> ${h.txt}</span></li>`).join('') || '<li><time>—</time><span>Няма прогресии в орбис 1° през тази година.</span></li>';
+    // 2. прогресивна Луна
+    const pm0=progAt(n,from,mcMode).pts.find(x=>x.k==='Moon'), pm1=progAt(n,to,mcMode).pts.find(x=>x.k==='Moon');
+    const h0=AC.houseOf(pm0.lon,n.hs.cusp), h1=AC.houseOf(pm1.lon,n.hs.cusp);
+    $('yrPm').innerHTML=`<li><time>През годината</time><span>Прогр. Луна минава от ${Ltxt(pm0.lon)} до ${Ltxt(pm1.lon)}, през ${h0===h1?h0+' натален дом':h0+' и '+h1+' натален дом'}: фокус върху ${KW.houses[h0-1].area.slice(0,2).join(' и ')}${h0!==h1?', после върху '+KW.houses[h1-1].area.slice(0,2).join(' и '):''}.</span></li>`+PG.hits.filter(h=>h.layer==='pm').map(h=>`<li><time>${fmtD(h.d)}</time><span>${h.txt}</span></li>`).join('');
+    // 3. транзити
+    const trRow=e=>`<li><time>${fmtD(e.d)}</time><span>${e.txt}${e.rx?' (R)':''}</span></li>`;
+    $('yrTr').innerHTML=TR.filter(e=>e.layer==='tr').map(trRow).join('')||'<li><time>—</time><span>Няма точни аспекти на Уран, Нептун, Плутон и Хирон.</span></li>';
+    $('yrJs').innerHTML=TR.filter(e=>e.layer==='js').sort((a,b)=>a.d-b.d).map(trRow).join('')||'<li><time>—</time><span>Няма.</span></li>';
+    $('yrLu').innerHTML=LU.map(e=>`<li><time>${fmtD(e.d)}</time><span>${e.txt}</span></li>`).join('')||'<li><time>—</time><span>Няма лунации върху натални точки.</span></li>';
+    // 4. ключови дати: групиране в прозорец от 5 дни
+    const groups=[]; all.forEach(e=>{ const g0=groups.find(g=>Math.abs(g.d-e.d)<=5*864e5); if(g0){ g0.items.push(e); g0.w+=e.w; } else groups.push({d:e.d, items:[e], w:e.w}); });
+    groups.forEach(g=>{ const layers=new Set(g.items.map(i=>i.layer)); g.w += (layers.size-1)*2 + (layers.has('tg')&&(layers.has('pg')||PG.active.length)?2:0); });
+    const top=groups.slice().sort((a,b)=>b.w-a.w).slice(0,+$('yrTop').value).sort((a,b)=>a.d-b.d);
+    const LN={pg:'прогресия',pm:'прогр. Луна',tr:'бавна планета',js:'Юпитер/Сатурн',lu:'лунация',tg:'спусък'};
+    $('yrKey').innerHTML=top.map(g=>`<article class="ntcard"><h3 class="ntt">${fmtD(g.d)} <span class="ntpos">тежест ${g.w}</span></h3><div class="ntchips">${[...new Set(g.items.map(i=>i.layer))].map(l=>`<span class="chip gold">${LN[l]}</span>`).join('')}</div><ul class="ntul">${g.items.map(i=>`<li>${fmtD(i.d)}: ${i.txt}</li>`).join('')}</ul></article>`).join('')||'<p class="note">Няма отбелязани дати.</p>';
+    yrText=[`Прогноза за ${y}: ${p.name}`,'','Ключови дати:',...top.map(g=>`${fmtD(g.d)} (тежест ${g.w}): `+g.items.map(i=>i.txt).join('; ')),'','Всички събития:',...all.map(e=>`${fmtD(e.d)}: ${e.txt}`)].join('\n');
+    $('yrStatus').textContent=`${all.length} събития, изчислени за ${((Date.now()-t0)/1000).toFixed(1)} с.`;
+  },30);
+}
+$('yrRun').onclick=runYear; $('yrCopy').onclick=()=>copyText(yrText);
+let yrInit=false;
+function initYear(){ if(yrInit) return; yrInit=true; $('yrYear').value=new Date().getFullYear(); }
 
 // =============== НЕБЕТО СЕГА (горе) ===============
 function skyNow(){
