@@ -980,6 +980,12 @@ th{background:var(--panel)}
       <div class="panel"><h2>4. Прогресивната Луна</h2><ul class="evlist ntlist" id="yrPm"></ul></div>
     </div>
     <div class="panel" style="margin-top:18px"><h2>5. Лунации и затъмнения върху картата</h2><ul class="evlist ntlist" id="yrLu"></ul></div>
+    <div class="panel" style="margin-top:18px">
+      <h2>Големите транзити: фази и продължителност</h2>
+      <p class="note">По идеята на Хауърд Саспортас („Боговете на промяната“), големият транзит е процес, а не дата. Той започва, когато планетата влезе в орбис, обикновено има три докосвания (директно, ретроградно, пак директно) и отшумява, когато излезе от орбис. Лентата показва целия процес. Пълните кръгчета са директните докосвания, празните са ретроградните, а златната черта е днешният ден. Показани са Плутон, Нептун, Уран, Сатурн и Хирон.</p>
+      <div class="controls"><label class="field"><span>Орбис</span><select id="phOrb"><option value="1">1°</option><option value="1.5" selected>1,5°</option><option value="2">2°</option></select></label><span class="status" id="phRef"></span></div>
+      <div class="ntgrid" id="phList"></div>
+    </div>
   </section>
 
   <!-- RECTIFICATION -->
@@ -9817,12 +9823,72 @@ function runYear(){
     const LN={pg:'прогресия',pm:'прогр. Луна',tr:'бавна планета',js:'Юпитер/Сатурн',lu:'лунация',tg:'спусък'};
     $('yrKey').innerHTML=top.map(g=>`<article class="ntcard"><h3 class="ntt">${fmtD(g.d)} <span class="ntpos">тежест ${g.w}</span></h3><div class="ntchips">${[...new Set(g.items.map(i=>i.layer))].map(l=>`<span class="chip gold">${LN[l]}</span>`).join('')}</div><ul class="ntul">${g.items.map(i=>`<li>${fmtD(i.d)}: ${i.txt}</li>`).join('')}</ul></article>`).join('')||'<p class="note">Няма отбелязани дати.</p>';
     yrText=[`Прогноза за ${y}: ${p.name}`,'','Ключови дати:',...top.map(g=>`${fmtD(g.d)} (тежест ${g.w}): `+g.items.map(i=>i.txt).join('; ')),'','Всички събития:',...all.map(e=>`${fmtD(e.d)}: ${e.txt}`)].join('\n');
+    runPhases();
     $('yrStatus').textContent=`${all.length} събития, изчислени за ${((Date.now()-t0)/1000).toFixed(1)} с.`;
   },30);
 }
 $('yrRun').onclick=runYear; $('yrCopy').onclick=()=>copyText(yrText);
 let yrInit=false;
 function initYear(){ if(yrInit) return; yrInit=true; $('yrYear').value=new Date().getFullYear(); }
+
+// =============== ГОЛЕМИТЕ ТРАНЗИТИ: ФАЗИ И ПРОДЪЛЖИТЕЛНОСТ (по идеята на Х. Саспортас) ===============
+const PH_K={Pluto:'дълбока трансформация: нещо старо приключва, за да се роди ново',Neptune:'разтваряне на границите: объркване, идеализъм, вдъхновение, нужда от доверие',Uranus:'внезапна промяна и освобождаване: пробуждане, нужда от свобода',Saturn:'проверка и структуриране: отговорност, реализъм, изграждане',Chiron:'досег до стара рана и шанс за изцеление'};
+const PH_T={first:['Първо докосване','темата се появява, нещата „чукват на вратата“'],retro:['Ретроградно докосване','връщане навътре: преразглеждане, осмисляне, понякога повторение на ситуацията'],last:['Последно докосване','интеграция: решения и нова форма, темата се затваря'],mid:['Повторно директно докосване','темата се връща с нова сила и се задвижва напред'],single:['Единично докосване','кратко и концентрирано действие']};
+function bigCycles(n, y, orb){
+  const from=dayStartUTC(`${y}-01-01`), to=dayStartUTC(`${y+1}-01-01`);
+  const wA=new Date(Math.max(Date.UTC(1900,0,1), from.getTime()-4*YEAR*864e5)), wB=new Date(Math.min(Date.UTC(2100,11,31), to.getTime()+4*YEAR*864e5));
+  const out=[];
+  ['Pluto','Neptune','Uranus','Saturn','Chiron'].forEach(k=>{
+    const step=stepFor(k,orb), ser=AC.series(k,wA,wB,step);
+    yrNat(n).forEach(np=>YR_MAJ.forEach(a=>targetsOf(np.lon,a).forEach(tg=>{
+      const runs=orbRuns(k,tg,orb,ser,step).map(r=>({...r, ex:exactsIn(k,tg,r.start,r.end,step)}));
+      // групиране на последователни периоди (планетата може да излезе от орбиса между докосванията)
+      const cyc=[]; runs.forEach(r=>{ const c=cyc[cyc.length-1]; if (c && (r.start-c.end)/864e5<400) { c.end=r.end; c.ex.push(...r.ex); } else cyc.push({start:r.start,end:r.end,ex:r.ex.slice()}); });
+      cyc.filter(c=>c.start<to && c.end>from).forEach(c=>out.push({k,a,t:np.k,tg,...c}));
+    })));
+  });
+  return out.sort((x,y)=>x.start-y.start);
+}
+function phaseNow(c, ref){
+  const ex=c.ex;
+  const lab=i=> ex.length===1 ? 'single' : i===0 ? 'first' : i===ex.length-1 ? 'last' : (ex[i].rx?'retro':'mid');
+  if (ref<c.start) return {t:'предстои', d:`започва на ${fmtD(c.start)}`};
+  if (ref>c.end) return {t:'завършен', d:`приключи на ${fmtD(c.end)}`};
+  if (!ex.length) return {t:'в орбис без точен аспект', d:'планетата докосва орбиса, но не стига до точния градус'};
+  const i=ex.findIndex(e=>e.d>ref);
+  if (i===0) return {t:'приближаване', d:`първите знаци; първото точно докосване е на ${fmtD(ex[0].d)}`};
+  if (i===-1) return {t:'отдалечаване', d:'интегриране на преживяното; транзитът отшумява'};
+  const prev=PH_T[lab(i-1)][0].toLowerCase(), next=PH_T[lab(i)][0].toLowerCase();
+  return {t:`след ${prev}`, d:`следва ${next} на ${fmtD(ex[i].d)}`};
+}
+function cycleBar(c, from, to, ref){
+  const W=600, H=34, x0=6, x1=W-6, a=c.start.getTime(), b=c.end.getTime(), X=d=>x0+(d-a)/(b-a)*(x1-x0);
+  const col=[90,180].includes(c.a)?'var(--hard)':[60,120].includes(c.a)?'var(--easy)':'var(--gold)';
+  let s=`<rect x="${x0}" y="12" width="${x1-x0}" height="10" rx="5" fill="${col}" fill-opacity=".18" stroke="${col}" stroke-opacity=".6"/>`;
+  const fa=Math.max(a,from.getTime()), fb=Math.min(b,to.getTime()); if (fb>fa) s+=`<rect x="${X(fa).toFixed(1)}" y="10" width="${(X(fb)-X(fa)).toFixed(1)}" height="14" rx="3" fill="${col}" fill-opacity=".22"/>`;
+  c.ex.forEach(e=>{ const x=X(e.d.getTime()).toFixed(1); s+=`<circle cx="${x}" cy="17" r="5.5" fill="${e.rx?'var(--panel)':col}" stroke="${col}" stroke-width="1.6"><title>${fmtD(e.d)}${e.rx?' R':''}</title></circle>`; });
+  if (ref>=a && ref<=b){ const x=X(ref.getTime()).toFixed(1); s+=`<line x1="${x}" y1="4" x2="${x}" y2="30" stroke="var(--gold)" stroke-width="2"/>`; }
+  s+=`<text x="${x0}" y="33" font-size="9" fill="var(--muted)" font-family="var(--f-body)">${fmtD(c.start)}</text><text x="${x1}" y="33" text-anchor="end" font-size="9" fill="var(--muted)" font-family="var(--f-body)">${fmtD(c.end)}</text>`;
+  return `<svg viewBox="0 0 ${W} ${H+4}" style="width:100%;height:auto;display:block;margin:6px 0">${s}</svg>`;
+}
+function runPhases(){
+  const p=active(), n=natalOf(p), y=+$('yrYear').value, orb=+$('phOrb').value;
+  const from=dayStartUTC(`${y}-01-01`), to=dayStartUTC(`${y+1}-01-01`), now=new Date(), ref = now>=from&&now<to ? now : from;
+  const st=c=>ref<c.start?1:ref>c.end?2:0, C=bigCycles(n,y,orb).sort((a,b)=>st(a)-st(b) || ['Pluto','Neptune','Uranus','Saturn','Chiron'].indexOf(a.k)-['Pluto','Neptune','Uranus','Saturn','Chiron'].indexOf(b.k) || a.start-b.start);
+  $('phRef').textContent = `Фазата е към ${fmtD(ref)}${ref===now?' (днес)':' (началото на годината)'}. Орбис ${orb}°.`;
+  $('phList').innerHTML = C.length ? C.map(c=>{
+    const ph=phaseNow(c,ref), days=Math.round((c.end-c.start)/864e5), mon=(days/30.44).toFixed(0);
+    const kind = c.ex.length>=3 ? `${c.ex.length}-кратно преминаване` : c.ex.length===2 ? 'двойно преминаване' : c.ex.length===1 ? 'единично преминаване' : 'само в орбис';
+    const passes=c.ex.map((e,i)=>{ const L_= c.ex.length===1?'single': i===0?'first': i===c.ex.length-1?'last': (e.rx?'retro':'mid'); return `<li>${fmtD(e.d)}${e.rx?' R':''}: <b>${PH_T[L_][0]}</b>, ${PH_T[L_][1]}.</li>`; }).join('');
+    return `<article class="ntcard"><h3 class="ntt">${PN(c.k)} <span class="pg ${aspCls(c.a)}">${g(aspOf(c.a).g)}</span> ${c.t==='ASC'||c.t==='MC'?'':PN(c.t)} <span style="font-family:var(--f-body);font-size:16px">${yrPN(c.k)} ${aspOf(c.a).n} ${yrPN(c.t)}</span></h3>
+      <div class="ntchips"><span class="chip gold">${ph.t}</span><span class="chip">${kind}</span><span class="chip">${days<60?days+' дни':'около '+mon+' месеца'}</span></div>
+      ${cycleBar(c,from,to,ref)}
+      <p class="note" style="margin:0 0 4px">${cap(ph.d)}.</p>
+      <p class="ntx" style="margin:0 0 4px">${cap(PH_K[c.k])}, в темата за ${(KW.planets[c.t]||KW_ANG[c.t]).fn[0]}.</p>
+      ${passes?`<ul class="ntul">${passes}</ul>`:''}</article>`; }).join('')
+    : '<p class="note">Няма големи транзити към картата през тази година.</p>';
+}
+$('phOrb').onchange=runPhases;
 
 // =============== НЕБЕТО СЕГА (горе) ===============
 function skyNow(){
