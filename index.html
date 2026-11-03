@@ -878,6 +878,12 @@ th{background:var(--panel)}
       <div class="ntgrid" id="ntPlanets"></div>
     </div>
     <div class="panel" style="margin-top:18px">
+      <h2>Изречения: планета + знак + дом</h2>
+      <p class="int-hint">Техниката „изречение“: планетата е <b>какво</b> (функцията), знакът е <b>как</b> (качеството, „какъв е актьорът“), домът е <b>къде</b> (сцената, „в коя пиеса играе“). Съставете изречения от трите и вижте кое звучи вярно за живота ви. Това е чернова за размисъл, не готов извод.</p>
+      <div class="flex" style="margin-bottom:10px"><button type="button" id="ntSentMore">Друг вариант на думите</button><button type="button" id="ntSentCopy">Копирай изреченията</button></div>
+      <div class="ntgrid" id="ntSent"></div>
+    </div>
+    <div class="panel" style="margin-top:18px">
       <h2>Домовете</h2>
       <div class="ntgrid" id="ntHouses"></div>
     </div>
@@ -9411,6 +9417,42 @@ $('ntFile').onchange=async()=>{
   catch(e){ $('ntStatus').textContent='Това не е файлът с бележките. Изберете ephemeris-notes.json.'; }
   $('ntFile').value='';
 };
+// =============== ТЕХНИКА „ИЗРЕЧЕНИЕ“: планета + знак + дом ===============
+let ntSentV=0, ntSentText='';
+const SENT_P=['Sun','Moon','Mercury','Venus','Mars','Jupiter','Saturn','Uranus','Neptune','Pluto','Chiron','Node'];
+const SENT_WHO={Sun:['Баща ми','се държи'],Moon:['Майка ми','се държи'],Mercury:['Братята, сестрите и близките ми','общуват с мен'],Saturn:['Авторитетите и по-възрастните около мен','се държат']};
+const objF=w=>w.replace(/([а-я])ът(?=\s|$)/g,'$1а').replace(/ият(?=\s|$)/g,'ия');
+const vIn=x=>(/^[ВФвф]/.test(x)?'във ':'в ')+x;
+const H_EL=[0,1,2,3,0,1,2,3,0,1,2,3]; // огън, земя, въздух, вода по домове 1..12
+const EL_N=['Огън','Земя','Въздух','Вода'];
+function ntSentRender(n){
+  const v=ntSentV, out=[], txt=[];
+  SENT_P.forEach(k=>{ const p=n.pts.find(x=>x.k===k); if(!p||!KW.planets[k]) return;
+    const sg=sgn(p.lon), h=p.house, S=KW.signs[sg], Hh=KW.houses[h-1], fn=KW.planets[k].fn;
+    const f1=objF(fn[v%fn.length]), f2=objF(fn[(v+1)%fn.length]), a1=S.adv[v%S.adv.length], a2=S.adv[(v+2)%S.adv.length], ar=Hh.area[v%Hh.area.length], ar2=Hh.area[(v+1)%Hh.area.length];
+    const pl=placeTxt(p.lon,n.hs.cusp), nxt=pl.includes('действа и в') ? h%12+1 : 0;
+    const L_=[
+      ['Как (знак)', `Изразявам ${f1} ${a1}.`],
+      ['Къде (дом)', `Най-силно го усещам в сферата на ${ar} (${h} дом${nxt?`, а заради близостта до върха и в ${nxt} дом: ${KW.houses[nxt-1].area[0]}`:''}).`],
+      ['Цялото', `Когато става дума за ${ar2}, търся ${f2} ${a2}.`]];
+    if (SENT_WHO[k]) L_.push(['Човек', `${SENT_WHO[k][0]} ${SENT_WHO[k][1]} ${a2}; срещам темата най-вече чрез ${ar}.`]);
+    // актьор и сцена
+    const se=['Огън','Земя','Въздух','Вода'].indexOf(S.el), he=H_EL[h-1];
+    const dg=dignity(k,sg);
+    let fit = se===he ? `Знакът (${S.el}) и домът (${EL_N[he]}) са от един елемент: актьорът играе в своя пиеса и се изявява естествено.`
+      : (se+he)%2===0 && Math.abs(se-he)===2 ? `Знакът (${S.el}) и домът (${EL_N[he]}) са съвместими елементи: ролята пасва, с малко нагласяне.`
+      : `Знакът (${S.el}) и домът (${EL_N[he]}) са различни по природа: актьорът е в чужда роля, затова проявата може да е напрегната или неочаквана.`;
+    if ([6,8,12].includes(h)) fit+=` ${h} дом не се вижда от Асцендента: тук планетата се проявява по-скрито или чрез други хора.`;
+    if (dg) fit+=` Планетата е ${dg.t} в знака.`;
+    out.push(`<article class="ntcard"><h3 class="ntt">${nameCell(k)} <span class="ntpos"><span class="sg">${SGg[sg]}</span> ${SIGNS[sg]} · ${h} дом</span></h3>
+      <p class="note" style="margin:0 0 6px"><b>Какво:</b> ${fn.slice(0,3).join(', ')} · <b>Как:</b> ${S.adv.slice(0,3).join(', ')} · <b>Къде:</b> ${Hh.area.slice(0,3).join(', ')}</p>
+      <ul class="ntul">${L_.map(([a,b])=>`<li><b>${a}:</b> ${b}</li>`).join('')}</ul><p class="note" style="margin:6px 0 0">${fit}</p></article>`);
+    txt.push(`${shortN(k)} ${vIn(SIGNS[sg])}, ${h} дом:`, ...L_.map(([a,b])=>`  ${a}: ${b}`), '  '+fit, '');
+  });
+  $('ntSent').innerHTML=out.join(''); ntSentText=txt.join('\n');
+}
+$('ntSentMore').onclick=()=>{ ntSentV++; ntSentRender(natalOf(active())); };
+$('ntSentCopy').onclick=()=>copyText(ntSentText);
 const ORB_C={Sun:12,Moon:12,Mercury:7,Venus:7,Mars:7,Jupiter:9,Saturn:9,Uranus:5,Neptune:5,Pluto:5,Chiron:5,Lilith:5,Node:5};
 const NT_KEYS=['Sun','Moon','Mercury','Venus','Mars','Jupiter','Saturn','Chiron','Uranus','Neptune','Pluto','Lilith','Node'];
 const MASC = s => s%2===0;
@@ -9478,6 +9520,7 @@ function runNotes(){
     }
     return `<article class="ntcard"><h3 class="ntt">${nameCell(k)} <span class="ntpos">${L(x.lon)} ${SIGNS[s]}, ${h} дом${rx?' R':''}</span></h3><div class="ntchips">${chips}</div>${body}</article>`;
   }).join('');
+  ntSentRender(n);
   // ---------- домове ----------
   $('ntHouses').innerHTML=Array.from({length:12},(_,i)=>i+1).map(h=>{
     const s=sgn(n.hs.cusp[h]), r=R[s], q=P(r), inH=n.pts.filter(x=>x.house===h&&NT_KEYS.includes(x.k)).map(x=>pn(x.k));
