@@ -199,6 +199,7 @@ th{background:var(--panel)}
 .ntlist li{grid-template-columns:7.5em 1fr}
 .ntul{margin:4px 0 0;padding-left:1.1em;font-size:13.5px;line-height:1.5}
 .ntlist time{font-family:var(--f-body);font-size:12.5px}
+.tra-sec{border-top:1px solid var(--soft);padding-top:6px;margin-top:12px}.tra-sec:first-child{border-top:0;margin-top:0}.tra-sec h3{margin:4px 0 8px}
 .aimsg{border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin:0 0 12px;background:var(--panel)}
 .aiq{font-weight:600;margin-bottom:6px;color:var(--accent)}
 .aia{font-size:14.5px;line-height:1.6;max-width:75ch;overflow-wrap:anywhere}
@@ -468,6 +469,12 @@ th{background:var(--panel)}
         <p class="int-hint">Подредени по тежест. Натиснете ред за тълкувание по наръчника.</p>
         <div class="controls"><label class="field"><span>Към дата</span><input type="date" id="trNowDate"></label><label class="field"><span>Орбис, °</span><input type="number" id="trOrb" value="1.5" step="0.5" min="0.5" max="10"></label></div>
         <div class="scroll"><table id="trNow"></table></div>
+      </div>
+      <div class="panel" style="grid-column:1/-1" id="trAnPanel" hidden>
+        <h2>Анализ на периода</h2>
+        <p class="int-hint">Обобщение на всичко отгоре: кои теми са главни, кога е най-натоварено и как да разчитате транзитите. Включени са транзитите с тежест над 30; по-слабите са фон.</p>
+        <div id="trAn"></div>
+        <div class="flex" style="margin-top:10px"><button type="button" class="primary" id="trAnAI">Попитай Claude за периода</button><button type="button" id="trAnCopy">Копирай анализа</button></div>
       </div>
     </div>
   </section>
@@ -8106,7 +8113,89 @@ $('trRun').onclick=async()=>{
   INTX.renderMatrix(trAnn, from, to, n);
   const showEcl=$('trEcl').checked;
   $('trEclPanel').hidden=!showEcl;
-  if (showEcl) $('trEclTable').innerHTML=eclTable(eclipseContacts(n,from,to));
+  const eclL=eclipseContacts(n,from,to);
+  if (showEcl) $('trEclTable').innerHTML=eclTable(eclL);
+  runTrAnalysis(n, from, to, showEcl?eclL:[]);
+};
+
+// =============== АНАЛИЗ НА ИЗБРАНИЯ ПЕРИОД ===============
+const TRA_DO={Pluto:'пуснете старото, което вече не работи; работете в дълбочина, без да насилвате резултата',Neptune:'проверявайте фактите и не решавайте на доверие; добро време за творчество, интуиция и помагане',Uranus:'оставете място за промяна и експеримент; не се вкопчвайте в старата форма',Saturn:'планирайте, поемете отговорност и вървете стъпка по стъпка; резултатите идват бавно, но остават',Jupiter:'приемайте възможности, учете, разширявайте се, но без да поемате твърде много',Chiron:'обърнете внимание на старата рана; помагайки на други, помагате и на себе си',Node:'нови хора и нова посока; следвайте това, което ви развива',Mars:'действайте и започвайте; внимавайте с прибързаност и конфликти',Sun:'фокус и видимост в темата',Venus:'отношения, удоволствие и пари в темата',Mercury:'разговори, документи, решения в темата'};
+const TRA_TONE=a=>INT.hard(a)?'напрегнат':INT.soft(a)?'хармоничен':'съвпад';
+let trAnText='', trAnData='';
+const traSent=(r,n)=>INT.sentence(r,n).text.split('\n')[0].replace(/ \([^)]*\)/,'').replace(/ \([^)]*\)/,'');
+function runTrAnalysis(n, from, to, ecl){
+  const p=active(), nm=INT.nm, KWi=INT.KW, HT=INT.HOUSE_T, c=INT.ctx(n);
+  // един транзит с няколко периода в орбис = един процес
+  const M={}; trAnn.forEach(r=>{ const key=r.k+'|'+r.a2+'|'+r.npk2; const x=M[key]; if(!x){ M[key]={...r, ex:r.ex.slice(), sc:{...r.sc}}; return; }
+    x.start=new Date(Math.min(x.start,r.start)); x.end=new Date(Math.max(x.end,r.end)); x.ex=x.ex.concat(r.ex).sort((a,b)=>a.d-b.d); if(r.sc.s>x.sc.s){ x.sc={...r.sc}; x.tlon=r.tlon; } });
+  const R=Object.values(M).filter(r=>r.sc.s>=30).sort((a,b)=>b.sc.s-a.sc.s);
+  $('trAnPanel').hidden=false;
+  if (!R.length){ $('trAn').innerHTML='<p class="note">В този период няма значими транзити (всички са с тежест под 30). Изберете по-дълъг период или повече транзитни планети.</p>'; trAnText=''; trAnData=''; return; }
+  const ANGH={ASC:1,DSC:7,IC:4,MC:10};
+  const ptHouse=k=>ANGH[k]||((n.points.find(x=>x.k===k)||{}).house);
+  const rulesOf=k=>['Node','SNode','Lilith','Chiron','ASC','MC','DSC','IC'].includes(k)?[]:(c.rules[k]||[]).filter(x=>!x.trad).map(x=>x.h);
+  const exD=r=>r.ex.length?r.ex.map(e=>fmtD(e.d)+(e.rx?' R':'')).join(', '):'без точен аспект';
+  const tName=r=>`${nm(r.k)} ${aspOf(r.a2).n} ${nm(r.npk2)}`;
+  // тон
+  let wh=0, ws=0, wc=0; R.forEach(r=>{ if(INT.hard(r.a2)) wh+=r.sc.s; else if(INT.soft(r.a2)) ws+=r.sc.s; else wc+=r.sc.s; });
+  const tot=wh+ws+wc, tone = wh>tot*0.55?'преобладаващо напрегнат: периодът изисква усилие, корекции и решения':ws>tot*0.55?'преобладаващо хармоничен: има подкрепа и възможности, но те работят само ако ги използвате активно':'смесен: има и напрежение, и подкрепа; напрегнатите аспекти показват какво да се промени, хармоничните с какво да се помогне';
+  // теми по натални точки
+  const th={}; R.forEach(r=>{ (th[r.npk2]=th[r.npk2]||{k:r.npk2,base:r.npk,list:[],w:0}).list.push(r); th[r.npk2].w+=r.sc.s; });
+  const themes=Object.values(th).sort((a,b)=>b.w-a.w);
+  // домове, които се засягат (наталното място + управлявани домове)
+  const hw={}; R.forEach(r=>{ const h=ptHouse(r.npk2); if(h) hw[h]=(hw[h]||0)+r.sc.s; rulesOf(r.npk).forEach(x=>hw[x]=(hw[x]||0)+r.sc.s*0.6); });
+  const topH=Object.entries(hw).sort((a,b)=>b[1]-a[1]).slice(0,3).map(x=>+x[0]);
+  // месеци
+  const months=[]; let d=new Date(Date.UTC(from.getUTCFullYear(),from.getUTCMonth(),1));
+  while(d<to){ const e=new Date(Date.UTC(d.getUTCFullYear(),d.getUTCMonth()+1,1)); const act=R.filter(r=>r.start<e&&r.end>d); const ex=R.filter(r=>r.ex.some(x=>x.d>=d&&x.d<e)); months.push({d,w:act.reduce((s,r)=>s+r.sc.s,0)+ex.reduce((s,r)=>s+r.sc.s*0.5,0),act,ex}); d=e; }
+  const MN=['януари','февруари','март','април','май','юни','юли','август','септември','октомври','ноември','декември'];
+  const mName=m=>`${MN[m.d.getUTCMonth()]} ${m.d.getUTCFullYear()}`;
+  const peak=months.length>2?months.slice().sort((a,b)=>b.w-a.w).slice(0,Math.min(3,Math.ceil(months.length/4))).sort((a,b)=>a.d-b.d):[];
+  const top=R.slice(0,3);
+  // HTML
+  const T=[]; const H=[];
+  const sec=(h,body)=>{ H.push(`<div class="tra-sec"><h3>${h}</h3>${body}</div>`); };
+  const nak=`Най-силните транзити са ${top.map(r=>`<b>${tName(r)}</b> (тежест ${r.sc.s})`).join(', ')}. Общият тон е ${tone}. Най-засегнатите области са ${topH.map(h=>`<b>${h} дом</b> (${HT[h]})`).join(', ')}.${peak.length?` Най-натоварени са ${peak.map(m=>`<b>${mName(m)}</b>`).join(', ')}.`:''}`;
+  sec('Накратко', `<p>${nak}</p>`);
+  T.push('АНАЛИЗ НА ПЕРИОДА '+fmtD(from)+' – '+fmtD(new Date(to-1))+': '+p.name, '', 'Накратко: '+nak.replace(/<[^>]+>/g,''));
+  // главни теми
+  const thH=themes.slice(0,6).map(t=>{ const h=ptHouse(t.k), ru=rulesOf(t.base), hard=t.list.filter(r=>INT.hard(r.a2)).length, soft=t.list.filter(r=>INT.soft(r.a2)).length;
+    const tt= t.list.length>1 ? `<p class="note">Множествен транзит: ${t.list.length} транзита към една точка, затова темата е подчертана.</p>`:'';
+    const where=`${h?`Натално в ${h} дом (${HT[h]})`:''}${ru.length?`; управлява ${ru.map(x=>x+' дом ('+HT[x]+')').join(', ')}`:''}.`;
+    const items=t.list.map(r=>{ const sn=traSent(r,n); return `<li><span class="chip ${INT.hard(r.a2)?'hard':INT.soft(r.a2)?'easy':'gold'}" style="margin-left:0">${TRA_TONE(r.a2)}</span> <b>${tName(r)}</b>: ${fmtD(r.start)} – ${fmtD(r.end)}, точно ${exD(r)}. ${escapeHtml(sn)} <i>Как да го използвате:</i> ${TRA_DO[r.k]||''}.</li>`; }).join('');
+    T.push('', `Тема: ${nm(t.k)} (${KWi[t.k]||''}). ${where}`, ...t.list.map(r=>`  - ${tName(r)} [${TRA_TONE(r.a2)}, тежест ${r.sc.s}]: ${fmtD(r.start)} – ${fmtD(r.end)}, точно ${exD(r)}. ${traSent(r,n)}`));
+    return `<article class="ntcard"><h3 class="ntt">${['SNode','DSC','IC'].includes(t.k)?nm(t.k):nameCell(t.k)} <span class="ntpos">${hard?hard+' напрегнати ':''}${soft?soft+' хармонични':''}</span></h3><p class="ntx" style="margin:0 0 4px"><b>Какво е:</b> ${KWi[t.k]||''}. ${where}</p>${tt}<ul class="ntul">${items}</ul></article>`; }).join('');
+  sec('Главни теми: кои части от картата се задействат', `<p class="note">Всяка натална точка е тема от живота. Колкото повече транзити я засягат едновременно, толкова по-важна е темата в този период.</p><div class="ntgrid">${thH}</div>`);
+  // хронология
+  if (months.length>1){
+    const ch=months.filter(m=>m.ex.length).map(m=>`<li><time>${mName(m)}</time><span>${m.ex.map(r=>`${tName(r)} (${r.ex.filter(x=>x.d>=m.d&&x.d<new Date(Date.UTC(m.d.getUTCFullYear(),m.d.getUTCMonth()+1,1))).map(x=>fmtD(x.d)+(x.rx?' R':'')).join(', ')})`).join('; ')}</span></li>`).join('');
+    if (ch){ sec('Хронология: кога темите стават точни', `<p class="note">Точният аспект е върхът на транзита. Събитията стават обикновено около него или по време на сближаването, а при многократни транзити първото докосване отваря темата, а последното я затваря.</p><ul class="evlist ntlist">${ch}</ul>`);
+      T.push('', 'Хронология:', ...months.filter(m=>m.ex.length).map(m=>`  ${mName(m)}: ${m.ex.map(tName).join('; ')}`)); }
+  }
+  if (ecl && ecl.length){ sec('Затъмнения', `<ul class="evlist ntlist">${ecl.map(e=>`<li><time>${fmtD(e.date)}</time><span>${e.kind==='solEcl'?'Слънчево (ново начало)':'Лунно (завършване, кулминация)'} в ${AC.houseOf(e.lon,n.hs.cusp)} дом, докосва ${e.hits.map(h=>aspOf(h.a).n+' '+nm(h.k)).join(', ')}. Действа около 6 месеца в темата на ${AC.houseOf(e.lon,n.hs.cusp)} дом (${HT[AC.houseOf(e.lon,n.hs.cusp)]}).</span></li>`).join('')}</ul>`);
+    T.push('', 'Затъмнения: '+ecl.map(e=>`${fmtD(e.date)} ${e.kind==='solEcl'?'слънчево':'лунно'} в ${AC.houseOf(e.lon,n.hs.cusp)} дом: ${e.hits.map(h=>aspOf(h.a).n+' '+nm(h.k)).join(', ')}`).join('; ')); }
+  // как да го разчетете: пример с най-силния транзит
+  const r0=R[0], hNow=AC.houseOf(r0.tlon,n.hs.cusp), tp=n.points.find(x=>x.k===r0.k), rT=rulesOf(r0.k), h0=ptHouse(r0.npk2), rN=rulesOf(r0.npk);
+  const steps=[
+    ['Кой идва', `транзитната планета. ${nm(r0.k)} носи ${KWi[r0.k]||''}.${tp&&tp.house?` Натално тя е в ${tp.house} дом${rT.length?' и управлява '+rT.join(', ')+' дом':''}, затова носи и тези теми.`:''}`],
+    ['Как действа', `аспектът. ${aspOf(r0.a2).n} е ${INT.hard(r0.a2)?'напрегнат: изисква промяна, корекция, решение':INT.soft(r0.a2)?'хармоничен: дава лекота и подкрепа, но само ако действате':'съвпад: сливане, ново начало в темата'}.`],
+    ['Какво задейства', `наталната точка. ${nm(r0.npk2)} е ${KWi[r0.npk2]||''}${h0?`, в ${h0} дом (${HT[h0]})`:''}${rN.length?`; управлява ${rN.join(', ')} дом, затова резултатът стига и там`:''}.`],
+    ['Къде се вижда', `сцената. Транзитната планета сега минава през ${hNow} дом (${HT[hNow]}). Там обикновено започва ситуацията.`],
+    ['Кога', `точните дати: ${exD(r0)}. Транзитът действа от ${fmtD(r0.start)} до ${fmtD(r0.end)}.`]];
+  sec('Как да го разчетете сама: 5 въпроса', `<p class="note">Всеки транзит се чете с едни и същи пет въпроса. Ето пример с най-силния транзит в периода, <b>${tName(r0)}</b>. Натиснете който и да е ред в таблицата отгоре за пълно тълкувание.</p><ol class="int-ol">${steps.map(([a,b])=>`<li><b>${a}:</b> ${b}</li>`).join('')}</ol><p class="note">Изречение по формулата: ${escapeHtml(INT.sentence(r0,n).text.split('\n')[0])}</p><p class="note">Правило: бавните планети (Плутон, Нептун, Уран) показват процес от месеци до години; Сатурн и Юпитер дават ритъма; Марс и бързите планети са спусък за няколко дни. Хармоничните аспекти не правят нищо сами, а напрегнатите не са „лоши“: показват къде е растежът.</p>`);
+  // насоки
+  const kinds=[...new Set(R.slice(0,6).map(r=>r.k))];
+  sec('Практични насоки за периода', `<ul class="ntul">${kinds.map(k=>`<li><b>${nm(k)}:</b> ${TRA_DO[k]||''}.</li>`).join('')}</ul>`);
+  T.push('', 'Насоки:', ...kinds.map(k=>`  ${nm(k)}: ${TRA_DO[k]||''}.`));
+  $('trAn').innerHTML=H.join('');
+  trAnText=T.join('\n');
+  trAnData=`ТРАНЗИТИ ЗА ПЕРИОДА ${fmtD(from)} – ${fmtD(new Date(to-1))} (тежест 0–100, маркери, период в орбис, точни дати, натален дом на точката):\n`+trAnn.slice().sort((a,b)=>b.sc.s-a.sc.s).slice(0,40).map(r=>`${tName(r)} [тежест ${r.sc.s}${r.m.length?'; '+r.m.map(x=>x.t).join(', '):''}]: ${fmtD(r.start)} – ${fmtD(r.end)}, точно ${exD(r)}; точката е в ${ptHouse(r.npk2)||'?'} дом; транзитната планета минава през ${AC.houseOf(r.tlon,n.hs.cusp)} дом`).join('\n')+(ecl&&ecl.length?'\nЗатъмнения: '+ecl.map(e=>`${fmtD(e.date)} ${e.kind==='solEcl'?'слънчево':'лунно'} в ${AC.houseOf(e.lon,n.hs.cusp)} дом: ${e.hits.map(h=>aspOf(h.a).n+' '+nm(h.k)).join(', ')}`).join('; '):'');
+}
+$('trAnCopy').onclick=()=>{ if(!trAnText){ toast('Първо изчислете транзитите'); return; } copyText(trAnText); };
+$('trAnAI').onclick=()=>{ if(!trAnData){ toast('Първо изчислете транзитите'); return; }
+  const q=`Анализирай транзитите ми за периода ${$('trFrom').value.split('-').reverse().join('.')} – ${$('trTo').value.split('-').reverse().join('.')}. Искам да се науча да ги разчитам: за главните транзити обясни стъпка по стъпка кой идва, как действа, какво задейства, къде се вижда и кога, после дай общата картина и практични насоки.`;
+  if (window.claude&&window.claude.use){ showTab('ai'); aiAsk(q, trAnData, q); }
+  else { copyText(AI_RULES+'\n\nДАННИ:\n'+aiContext()+'\n\n'+trAnData+'\n\nВЪПРОС: '+q); toast('AI работи във версията в Claude. Данните са копирани: поставете ги в разговор с Claude.'); }
 };
 
 let trAnn=[];
