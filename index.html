@@ -200,6 +200,7 @@ th{background:var(--panel)}
 .ntul{margin:4px 0 0;padding-left:1.1em;font-size:13.5px;line-height:1.5}
 .ntlist time{font-family:var(--f-body);font-size:12.5px}
 .tra-sec{border-top:1px solid var(--soft);padding-top:6px;margin-top:12px}.tra-sec:first-child{border-top:0;margin-top:0}.tra-sec h3{margin:4px 0 8px}
+.aiver{margin-top:10px;padding:8px 12px;border-radius:10px;font-size:13px;line-height:1.5;border-left:3px solid var(--ok);background:color-mix(in srgb,var(--ok) 8%,transparent)}.aiver.warn{border-left-color:var(--hard);background:color-mix(in srgb,var(--hard) 8%,transparent)}.aiver ul{margin:4px 0 4px 1.2em;padding:0}mark.aibad{background:color-mix(in srgb,var(--hard) 25%,transparent);color:inherit;border-bottom:2px solid var(--hard);border-radius:2px;cursor:help}
 .aimsg{border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin:0 0 12px;background:var(--panel)}
 .aiq{font-weight:600;margin-bottom:6px;color:var(--accent)}
 .aia{font-size:14.5px;line-height:1.6;max-width:75ch;overflow-wrap:anywhere}
@@ -1027,6 +1028,8 @@ th{background:var(--panel)}
         <button class="primary" type="button" id="aiYearGo">Тълкувай годината</button>
         <button type="button" id="aiYearCopy">Копирай годината за Claude</button>
       </div>
+      <div class="field" style="margin:0 0 12px"><span>Анализ на наталната карта по тема</span>
+        <div class="flex" id="aiTopics"><button type="button" data-topic="career">Кариера и призвание</button><button type="button" data-topic="money">Пари и ресурси</button><button type="button" data-topic="love">Любов и отношения</button><button type="button" data-topic="health">Здраве и енергия</button><button type="button" data-topic="karma">Карма и род</button><button type="button" data-topic="general">Общ анализ</button></div></div>
       <p class="note" id="aiAvail">Claude получава наталната карта с управителите на домовете, днешните транзити и прогресии, вашето описание и сравнението отгоре. Сам може да изчисли годишна прогноза, солар, прогресии и транзити за всяка дата.</p>
       <div class="flex" style="margin-bottom:10px">
         <button type="button" data-aiq="dj">Анализирай дежавюто</button>
@@ -10189,6 +10192,7 @@ function aiTools(n){
         return AC.transitHits(k,np.lon,a,f,to).map(h=>isoDay(h.date)+(AC.speed(k,AC.T(h.date))<0?' R':'')); }}
   ];
 }
+let aiCorpus=[];
 function aiTools2(n,p){ return aiTools(n).concat([
   {name:'year_forecast', description:'Връща пълната годишна прогноза за дадена година: активни прогресии, прогресивна Луна, ключови дати с тежест, всички транзити, лунации и затъмнения, големите транзитни цикли с фазите и соларната карта. Ползвай го за всеки въпрос за конкретна година.', inputSchema:{type:'object',properties:{year:{type:'number'}},required:['year']},
     execute:(i)=>{ const y=Math.round(Number(i.year)); if(!(y>=1900&&y<=2100)) throw new Error('Година между 1900 и 2100'); $('aiStep').textContent=`Изчислявам ${y}…`; return yearText(n,p,y); }},
@@ -10208,9 +10212,10 @@ async function aiAsk(q, extra, label){
   let lim=null; try{ lim=await sample.limits(); }catch(e){}
   try{
     const opts={signal:aiCtl.signal, cache:false, onText:({text})=>{ out.innerHTML=mdLite(text); }};
-    if (lim&&lim.tools){ delete opts.cache; opts.tools=aiTools2(n,p); }
+    if (lim&&lim.tools){ delete opts.cache; opts.tools=aiTools2(n,p).map(t=>({...t, execute:async(i)=>{ const r=await t.execute(i); aiCorpus.push(typeof r==='string'?r:JSON.stringify(r)); return r; }})); }
     const r=await sample([{role:'user',content:aiCtxText}, ...aiTurns], opts);
-    out.innerHTML=mdLite(r.text)+(r.truncated?'<p class="note">Отговорът е съкратен. Попитайте по-конкретно.</p>':'');
+    const V=aiVerify(r.text, n, [aiCtxText, ...aiTurns.map(t=>t.content), ...aiCorpus].join('\n'));
+    out.innerHTML=V.html+(r.truncated?'<p class="note">Отговорът е съкратен. Попитайте по-конкретно.</p>':'')+V.box;
     aiTurns.push({role:'assistant', content:r.text});
   }catch(e){
     if (e.text) out.innerHTML=mdLite(e.text); else out.textContent='';
@@ -10218,10 +10223,104 @@ async function aiAsk(q, extra, label){
     out.insertAdjacentHTML('beforeend',`<p class="note">${msg}</p>`); aiTurns.pop();
   }finally{ $('aiSend').disabled=false; $('aiStop').hidden=true; $('aiStep').textContent=''; }
 }
+// =============== ПРОВЕРКА НА AI ОТГОВОРА СПРЯМО ИЗЧИСЛЕНИЯТА ===============
+const AV_P=[['Sun','Слънце','Слънцето'],['Moon','Луна','Луната'],['Mercury','Меркурий','Меркурий'],['Venus','Венера','Венерата'],['Mars','Марс','Марс'],['Jupiter','Юпитер','Юпитер'],['Saturn','Сатурн','Сатурн'],['Uranus','Уран','Уран'],['Neptune','Нептун','Нептун'],['Pluto','Плутон','Плутон'],['Chiron','Хирон','Хирон']];
+const AV_S=['Овен','Телец','Близнаци','Рак','Лъв','Дева','Везни','Скорпион','Стрелец','Козирог','Водолей','Риби'];
+const AV_SF=[['Овен','Овена'],['Телец','Телеца'],['Близнаци','Близнаците'],['Рак','Рака'],['Лъв','Лъва'],['Дева','Девата'],['Везни','Везните'],['Скорпион','Скорпиона'],['Стрелец','Стрелеца'],['Козирог','Козирога'],['Водолей','Водолея'],['Риби','Рибите']];
+const AV_A={'съвпад':0,'секстил':60,'квадрат':90,'тригон':120,'опозиция':180};
+function aiVerify(text, n, corpus){
+  const bad=[], ok={n:0};
+  const pRe=AV_P.map(x=>x[2]!==x[1]?x[2]+'|'+x[1]:x[1]).join('|'), sRe=AV_SF.map(x=>x[1]+'|'+x[0]).join('|');
+  const pk=w=>(AV_P.find(x=>w===x[1]||w===x[2])||[])[0], sk=w=>AV_SF.findIndex(x=>x.includes(w));
+  const corpDates=new Set((corpus.match(/\b\d{2}\.\d{2}\.\d{4}\b/g)||[]).concat((corpus.match(/\b\d{4}-\d{2}-\d{2}\b/g)||[]).map(d=>d.split('-').reverse().join('.'))));
+  const dt=s=>{ const [d,m,y]=s.split('.').map(Number); return Date.UTC(y,m-1,d); };
+  const cd=[...corpDates].map(dt).filter(x=>!isNaN(x));
+  // прозорец за транзитите: от година назад до две години напред, плюс ±60 дни около всяка дата в отговора
+  const now=Date.now(), W=[[now-365*864e5, now+730*864e5]];
+  (text.match(/\b\d{1,2}\.\d{1,2}\.\d{4}\b/g)||[]).forEach(x=>{ const [d,m_,y]=x.split('.').map(Number), t=Date.UTC(y,m_-1,d); if(!isNaN(t)) W.push([t-60*864e5,t+60*864e5]); });
+  const sweep=(k,f)=>{ const S=new Set(); W.forEach(([a,b])=>{ for(let t=a;t<=b;t+=5*864e5) S.add(f(AC.lon(k,AC.T(new Date(t))))); }); return S; };
+  const signsIn=k=>sweep(k,l=>sgn(l)), housesIn=k=>sweep(k,l=>AC.houseOf(l,n.hs.cusp));
+  // има ли на тази дата (±3 дни) точен транзит към наталната карта или лунация
+  const dateHasEvent=t=>{ const pts=n.points.filter(q=>q.k!=='Lilith');
+    const cross=(k,days,asps)=>{ const a0=new Date(t-days*864e5), b0=new Date(t+days*864e5), la=AC.lon(k,AC.T(a0)), lb=AC.lon(k,AC.T(b0));
+      return pts.some(np=>asps.some(a=>targetsOf(np.lon,a).some(tg=>{ const va=dif(la,tg), vb=dif(lb,tg); return (va<0)!==(vb<0) && Math.abs(va-vb)<30; }))); };
+    if (['Jupiter','Saturn','Uranus','Neptune','Pluto','Chiron'].some(k=>cross(k,4,[0,60,90,120,180]))) return true;
+    if (cross('Mars',1.5,[0,90,180])) return true;
+    try{ if (AC.lunations(new Date(t-2*864e5),new Date(t+2*864e5)).some(x=>x.kind!=='phase'||x.q%2===0 ? pts.some(np=>[0,90,180].some(a=>Math.abs(Math.abs(dif(x.lon,np.lon))-a)<=3)) : false)) return true; }catch(e){}
+    return false; };
+  const cacheS={}, cacheH={};
+  const natal=k=>n.pts.find(x=>x.k===k);
+  // 1) дати
+  (text.match(/\b\d{1,2}\.\d{1,2}\.\d{4}\b/g)||[]).forEach(s0=>{ const s=s0.split('.').map((x,i)=>i<2?x.padStart(2,'0'):x).join('.'); const t=dt(s); if (isNaN(t)) return; ok.n++;
+    if (corpDates.has(s) || cd.some(c=>Math.abs(c-t)<=2*864e5)) return;
+    if (t < n.date.getTime() || t < now-3*365*864e5) return; // исторически и далечни минали дати не се проверяват
+    if (dateHasEvent(t)) return;
+    bad.push({m:s0, why:'около тази дата не намирам точен транзит към картата или лунация'}); });
+  // 2) планета в знак
+  const reS=new RegExp(`(${pRe})(?:\\s+(?:е|беше|ще бъде|влиза|минава|стои))?\\s+(?:в|във|през)\\s+(${sRe})(?![а-я])`,'g');
+  let m; while((m=reS.exec(text))){ const k=pk(m[1]), s_=sk(m[2]); if(!k||s_<0) continue; ok.n++;
+    const nt=natal(k); if (nt && sgn(nt.lon)===s_) continue;
+    if (/натал/i.test(text.slice(Math.max(0,m.index-14), m.index))){ bad.push({m:m[0], why:`натално ${AV_P.find(x=>x[0]===k)[2]} е в ${AV_S[sgn(nt.lon)]}`}); continue; }
+    const pr=progAt(n,new Date(),'sa').pts.find(x=>x.k===k); if (pr && sgn(pr.lon)===s_) continue;
+    if (new RegExp(`${AV_P.find(x=>x[0]===k)[1]} \\d+°${AV_S[s_].slice(0,3)}`).test(corpus)) continue;
+    (cacheS[k]=cacheS[k]||signsIn(k)); if (cacheS[k].has(s_)) continue;
+    bad.push({m:m[0], why:`${AV_P.find(x=>x[0]===k)[1]} не е в ${AV_S[s_]} нито в наталната карта, нито в разглеждания период`}); }
+  // 3) планета в дом
+  const reH=new RegExp(`(${pRe})[^.\\n]{0,25}?\\s(?:в|във|през)\\s(\\d{1,2})(?:-?(?:ти|ви|ри|ми))?\\s(натален\\s|наталния\\s)?дом`,'g');
+  while((m=reH.exec(text))){ const k=pk(m[1]), h=+m[2]; if(!k||!(h>=1&&h<=12)) continue; if (/солар|лунар/.test(text.slice(m.index, m.index+m[0].length+12))) continue; ok.n++;
+    const nt=natal(k); if (nt && housesOfPoint(nt.lon,n.hs.cusp).includes(h)) continue;
+    if (/натал/i.test(text.slice(Math.max(0,m.index-14), m.index))){ bad.push({m:m[0], why:`натално ${AV_P.find(x=>x[0]===k)[2]} е в ${nt.house} дом`}); continue; }
+    const pr=progAt(n,new Date(),'sa').pts.find(x=>x.k===k); if (pr && AC.houseOf(pr.lon,n.hs.cusp)===h) continue;
+    if (new RegExp(`${AV_P.find(x=>x[0]===k)[1]}[^;.]{0,30}${h} (натален |соларен )?дом`).test(corpus)) continue;
+    (cacheH[k]=cacheH[k]||housesIn(k)); if (cacheH[k].has(h)) continue;
+    bad.push({m:m[0], why:`${AV_P.find(x=>x[0]===k)[1]} не е в ${h} дом нито натално, нито в разглеждания период`}); }
+  // 4) аспекти между две точки
+  const ptRe=pRe+'|Асцендента|Асцендент|MC|Възела|Възел';
+  const reA=new RegExp(`(${pRe})\\s+(?:прави\\s+)?(съвпад|секстил|квадрат|тригон|опозиция)\\s+(?:с\\s+|със\\s+)?(?:наталн(?:ия|ата|ото|ия)?|натален|натална|натално|прогр\\.?|прогресивн\\S*)?\\s*(${ptRe})(?![а-я])`,'g');
+  const nameOf=w=>/^Асцендент/.test(w)?'Асцендент':/^Възел/.test(w)?'Възел':w==='MC'?'MC':AV_P.find(x=>w===x[1]||w===x[2])[1];
+  while((m=reA.exec(text))){ ok.n++; const A=nameOf(m[1]), B=nameOf(m[3]), a=m[2];
+    const re1=new RegExp(`${A}[^;.|\\n]{0,4}\\s${a}\\s(?:натален\\s|натална\\s|прогр\\.\\s)?(?:\\S+\\s)?${B}`), re2=new RegExp(`${B}[^;.|\\n]{0,4}\\s${a}\\s(?:натален\\s|натална\\s)?${A}`);
+    if (re1.test(corpus) || re2.test(corpus)) continue;
+    bad.push({m:m[0], why:`не намирам ${A} ${a} ${B} в изчисленията`}); }
+  let html=mdLite(text);
+  const seen=new Set(); bad.forEach(b=>{ if(seen.has(b.m)) return; seen.add(b.m); html=html.split(escapeHtml(b.m)).join(`<mark class="aibad" title="${escapeHtml(b.why)}">${escapeHtml(b.m)}</mark>`); });
+  const ub=bad.filter((b,i)=>bad.findIndex(x=>x.m===b.m)===i);
+  const box = ok.n ? `<div class="aiver ${ub.length?'warn':'ok'}"><b>Проверка спрямо изчисленията:</b> ${ok.n} твърдения за дати, знаци, домове и аспекти${ub.length?`, от тях ${ub.length} не съвпадат с изчисленията (маркирани в текста):<ul>${ub.map(b=>`<li><i>${escapeHtml(b.m)}</i>: ${escapeHtml(b.why)}</li>`).join('')}</ul>`:'; всички съвпадат.'} <span class="note">Проверката хваща само част от твърденията; тълкуването остава на AI.</span></div>` : '';
+  return {html, box, bad:ub, n:ok.n};
+}
+
+// =============== АНАЛИЗ ПО ТЕМА ===============
+const TOPICS={
+  career:{name:'Кариера и призвание', houses:[10,6,2], pts:['MC','Sun','Saturn','Jupiter','Mars'], q:'Направи анализ на наталната ми карта по темата кариера и призвание: в какво съм силна, каква среда и роля ми подхождат, къде е рискът и какво показват текущите транзити и прогресии за кариерата. Свържи с моята ситуация, ако е описана.'},
+  money:{name:'Пари и ресурси', houses:[2,8,11], pts:['Venus','Jupiter','Moon','Saturn'], q:'Направи анализ на наталната ми карта по темата пари и ресурси: как печеля, как харча, откъде идват ресурсите (собствени, от други, от групи), къде е рискът и какво показват текущите транзити. Без инвестиционни съвети.'},
+  love:{name:'Любов и отношения', houses:[5,7,8], pts:['Venus','Mars','Moon','Sun'], q:'Направи анализ на наталната ми карта по темата любов и отношения: какво търся в партньора, как обичам, какви модели се повтарят и какво показват текущите транзити за отношенията.'},
+  health:{name:'Здраве и енергия', houses:[1,6,12], pts:['Sun','Moon','Mars','Saturn'], q:'Направи анализ на наталната ми карта по темата здраве и жизнена енергия: къде е силата ми, кои са уязвимите зони по традиционната астрология, какъв режим ми помага и какво показват текущите транзити. Това не е диагноза и не е медицински съвет; дай само насоки за грижа за себе си.'},
+  karma:{name:'Карма и род', houses:[4,8,12], pts:['Node','Saturn','Moon','Pluto','Chiron'], q:'Направи анализ на наталната ми карта по темата карма и род: какво нося от рода, какви уроци повтарям, накъде води пътят на развитие по лунните възли и какво показват текущите транзити.'},
+  general:{name:'Общ анализ', houses:[1,4,7,10], pts:['Sun','Moon','ASC','MC','Saturn'], q:'Направи общ анализ на наталната ми карта: основните черти, силните страни, вътрешните противоречия, главните теми в живота и какво е най-важно за мен в момента според транзитите и прогресиите.'}
+};
+function topicData(n, key){
+  const T=TOPICS[key], P=k=>n.pts.find(x=>x.k===k), lonOf=k=>k==='ASC'?n.hs.asc:k==='MC'?n.hs.mc:(P(k)||{}).lon;
+  const L=[`ТЕМА: ${T.name}. Ключови домове: ${T.houses.join(', ')}.`];
+  T.houses.forEach(h=>{ const s=sgn(n.hs.cusp[h]), r=RUL_MOD[s], q=P(r), inH=n.pts.filter(x=>YR_NAT.includes(x.k)&&housesOfPoint(x.lon,n.hs.cusp).includes(h)).map(x=>`${yrPN(x.k)} ${Ltxt(x.lon)}`);
+    L.push(`${h} дом: връх в ${SIGNS[s]} (${KW.houses[h-1].area.join(', ')}); управител ${yrPN(r)} в ${SIGNS[sgn(q.lon)]}, ${placeTxt(q.lon,n.hs.cusp)}; планети в дома: ${inH.join(', ')||'няма'}.`); });
+  const asp=courseAspects(n);
+  T.pts.forEach(k=>{ const l=lonOf(k); if (l==null) return; const a=asp.filter(x=>x.a===k||x.b===k).map(x=>`${yrPN(x.a)} ${aspOf(x.asp).n} ${yrPN(x.b)} ${x.o.toFixed(1)}°`);
+    L.push(`${yrPN(k)}: ${Ltxt(l)}${P(k)?', '+placeTxt(l,n.hs.cusp):''}; аспекти: ${a.join('; ')||'няма в орбисите на курса'}.`); });
+  if (key==='career' || key==='money'){ try{ runProf(); const t=$('tab-pr').innerText.replace(/\s+\n/g,'\n').replace(/\n{2,}/g,'\n').trim(); if (t) L.push('ОТ РАЗДЕЛ „ПРОФЕСИЯ И ФОРТУНА“ НА САЙТА:\n'+t.slice(0,5000)); }catch(e){} }
+  // текущи транзити към ключовите точки
+  const now=new Date(), t=AC.T(now), hits=[];
+  ['Jupiter','Saturn','Uranus','Neptune','Pluto','Chiron'].forEach(k=>{ const l=AC.lon(k,t); T.pts.concat(T.houses.map(h=>'C'+h)).forEach(tk=>{ const tl=tk[0]==='C'?n.hs.cusp[+tk.slice(1)]:lonOf(tk); if(tl==null) return; [0,60,90,120,180].forEach(a=>{ const o=Math.abs(Math.abs(dif(l,tl))-a); if(o<=2) hits.push(`${yrPN(k)} ${aspOf(a).n} ${tk[0]==='C'?'върха на '+tk.slice(1)+' дом':'натален '+yrPN(tk)} (${o.toFixed(1)}°)`); }); }); });
+  L.push('Транзити сега към ключовите точки и върхове: '+(hits.join('; ')||'няма тесни')+'.');
+  return L.join('\n');
+}
+document.querySelectorAll('[data-topic]').forEach(b=>b.onclick=()=>{ const key=b.dataset.topic, T=TOPICS[key], p=active(), n=natalOf(p);
+  const data='ДАННИ ЗА ТЕМАТА:\n'+topicData(n,key);
+  if (window.claude&&window.claude.use) aiAsk(T.q, data, `Анализ по тема: ${T.name}`);
+  else { copyText(AI_RULES+'\n\nДАННИ:\n'+aiContext()+'\n\n'+data+'\n\nВЪПРОС: '+T.q); toast('AI работи във версията в Claude. Данните са копирани: поставете ги в разговор с Claude.'); } });
 function mdLite(t){ return escapeHtml(t).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/^#{1,4} (.+)$/gm,'<b>$1</b>').replace(/^[-•] (.+)$/gm,'• $1').replace(/\n/g,'<br>'); }
 $('aiSend').onclick=()=>{ const q=$('aiQ').value.trim(); if(!q) return; $('aiQ').value=''; aiAsk(q); };
 $('aiStop').onclick=()=>aiCtl&&aiCtl.abort();
-$('aiNew').onclick=()=>{ aiTurns.length=0; $('aiLog').innerHTML=''; };
+$('aiNew').onclick=()=>{ aiTurns.length=0; aiCorpus=[]; $('aiLog').innerHTML=''; };
 $('aiYearGo').onclick=()=>{ const y=+$('aiYear').value; if(!(y>=1900&&y<=2100)) return; const p=active(), n=natalOf(p);
   $('aiStep').textContent=`Изчислявам ${y}…`;
   setTimeout(()=>{ const q=aiYearQ(p,y); aiAsk(q, 'ДАННИ ЗА ГОДИНАТА:\n'+yearText(n,p,y)+aiYearEvents(p,y)); },30); };
