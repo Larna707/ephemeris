@@ -201,6 +201,7 @@ th{background:var(--panel)}
 .ntlist time{font-family:var(--f-body);font-size:12.5px}
 .tra-sec{border-top:1px solid var(--soft);padding-top:6px;margin-top:12px}.tra-sec:first-child{border-top:0;margin-top:0}.tra-sec h3{margin:4px 0 8px}
 .aiver{margin-top:10px;padding:8px 12px;border-radius:10px;font-size:13px;line-height:1.5;border-left:3px solid var(--ok);background:color-mix(in srgb,var(--ok) 8%,transparent)}.aiver.warn{border-left-color:var(--hard);background:color-mix(in srgb,var(--hard) 8%,transparent)}.aiver ul{margin:4px 0 4px 1.2em;padding:0}mark.aibad{background:color-mix(in srgb,var(--hard) 25%,transparent);color:inherit;border-bottom:2px solid var(--hard);border-radius:2px;cursor:help}
+.ectab td{vertical-align:top}.ectab .ecsub{font-size:11.5px;color:var(--muted);margin-top:2px;font-family:var(--f-body)}.ectab td.l{white-space:normal}.ectab td:first-child{white-space:nowrap}.ectab .ecvis{white-space:normal;display:inline-block}.ectab tr.ecdet td{text-align:left;white-space:normal;font-family:var(--f-body);background:color-mix(in srgb,var(--gold) 5%,transparent)}.ecrow{cursor:pointer}.ecrow:hover td{background:color-mix(in srgb,var(--gold) 8%,transparent)}.ecdot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;vertical-align:middle}.ecdot.sol{background:#e8a33d}.ecdot.lun{background:#7a6cf0}.ecvis{padding:1px 7px;border-radius:9px;font-size:12px;white-space:nowrap}.ecvis.ok{background:color-mix(in srgb,var(--ok) 18%,transparent)}.ecvis.part{background:color-mix(in srgb,var(--gold) 20%,transparent)}.ecvis.no{color:var(--muted)}.ecbox{padding:4px 6px 8px;font-size:14px;line-height:1.55}.ecbox p{margin:4px 0}.ecchip{display:inline-block;margin:2px 4px 2px 0;padding:1px 8px;border-radius:10px;font-size:12px;white-space:nowrap;border:1px solid}.ecchip.sol{border-color:#e8a33d;background:color-mix(in srgb,#e8a33d 12%,transparent)}.ecchip.lun{border-color:#7a6cf0;background:color-mix(in srgb,#7a6cf0 12%,transparent)}
 .aimsg{border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin:0 0 12px;background:var(--panel)}
 .aiq{font-weight:600;margin-bottom:6px;color:var(--accent)}
 .aia{font-size:14.5px;line-height:1.6;max-width:75ch;overflow-wrap:anywhere}
@@ -228,6 +229,7 @@ th{background:var(--panel)}
   <nav class="tabs" role="tablist" id="tabs">
     <button role="tab" data-tab="eph" aria-selected="true">Ефемериди за месеца</button>
     <button role="tab" data-tab="moon">Луна</button>
+    <button role="tab" data-tab="ecl">Затъмнения</button>
     <button role="tab" data-tab="chart">Карта</button>
     <button role="tab" data-tab="nt">Бележки и показатели</button>
     <button role="tab" data-tab="pr">Професия и Фортуна</button>
@@ -762,6 +764,28 @@ th{background:var(--panel)}
   </section>
 
   <!-- MOON -->
+  <section id="tab-ecl" role="tabpanel" hidden>
+    <div class="panel">
+      <h2 id="ecHead">Затъмнения</h2>
+      <p class="int-hint">Астрономическите данни са като в каталога на NASA (вид, сарос серия, фаза, продължителност, видимост), а до тях е какво докосва всяко затъмнение във вашата карта. Слънчевото затъмнение е силно новолуние: ново начало в темата на дома. Лунното е силно пълнолуние: кулминация, завършване, осъзнаване. Действието е около 6 месеца, а точката се „задейства“, когато транзитна планета мине през нея.</p>
+      <div class="controls">
+        <label class="field"><span>От година</span><input id="ecFrom" type="number" min="1900" max="2100" style="width:6.5em"></label>
+        <label class="field"><span>До година</span><input id="ecTo" type="number" min="1900" max="2100" style="width:6.5em"></label>
+        <label class="field"><span>Вид</span><select id="ecKind"><option value="all">Всички</option><option value="sol">Слънчеви</option><option value="lun">Лунни</option></select></label>
+        <label class="field"><span>Орбис</span><select id="ecOrb"><option>2</option><option selected>3</option><option>5</option></select></label>
+        <label class="field"><span>Място за видимост</span><input id="ecPlace" type="text" value="София" style="width:8em"></label>
+        <label class="field"><span>Ширина</span><input id="ecLat" type="number" step="0.0001" value="42.6977" style="width:7em"></label>
+        <label class="field"><span>Дължина</span><input id="ecLon" type="number" step="0.0001" value="23.3219" style="width:7em"></label>
+        <label class="flex" style="font-size:13px;align-self:flex-end;margin-bottom:8px"><input type="checkbox" id="ecOnly"> само докосващите картата</label>
+        <button class="primary" type="button" id="ecRun">Покажи</button>
+      </div>
+      <p class="note" id="ecStatus"></p>
+    </div>
+    <div class="panel" style="margin-top:18px"><h2>Затъмнението преди раждането и вашата сарос серия</h2><div id="ecPre"></div></div>
+    <div class="panel" style="margin-top:18px"><h2>Таблица на затъмненията</h2><p class="int-hint">Натиснете ред за подробности: темата на дома, предишното затъмнение от същата серия (18 години назад) и кога транзитите задействат точката.</p><div class="scroll"><table id="ecTable" class="ectab"></table></div></div>
+    <div class="panel" style="margin-top:18px"><h2>Затъмненията през наталните точки и върховете на домовете</h2><p class="int-hint">Затъмненията вървят назад по зодиака заедно с лунните възли (около 18,6 години за пълен кръг). Тук е кога в избрания период затъмнение пада в съвпад или опозиция с всяка натална точка и всеки връх на дом.</p><div class="scroll"><table id="ecMatrix" class="ectab"></table></div></div>
+  </section>
+
   <section id="tab-moon" role="tabpanel" hidden>
     <div class="panel">
       <h2>Луната</h2>
@@ -7932,7 +7956,7 @@ INTX.initUI();
 
 
 // =============== TABS ===============
-const TABS=['eph','moon','chart','nt','pr','ps','yr','ai','dh','sky','an','tr','pass','hs','sr','pd','kw','syn','hor','rect','cyc','jr'];
+const TABS=['eph','moon','ecl','chart','nt','pr','ps','yr','ai','dh','sky','an','tr','pass','hs','sr','pd','kw','syn','hor','rect','cyc','jr'];
 tab = store.get('tab','eph'); if (!TABS.includes(tab)) tab='eph';
 function showTab(t){
   tab=t; store.set('tab',t);
@@ -7954,6 +7978,7 @@ function render(){
   else if (tab==='syn') runSyn();
   else if (tab==='hor') { initHor(); runHor(); }
   else if (tab==='moon') runMoon();
+  else if (tab==='ecl') { if(!ecInit) initEcl(); runEcl(); }
   else if (tab==='dh') runDh();
   else if (tab==='nt') runNotes();
   else if (tab==='pr') runProf();
@@ -8093,6 +8118,94 @@ function eclTable(list){
   return `<thead><tr><th class="t l">Дата</th><th class="t l">Затъмнение</th><th class="t">Позиция</th><th class="t l">Докосва</th></tr></thead><tbody>`+
     list.map(e=>`<tr><td class="l">${fmtD(e.date)}</td><td class="l" style="font-family:var(--f-body)">${e.kind==='solEcl'?'Слънчево':'Лунно'} (${ECL_BG[e.type]||e.type})</td><td>${L(e.lon)}</td><td class="l">${e.hits.map(h=>`${aspCell(h.a)} ${nameCell(h.k)} ${h.o.toFixed(1)}°`).join('<br>')}</td></tr>`).join('')+'</tbody>';
 }
+
+// =============== ЗАТЪМНЕНИЯ ===============
+const EC_SYN=29.530588853, EC_ANCH={sol:{t:Date.UTC(2024,3,8,18,17),s:139}, lun:{t:Date.UTC(2025,2,14,6,59),s:123}};
+const EC_INV=(()=>{ for(let x=1;x<223;x++) if((358*x)%223===1) return x; })();
+function ecSaros(kind,date){ const a=EC_ANCH[kind], L=Math.round((date.getTime()-a.t)/864e5/EC_SYN); let s_=a.s+(((L*EC_INV)%223)+223)%223; while(s_>223) s_-=223; return s_; }
+function ecList(from,to){ const out=[], A=Astronomy;
+  let e=A.SearchLunarEclipse(from); while(e.peak.date<to){ out.push({kind:'lun', date:e.peak.date, type:e.kind, lon:AC.lon('Moon',AC.T(e.peak.date)), obsc:e.obscuration, tot:e.sd_total*2, par:e.sd_partial*2, pen:e.sd_penum*2}); e=A.NextLunarEclipse(e.peak); }
+  let g=A.SearchGlobalSolarEclipse(from); while(g.peak.date<to){ out.push({kind:'sol', date:g.peak.date, type:g.kind, lon:AC.lon('Sun',AC.T(g.peak.date)), obsc:g.obscuration, glat:g.latitude, glon:g.longitude}); g=A.NextGlobalSolarEclipse(g.peak); }
+  out.forEach(x=>{ x.saros=ecSaros(x.kind,x.date); const nn=AC.lon('Node',AC.T(x.date)), dn=Math.abs(dif(x.lon,nn)); x.node = dn<90 ? 'N' : 'S'; });
+  return out.sort((a,b)=>a.date-b.date);
+}
+function ecVis(e, lat, lon){
+  const A=Astronomy, obs=new A.Observer(lat,lon,0);
+  if (e.kind==='lun'){ const alt=d=>{ const eq=A.Equator(A.Body.Moon,d,obs,true,true); return A.Horizon(d,obs,eq.ra,eq.dec,'normal').altitude; };
+    const half=(e.type==='penumbral'?e.pen:e.par)/2*60e3, a0=alt(new Date(e.date-half)), a1=alt(e.date), a2=alt(new Date(e.date.getTime()+half));
+    if (a1>0 && a0>0 && a2>0) return {t:'вижда се цялото', c:'ok'}; if (a0>0||a1>0||a2>0) return {t:'вижда се частично', c:'part'}; return {t:'не се вижда', c:'no'}; }
+  try{ const l=A.SearchLocalSolarEclipse(new Date(e.date.getTime()-2*864e5), obs); if (Math.abs(l.peak.time.date-e.date)>2*864e5) return {t:'не се вижда', c:'no'};
+    const ups=[l.partial_begin,l.peak,l.partial_end].filter(Boolean).map(x=>x.altitude>0);
+    if (!ups.some(Boolean)) return {t:'не се вижда (под хоризонта)', c:'no'};
+    return {t:`частично, до ${Math.round(l.obscuration*100)}%${ups.every(Boolean)?'':' (при изгрев или залез)'}`, c:ups.every(Boolean)?'ok':'part'}; }catch(err){ return {t:'не се вижда', c:'no'}; }
+}
+function ecHits(n,lon,orb){ const h=[];
+  n.points.filter(q=>q.k!=='Lilith'&&q.k!=='SNode').forEach(np=>[[0,orb],[180,orb],[90,Math.min(orb,2)]].forEach(([a,o])=>{ const d=Math.abs(Math.abs(dif(lon,np.lon))-a); if(d<=o) h.push({k:np.k,a,o:d}); }));
+  for(let c=1;c<=12;c++){ if(c===1||c===10) continue; [0,180].forEach(a=>{ const d=Math.abs(Math.abs(dif(lon,n.hs.cusp[c]))-a); if(d<=orb) h.push({k:'C'+c,a,o:d}); }); }
+  return h.sort((a,b)=>a.o-b.o);
+}
+const ecPtName=k=>k[0]==='C'&&/^C\d/.test(k)?`връх на ${k.slice(1)} дом`:nameCell(k);
+const ecTypeTxt=e=>(e.kind==='sol'?'Слънчево ':'Лунно ')+(ECL_BG[e.type]||e.type);
+function ecDur(e){ const m=x=>x>=1?`${Math.floor(x/60)?Math.floor(x/60)+' ч ':''}${Math.round(x%60)} мин`:'—';
+  if (e.kind==='sol') return ''; return e.type==='total'?`пълна фаза ${m(e.tot)}`:e.type==='partial'?`частична фаза ${m(e.par)}`:`полусянка ${m(e.pen)}`; }
+function ecPhase(e){ if (e.kind==='lun') return e.type==='penumbral'?'само полусянка':`${Math.round(e.obsc*100)}%`; return e.obsc!=null?`${Math.round(e.obsc*100)}% (в центъра)`:'частично'; }
+function ecActivations(e, months){ const from=e.date, to=new Date(e.date.getTime()+months*30.44*864e5), out=[];
+  [['Mars',[0,90,180],6],['Jupiter',[0,180],12],['Saturn',[0,90,180],12],['Uranus',[0,180],12],['Neptune',[0,180],12],['Pluto',[0,180],12]].forEach(([k,asps,mm])=>{ const t2=new Date(e.date.getTime()+Math.min(months,mm)*30.44*864e5);
+    asps.forEach(a=>AC.transitHits(k,e.lon,a,from,t2).forEach(h=>out.push({d:h.date,k,a}))); });
+  return out.sort((a,b)=>a.d-b.d);
+}
+let ecInit=false, ecRows=[];
+function initEcl(){ ecInit=true; const y=new Date().getFullYear(); $('ecFrom').value=y-1; $('ecTo').value=y+3; }
+function runEcl(){
+  const p=active(), n=natalOf(p), y0=+$('ecFrom').value, y1=+$('ecTo').value, orb=+$('ecOrb').value, kind=$('ecKind').value, lat=+$('ecLat').value, lon=+$('ecLon').value;
+  if (!(y0>=1900&&y1<=2100&&y1>=y0)){ $('ecStatus').textContent='Изберете години между 1900 и 2100.'; return; }
+  if (y1-y0>120){ $('ecStatus').textContent='Изберете период до 120 години.'; return; }
+  $('ecHead').textContent=`Затъмнения: ${p.name}`; $('ecStatus').textContent='Изчислявам…';
+  setTimeout(()=>{
+    const from=dayStartUTC(`${y0}-01-01`), to=dayStartUTC(`${y1+1}-01-01`);
+    let EL=ecList(from,to).filter(e=>kind==='all'||e.kind===kind);
+    EL.forEach(e=>{ e.hits=ecHits(n,e.lon,orb); e.house=AC.houseOf(e.lon,n.hs.cusp); });
+    ecRows = $('ecOnly').checked ? EL.filter(e=>e.hits.length) : EL;
+    const tbl = ecRows.length>200 ? ecRows.slice(0,200) : ecRows;
+    $('ecTable').innerHTML=`<thead><tr><th class="t l">Дата и час</th><th class="t l">Вид и сарос</th><th class="t l">Фаза</th><th class="t l">Видимост (${escapeHtml($('ecPlace').value||'')})</th><th class="t l">Позиция</th><th class="t l">Докосва във вашата карта</th></tr></thead><tbody>`+
+      tbl.map((e,i)=>{ const v=ecVis(e,lat,lon); return `<tr class="ecrow ${e.kind}" data-ec="${i}"><td class="l">${fmtDT(e.date)}</td><td class="l"><span class="ecdot ${e.kind}"></span>${ecTypeTxt(e)}<div class="ecsub">сарос ${e.saros} · ${e.node==='N'?'☊ Северен възел':'☋ Южен възел'}</div></td><td class="l">${ecPhase(e)}<div class="ecsub">${ecDur(e)}</div></td><td class="l"><span class="ecvis ${v.c}">${v.t}</span></td><td class="l">${L_(e.lon)}<div class="ecsub">${e.house} натален дом</div></td><td class="l">${e.hits.map(h=>`${aspCell(h.a)} ${ecPtName(h.k)} ${h.o.toFixed(1)}°`).join('<br>')||'<span class="ecsub">—</span>'}</td></tr><tr class="ecdet" id="ecd${i}" hidden><td colspan="6"></td></tr>`; }).join('')+'</tbody>';
+    $('ecTable').querySelectorAll('.ecrow').forEach(r=>r.onclick=()=>ecDetail(+r.dataset.ec, n));
+    ecPrenatal(n, orb);
+    ecMatrix(n, EL, orb);
+    $('ecStatus').textContent=`${EL.length} затъмнения за ${y0}–${y1}${$('ecOnly').checked?`, ${ecRows.length} докосват картата`:''}${ecRows.length>200?'; таблицата показва първите 200':''}.`;
+  },30);
+}
+const L_=l=>L(l);
+function ecDetail(i, n){
+  const e=ecRows[i], row=$('ecd'+i); if(!row) return; if(!row.hidden){ row.hidden=true; return; }
+  const Hh=KW.houses[e.house-1], sun=e.kind==='sol';
+  const prevD=new Date(e.date.getTime()-6585.32*864e5), prev=ecList(new Date(prevD-20*864e5), new Date(prevD.getTime()+20*864e5)).find(x=>x.kind===e.kind&&x.saros===e.saros);
+  const act=ecActivations(e, 12);
+  const opp=sun?'':` Луната е в ${SIGNS[sgn(e.lon)]}, Слънцето срещу нея в ${SIGNS[sgn(e.lon+180)]}: оста ${AC.houseOf(e.lon,n.hs.cusp)}–${AC.houseOf(e.lon+180,n.hs.cusp)} дом.`;
+  let h=`<div class="ecbox"><p><b>Тема:</b> ${sun?'ново начало, посяване':'кулминация, завършване, осъзнаване'} в сферата на ${Hh.area.slice(0,3).join(', ')} (${e.house} дом).${opp} ${e.node==='N'?'Затъмнение при Северния възел: насока към растеж, нови хора и възможности.':'Затъмнение при Южния възел: освобождаване от старото и изчерпаното, за да има място за новото.'}</p>`;
+  if (e.hits.length) h+=`<p><b>Във вашата карта:</b> ${e.hits.map(x=>`${aspOf(x.a).n} ${x.k[0]==='C'&&/^C\d/.test(x.k)?'върха на '+x.k.slice(1)+' дом ('+KW.houses[+x.k.slice(1)-1].area[0]+')':yrPN(x.k)+' ('+((KW.planets[x.k]||KW_ANG[x.k]||{fn:['']}).fn[0])+')'} ${x.o.toFixed(1)}°`).join('; ')}.</p>`;
+  else h+=`<p><b>Във вашата карта:</b> не докосва натални точки в орбис; действа като фон в темата на ${e.house} дом.</p>`;
+  if (prev) h+=`<p><b>Предишно от същата сарос серия ${e.saros}:</b> ${fmtD(prev.date)}, ${L(prev.lon)}, ${AC.houseOf(prev.lon,n.hs.cusp)} дом. Затъмненията от една серия често повтарят темата през 18 години: погледнете какво се случваше тогава.</p>`;
+  h+=`<p><b>Кога транзитите задействат точката (до 12 месеца):</b> ${act.length?act.map(a=>`${fmtD(a.d)} ${yrPN(a.k)} ${aspOf(a.a).n}`).join('; '):'няма точни преминавания'}.</p></div>`;
+  row.querySelector('td').innerHTML=h; row.hidden=false;
+}
+function ecPrenatal(n, orb){
+  const b=n.date, PL=ecList(new Date(b.getTime()-220*864e5), b), sol=PL.filter(x=>x.kind==='sol').pop(), lun=PL.filter(x=>x.kind==='lun').pop();
+  const card=(e,t)=>{ if(!e) return ''; const hs=ecHits(n,e.lon,orb), hh=AC.houseOf(e.lon,n.hs.cusp);
+    return `<article class="ntcard"><h3 class="ntt">${t} <span class="ntpos">${fmtD(e.date)}</span></h3><div class="ntchips"><span class="chip gold">${ecTypeTxt(e)}</span><span class="chip">сарос ${e.saros}</span><span class="chip">${L(e.lon)}</span><span class="chip">${hh} дом</span></div><p class="ntx" style="margin:6px 0 0">${e.kind==='sol'?'Пренаталното слънчево затъмнение показва темата, с която идвате (по Б. Брейди: „семейството“ от затъмнения, към което принадлежите).':'Пренаталното лунно затъмнение показва емоционалния и наследения модел, който се завършва.'} Попада в ${hh} дом: ${KW.houses[hh-1].area.slice(0,2).join(' и ')}.${hs.length?' Докосва: '+hs.map(x=>`${aspOf(x.a).n} ${x.k[0]==='C'&&/^C\d/.test(x.k)?'връх на '+x.k.slice(1)+' дом':yrPN(x.k)} ${x.o.toFixed(1)}°`).join(', ')+'.':''}</p></article>`; };
+  let ret='';
+  if (sol){ const R=[]; for(let k=1;k<=6;k++){ const d=new Date(sol.date.getTime()+k*6585.32*864e5); if(d.getUTCFullYear()>2100) break; const x=ecList(new Date(d-20*864e5),new Date(d.getTime()+20*864e5)).find(z=>z.kind==='sol'&&z.saros===sol.saros); if(x) R.push(x); }
+    ret=`<p class="note" style="margin-top:10px"><b>Завръщания на вашата сарос серия ${sol.saros}</b> (на всеки 18 години и 11 дни; по Брейди тези години носят теми, сходни с пренаталното затъмнение): ${R.map(x=>`${fmtD(x.date)} в ${L(x.lon)}, ${AC.houseOf(x.lon,n.hs.cusp)} дом`).join('; ')}.</p>`; }
+  $('ecPre').innerHTML=`<div class="ntgrid">${card(sol,'Пренатално слънчево затъмнение')}${card(lun,'Пренатално лунно затъмнение')}</div>${ret}`;
+}
+function ecMatrix(n, EL, orb){
+  const keys=n.points.filter(q=>q.k!=='Lilith'&&q.k!=='SNode').map(q=>q.k).concat([2,3,5,6,8,9,11,12].map(c=>'C'+c));
+  const lonOf=k=>k[0]==='C'&&/^C\d/.test(k)?n.hs.cusp[+k.slice(1)]:n.points.find(q=>q.k===k).lon;
+  const rows=keys.map(k=>{ const lk=lonOf(k), hits=EL.filter(e=>[0,180].some(a=>Math.abs(Math.abs(dif(e.lon,lk))-a)<=orb)).map(e=>({e,a:Math.abs(dif(e.lon,lk))>90?180:0}));
+    return `<tr><td class="l" style="white-space:nowrap">${ecPtName(k)}</td><td class="l">${hits.length?hits.map(x=>`<span class="ecchip ${x.e.kind}" title="${ecTypeTxt(x.e)}, ${Ltxt(x.e.lon)}">${aspCell(x.a)} ${fmtD(x.e.date)}</span>`).join(' '):'<span class="note">няма в периода</span>'}</td></tr>`; }).join('');
+  $('ecMatrix').innerHTML=`<thead><tr><th class="t l">Точка</th><th class="t l">Затъмнения (<span class="ecdot sol"></span>слънчево, <span class="ecdot lun"></span>лунно)</th></tr></thead><tbody>${rows}</tbody>`;
+}
+$('ecRun').onclick=runEcl;
 
 // =============== TRANSITS: periods + timeline ===============
 let trPeriods=[];
