@@ -202,6 +202,7 @@ th{background:var(--panel)}
 .tra-sec{border-top:1px solid var(--soft);padding-top:6px;margin-top:12px}.tra-sec:first-child{border-top:0;margin-top:0}.tra-sec h3{margin:4px 0 8px}
 .aiver{margin-top:10px;padding:8px 12px;border-radius:10px;font-size:13px;line-height:1.5;border-left:3px solid var(--ok);background:color-mix(in srgb,var(--ok) 8%,transparent)}.aiver.warn{border-left-color:var(--hard);background:color-mix(in srgb,var(--hard) 8%,transparent)}.aiver ul{margin:4px 0 4px 1.2em;padding:0}mark.aibad{background:color-mix(in srgb,var(--hard) 25%,transparent);color:inherit;border-bottom:2px solid var(--hard);border-radius:2px;cursor:help}
 .ectab td{vertical-align:top}.ectab .ecsign{font-family:var(--f-body);font-weight:600}.ectab .ecsub{font-size:11.5px;color:var(--muted);margin-top:2px;font-family:var(--f-body)}.ectab td.l{white-space:normal}.ectab td:first-child{white-space:nowrap}.ectab .ecvis{white-space:normal;display:inline-block}.ectab tr.ecdet td{text-align:left;white-space:normal;font-family:var(--f-body);background:color-mix(in srgb,var(--gold) 5%,transparent)}.ecrow{cursor:pointer}.ecrow:hover td{background:color-mix(in srgb,var(--gold) 8%,transparent)}.ecdot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;vertical-align:middle}.ecdot.sol{background:#e8a33d}.ecdot.lun{background:#7a6cf0}.ecvis{padding:1px 7px;border-radius:9px;font-size:12px;white-space:nowrap}.ecvis.ok{background:color-mix(in srgb,var(--ok) 18%,transparent)}.ecvis.part{background:color-mix(in srgb,var(--gold) 20%,transparent)}.ecvis.no{color:var(--muted)}.ecbox{padding:4px 6px 8px;font-size:14px;line-height:1.55}.ecbox p{margin:4px 0}.ecchip{display:inline-block;margin:2px 4px 2px 0;padding:1px 8px;border-radius:10px;font-size:12px;white-space:nowrap;border:1px solid}.ecchip.sol{border-color:#e8a33d;background:color-mix(in srgb,#e8a33d 12%,transparent)}.ecchip.lun{border-color:#7a6cf0;background:color-mix(in srgb,#7a6cf0 12%,transparent)}
+.grpgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;margin-top:8px}.grpul{list-style:none;margin:6px 0 0;padding:0}.grpul li{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:5px 0;border-top:1px solid var(--soft)}.grpul li:first-child{border-top:0}.grpul li>span{min-width:0;overflow:hidden;text-overflow:ellipsis}.grpmv{max-width:46%}.grpact{gap:6px;margin:4px 0 2px;flex-wrap:wrap}.grpact button{font-size:12px;padding:3px 9px}
 .aimsg{border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin:0 0 12px;background:var(--panel)}
 .aiq{font-weight:600;margin-bottom:6px;color:var(--accent)}
 .aia{font-size:14.5px;line-height:1.6;max-width:75ch;overflow-wrap:anywhere}
@@ -220,6 +221,7 @@ th{background:var(--panel)}
       <select id="profSel"></select>
       <button id="profEdit" type="button">Редактирай</button>
       <button id="profNew" type="button">Нова</button>
+      <button id="profGroups" type="button">Групи</button>
       <span class="status" id="cloudStat" style="font-size:12px"></span>
       <label for="dispTz" style="margin-left:6px">Часове в</label>
       <select id="dispTz"></select>
@@ -290,6 +292,7 @@ th{background:var(--panel)}
       <h2 id="pfTitle">Данни за раждане</h2>
       <div class="controls">
         <label class="field"><span>Име</span><input id="pfName" type="text" style="width:12em"></label>
+        <label class="field"><span>Група (изберете или напишете нова)</span><input id="pfGroup" type="text" list="groupList" autocomplete="off" placeholder="напр. Семейство" style="width:12em"></label>
         <label class="field"><span>Дата</span><input id="pfDate" type="date" min="1900-01-01" max="2100-12-31"></label>
         <label class="field"><span>Час (местен)</span><input id="pfTime" type="time" step="60"></label>
         <label class="field"><span>Часова зона</span><select id="pfTz"></select></label>
@@ -307,6 +310,17 @@ th{background:var(--panel)}
         <button type="button" id="pfDel">Изтрий картата</button>
         <span class="status" id="pfStatus"></span>
       </div>
+    </div>
+    <datalist id="groupList"></datalist>
+    <div class="panel" id="grpPanel" hidden style="margin-top:18px">
+      <h2>Групи и карти</h2>
+      <p class="int-hint">Подредете картите в групи, например Лични, Семейство, Курс, Държави. Групите се виждат в менюто „Натална карта“ горе. Картата може да се премести с менюто до нея; групата се преименува с бутона до името ѝ.</p>
+      <div class="controls">
+        <label class="field"><span>Нова група</span><input id="grpNew" type="text" placeholder="напр. Курс" style="width:12em"></label>
+        <button type="button" class="primary" id="grpAdd">Добави група</button>
+        <span class="status" id="grpStatus"></span>
+      </div>
+      <div id="grpList" class="grpgrid"></div>
     </div>
     <div class="grid2" style="margin-top:18px">
       <div class="panel"><svg class="wheel" id="chWheel" viewBox="0 0 520 520" role="img" aria-label="Кръг на картата"></svg></div>
@@ -6772,9 +6786,50 @@ function natalOf(p){
 
 // ---------- selects ----------
 function fillSelect(sel, items, val){ sel.innerHTML = items.map(([v,t])=>`<option value="${v}">${t}</option>`).join(''); if(val!=null) sel.value = val; }
-function renderProfileSel(){
-  fillSelect($('profSel'), profiles.map(p=>[p.id, p.name + (p.example?' (пример)':'') + ' · ' + p.date.split('-').reverse().join('.')]), activeId);
+const NOGRP='Без група';
+function grpNames(){ const extra=store.get('groups',[]), used=profiles.filter(p=>!p.example).map(p=>p.group||'').filter(Boolean);
+  const order=store.get('groupOrder',[]); const all=[...new Set([...order, ...extra, ...used])];
+  return all.filter(g=>g && (extra.includes(g)||used.includes(g))); }
+function profOptions(list, val, label){
+  const gs=grpNames(), by=g=>list.filter(p=>(p.group||'')===g).sort((a,b)=>a.name.localeCompare(b.name,'bg'));
+  const opt=p=>`<option value="${p.id}">${escapeHtml(label(p))}</option>`;
+  const nog=by(''); let h='';
+  gs.forEach(g=>{ const L=by(g); if(L.length) h+=`<optgroup label="${escapeHtml(g)}">${L.map(opt).join('')}</optgroup>`; });
+  if (nog.length) h += gs.some(g=>by(g).length) ? `<optgroup label="${NOGRP}">${nog.map(opt).join('')}</optgroup>` : nog.map(opt).join('');
+  return h;
 }
+function renderProfileSel(){
+  $('profSel').innerHTML=profOptions(profiles, activeId, p=>p.name + (p.example?' (пример)':'') + ' · ' + p.date.split('-').reverse().join('.'));
+  $('profSel').value=activeId;
+  $('groupList').innerHTML=grpNames().map(g=>`<option value="${escapeHtml(g)}">`).join('');
+  if (!$('grpPanel').hidden) renderGroups();
+}
+function renderGroups(){
+  const gs=grpNames(), real=profiles.filter(p=>!p.example), cnt=g=>real.filter(p=>(p.group||'')===g).length;
+  const sel=p=>`<select data-mv="${p.id}" class="grpmv">${['',...gs].map(g=>`<option value="${escapeHtml(g)}" ${(p.group||'')===g?'selected':''}>${g?escapeHtml(g):NOGRP}</option>`).join('')}</select>`;
+  const card=(g)=>{ const L=real.filter(p=>(p.group||'')===g).sort((a,b)=>a.name.localeCompare(b.name,'bg'));
+    return `<article class="ntcard grpcard"><h3 class="ntt">${g?escapeHtml(g):NOGRP} <span class="ntpos">${L.length} ${L.length===1?'карта':'карти'}</span></h3>
+      ${g?`<div class="flex grpact"><button type="button" data-ren="${escapeHtml(g)}">Преименувай</button>${gs.indexOf(g)>0?`<button type="button" data-up="${escapeHtml(g)}" title="Нагоре в менюто">↑</button>`:''}<button type="button" data-delg="${escapeHtml(g)}">Изтрий групата</button></div>`:''}
+      <ul class="grpul">${L.map(p=>`<li><span>${escapeHtml(p.name)} <span class="note">${p.date.split('-').reverse().join('.')}</span></span>${sel(p)}</li>`).join('')||'<li class="note">Празна група</li>'}</ul></article>`; };
+  $('grpList').innerHTML=gs.map(card).join('')+(cnt('')||!gs.length?card(''):'');
+  $('grpList').querySelectorAll('.grpmv').forEach(x=>x.onchange=()=>{ const p=profiles.find(q=>q.id===x.dataset.mv); p.group=x.value; saveProfiles(); renderProfileSel(); renderGroups(); $('grpStatus').textContent=`„${p.name}“ е преместена в ${x.value||NOGRP}.`; });
+  $('grpList').querySelectorAll('[data-ren]').forEach(b=>b.onclick=()=>{ const old=b.dataset.ren, card=b.closest('.grpcard');
+    if (card.querySelector('.grpren')) return;
+    b.insertAdjacentHTML('afterend',`<span class="grpren flex"><input type="text" value="${escapeHtml(old)}" style="width:10em"><button type="button" class="primary">Запази</button></span>`);
+    const box=card.querySelector('.grpren'), inp=box.querySelector('input'); inp.focus(); inp.select();
+    box.querySelector('button').onclick=()=>{ const nw=inp.value.trim(); if(!nw||nw===old){ box.remove(); return; }
+      profiles.forEach(p=>{ if((p.group||'')===old) p.group=nw; });
+      store.set('groups', [...new Set(store.get('groups',[]).map(g=>g===old?nw:g))]); store.set('groupOrder', store.get('groupOrder',[]).map(g=>g===old?nw:g));
+      saveProfiles(); renderProfileSel(); renderGroups(); $('grpStatus').textContent=`Групата е преименувана на „${nw}“.`; }; });
+  $('grpList').querySelectorAll('[data-up]').forEach(b=>b.onclick=()=>{ const g=b.dataset.up, o=grpNames(), i=o.indexOf(g); if(i>0){ [o[i-1],o[i]]=[o[i],o[i-1]]; store.set('groupOrder',o); renderProfileSel(); renderGroups(); } });
+  $('grpList').querySelectorAll('[data-delg]').forEach(b=>b.onclick=()=>{ const g=b.dataset.delg;
+    if (!b.dataset.confirm){ b.dataset.confirm='1'; b.textContent='Потвърди: картите остават, само без група'; setTimeout(()=>{ if(b.isConnected){ delete b.dataset.confirm; b.textContent='Изтрий групата'; } },4000); return; }
+    profiles.forEach(p=>{ if((p.group||'')===g) p.group=''; }); store.set('groups', store.get('groups',[]).filter(x=>x!==g)); store.set('groupOrder', store.get('groupOrder',[]).filter(x=>x!==g));
+    saveProfiles(); renderProfileSel(); renderGroups(); $('grpStatus').textContent=`Групата „${g}“ е изтрита; картите ѝ са в ${NOGRP}.`; });
+}
+$('grpAdd').onclick=()=>{ const g=$('grpNew').value.trim(); if(!g) return; if(grpNames().includes(g)){ $('grpStatus').textContent='Тази група вече съществува.'; return; }
+  store.set('groups',[...store.get('groups',[]),g]); store.set('groupOrder',[...grpNames()]); $('grpNew').value=''; renderProfileSel(); renderGroups(); $('grpStatus').textContent=`Групата „${g}“ е създадена. Преместете карти в нея с менютата.`; };
+$('grpNew').onkeydown=e=>{ if(e.key==='Enter') $('grpAdd').onclick(); };
 fillSelect($('dispTz'), ZONES.filter(z=>z[0]!=='manual').map(z=>z[0]==='UTC'?['UTC','UTC (Гринуич, като в лекциите)']:z), store.get('dispTz','Europe/Sofia'));
 dispTz = $('dispTz').value;
 fillSelect($('pfTz'), ZONES);
@@ -6911,7 +6966,7 @@ function renderChart(c, title){
   wheel($('chWheel'), c);
 }
 function loadForm(p){
-  $('pfName').value=p.name; $('pfDate').value=p.date; $('pfTime').value=p.time; $('pfTz').value=p.tz; $('pfOff').value=p.off??2;
+  $('pfName').value=p.name; $('pfGroup').value=p.group||''; $('pfDate').value=p.date; $('pfTime').value=p.time; $('pfTz').value=p.tz; $('pfOff').value=p.off??2;
   $('pfLat').value=p.lat; $('pfLon').value=p.lon;
   $('pfCity').value = p.city||'';
   $('pfOffWrap').hidden = p.tz!=='manual';
@@ -6919,7 +6974,7 @@ function loadForm(p){
   $('pfStatus').textContent='';
 }
 function readForm(){
-  return {name:$('pfName').value.trim()||'Без име', date:$('pfDate').value, time:$('pfTime').value||'12:00', tz:$('pfTz').value, off:+$('pfOff').value||0,
+  return {name:$('pfName').value.trim()||'Без име', group:$('pfGroup').value.trim(), date:$('pfDate').value, time:$('pfTime').value||'12:00', tz:$('pfTz').value, off:+$('pfOff').value||0,
     city: $('pfCity').value.trim(), lat:+$('pfLat').value, lon:+$('pfLon').value};
 }
 function validForm(f){
@@ -6948,6 +7003,7 @@ $('pfDel').onclick=()=>{
 };
 let editingNew=false;
 $('profEdit').onclick=()=>{ editingNew=false; showTab('chart'); };
+$('profGroups').onclick=()=>{ showTab('chart'); $('grpPanel').hidden=false; renderGroups(); $('grpPanel').scrollIntoView({behavior:'smooth',block:'start'}); };
 $('profNew').onclick=()=>{ editingNew=true; showTab('chart'); loadForm({name:'',date:'',time:'12:00',tz:'Europe/Sofia',off:2,city:'',lat:'',lon:''}); $('pfTitle').textContent='Нова натална карта'; $('pfName').focus(); };
 $('profSel').onchange=()=>{ activeId=$('profSel').value; saveProfiles(); profileChanged(); render(); };
 
@@ -8877,7 +8933,7 @@ function runSyn(){
   if (!others.length){ $('synNone').hidden=false; $('synBody').hidden=true; return; }
   $('synNone').hidden=true; $('synBody').hidden=false;
   let bid=store.get('synB',null); if(!others.some(p=>p.id===bid)) bid=($('synB').value && others.some(p=>p.id===$('synB').value)) ? $('synB').value : others[0].id;
-  fillSelect($('synB'), others.map(p=>[p.id, p.name]), bid);
+  $('synB').innerHTML=profOptions(others, bid, p=>p.name); $('synB').value=bid;
   const pB=others.find(p=>p.id===bid), nA=natalOf(pA), nB=AC.chart(localToUTC(pB.date,pB.time,pB.tz,pB.off), +pB.lat, +pB.lon);
   const A=fname(pA), B=fname(pB)===A ? pB.name : fname(pB);
   $('synLgA').textContent=`Вътре: ${pA.name}`; $('synLgB').textContent=`Отвън: ${pB.name}`;
