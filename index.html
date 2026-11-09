@@ -203,6 +203,7 @@ th{background:var(--panel)}
 .aiver{margin-top:10px;padding:8px 12px;border-radius:10px;font-size:13px;line-height:1.5;border-left:3px solid var(--ok);background:color-mix(in srgb,var(--ok) 8%,transparent)}.aiver.warn{border-left-color:var(--hard);background:color-mix(in srgb,var(--hard) 8%,transparent)}.aiver ul{margin:4px 0 4px 1.2em;padding:0}mark.aibad{background:color-mix(in srgb,var(--hard) 25%,transparent);color:inherit;border-bottom:2px solid var(--hard);border-radius:2px;cursor:help}
 .ectab td{vertical-align:top}.ectab .ecsign{font-family:var(--f-body);font-weight:600}.ectab .ecsub{font-size:11.5px;color:var(--muted);margin-top:2px;font-family:var(--f-body)}.ectab td.l{white-space:normal}.ectab td:first-child{white-space:nowrap}.ectab .ecvis{white-space:normal;display:inline-block}.ectab tr.ecdet td{text-align:left;white-space:normal;font-family:var(--f-body);background:color-mix(in srgb,var(--gold) 5%,transparent)}.ecrow{cursor:pointer}.ecrow:hover td{background:color-mix(in srgb,var(--gold) 8%,transparent)}.ecdot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;vertical-align:middle}.ecdot.sol{background:#e8a33d}.ecdot.lun{background:#7a6cf0}.ecvis{padding:1px 7px;border-radius:9px;font-size:12px;white-space:nowrap}.ecvis.ok{background:color-mix(in srgb,var(--ok) 18%,transparent)}.ecvis.part{background:color-mix(in srgb,var(--gold) 20%,transparent)}.ecvis.no{color:var(--muted)}.ecbox{padding:4px 6px 8px;font-size:14px;line-height:1.55}.ecbox p{margin:4px 0}.ecchip{display:inline-block;margin:2px 4px 2px 0;padding:1px 8px;border-radius:10px;font-size:12px;white-space:nowrap;border:1px solid}.ecchip.sol{border-color:#e8a33d;background:color-mix(in srgb,#e8a33d 12%,transparent)}.ecchip.lun{border-color:#7a6cf0;background:color-mix(in srgb,#7a6cf0 12%,transparent)}
 .grpgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;margin-top:8px}.grpul{list-style:none;margin:6px 0 0;padding:0}.grpul li{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:5px 0;border-top:1px solid var(--soft)}.grpul li:first-child{border-top:0}.grpul li>span{min-width:0;overflow:hidden;text-overflow:ellipsis}.grpmv{max-width:46%}.grpact{gap:6px;margin:4px 0 2px;flex-wrap:wrap}.grpact button{font-size:12px;padding:3px 9px}
+.rxnow td{background:color-mix(in srgb,var(--gold) 10%,transparent)}.elpro{color:inherit}.elpro::marker{content:'+  ';color:var(--ok)}.elcon::marker{content:'−  ';color:var(--hard)}.elcon{color:var(--muted)}.dngrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}.dnnow{outline:2px solid var(--gold)}
 .aimsg{border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin:0 0 12px;background:var(--panel)}
 .aiq{font-weight:600;margin-bottom:6px;color:var(--accent)}
 .aia{font-size:14.5px;line-height:1.6;max-width:75ch;overflow-wrap:anywhere}
@@ -507,6 +508,12 @@ th{background:var(--panel)}
       <div class="scroll" style="margin-top:14px"><table id="cycTable"></table></div>
       <div id="cycNotes" style="margin-top:12px"></div>
     </div>
+    <div class="panel" style="margin-top:18px">
+      <h2>Символични години (метод на Николай Дойнов)</h2>
+      <p class="int-hint">Ъгълът между всеки две натални планети се „движи“ с 1° на година. Когато разликата до точен аспект стане равна на възрастта, двете планети символично образуват този аспект. Важни са годините, в които се натрупват много аспекти. По опита от лекцията най-силно работят мажорните: квадратът (90°) работи винаги, тригонът (120°) дава лекота, секстилът (60°) иска стимул.</p>
+      <div class="controls"><label class="field"><span>До възраст</span><input type="number" id="dnMax" value="90" min="20" max="110" style="width:5em"></label><label class="flex" style="font-size:13px;align-self:flex-end;margin-bottom:8px"><input type="checkbox" id="dnMinor"> и минорни (30°, 45°, 135°, 150°)</label><label class="field"><span>Покажи години с поне</span><select id="dnMin"><option>1</option><option selected>3</option><option>4</option><option>5</option></select></label><button class="primary" type="button" id="dnRun">Изчисли</button></div>
+      <div id="dnOut" style="margin-top:10px"></div>
+    </div>
   </section>
 
   <section id="tab-jr" role="tabpanel" hidden>
@@ -555,6 +562,12 @@ th{background:var(--panel)}
     <div class="panel" style="margin-top:18px">
       <h2 id="psHead">Преминавания</h2>
       <div class="scroll"><table id="psTable"></table></div>
+    </div>
+    <div class="panel" style="margin-top:18px">
+      <h2>Ретроградни периоди и сянка</h2>
+      <p class="int-hint">Сянката започва, когато планетата за първи път стигне градуса, до който после ще се върне (директната станция), и свършва, когато отново стигне градуса на ретроградната станция. Целият участък е период на повишено внимание, а най-силни са двете станции, когато планетата „спира“. Ретроградността засяга най-много домовете и наталните точки в участъка.</p>
+      <div class="controls"><label class="field"><span>Година</span><input type="number" id="rxYear" min="1900" max="2100" style="width:6.5em"></label><div class="checks" id="rxBodies"></div><button class="primary" type="button" id="rxRun">Покажи</button></div>
+      <div class="scroll" style="margin-top:10px"><table id="rxTable" class="ectab"></table></div>
     </div>
   </section>
 
@@ -828,6 +841,19 @@ th{background:var(--panel)}
       <h2 id="mnYearHead">Новолуния и пълнолуния за годината</h2>
       <div class="controls"><label class="field"><span>Година</span><input type="number" id="mnYear" min="1900" max="2100"></label></div>
       <div class="scroll"><table id="mnYearT"></table></div>
+    </div>
+    <div class="panel" style="margin-top:18px">
+      <h2>Избор на момент по Луната</h2>
+      <p class="int-hint">Елективна астрология: първо решете какво искате, нещо да расте или да приключи. Растящата Луна „пълни“, намаляващата „изпразва“; невидимата Луна около новолуние не дава плод; празната Луна (без курс) значи „нищо няма да последва“; Via Combusta (15° Везни до 15° Скорпион) е неблагоприятна зона. Южната ширина помага на материализацията, бързата Луна ускорява. Денят се оценява за избрания час.</p>
+      <div class="controls">
+        <label class="field"><span>Цел</span><select id="elPurpose"><option value="grow">Начало на нещо, което да расте</option><option value="end">Приключване, премахване</option><option value="contract">Договор, документи, важен разговор</option><option value="wedding">Сватба</option><option value="move">Нанасяне в жилище</option></select></label>
+        <label class="field"><span>От</span><input type="date" id="elFrom"></label>
+        <label class="field"><span>До</span><input type="date" id="elTo"></label>
+        <label class="field"><span>Час</span><input type="time" id="elTime" value="10:00" step="60"></label>
+        <button class="primary" type="button" id="elRun">Намери дните</button>
+      </div>
+      <p class="note" id="elStatus"></p>
+      <div class="ntgrid" id="elList"></div>
     </div>
   </section>
 
@@ -8025,7 +8051,7 @@ function render(){
   else if (tab==='chart') { loadForm(active()); renderChart(natalOf(active()), 'Натална карта: '+active().name); }
   else if (tab==='an') { renderEventsList(); runAn(); }
   else if (tab==='tr') { if(!trInit) initTr(); renderTrNow(); }
-  else if (tab==='pass') initPass();
+  else if (tab==='pass') { initPass(); if(!rxInit) initRx(); }
   else if (tab==='hs') initHs();
   else if (tab==='sr') runSR();
   else if (tab==='pd') runPD();
@@ -8033,7 +8059,7 @@ function render(){
   else if (tab==='kw') { kwRender(); refRender(); hrRender(); }
   else if (tab==='syn') runSyn();
   else if (tab==='hor') { initHor(); runHor(); }
-  else if (tab==='moon') runMoon();
+  else if (tab==='moon') { runMoon(); if(!elInit) initElect(); }
   else if (tab==='ecl') { if(!ecInit) initEcl(); runEcl(); }
   else if (tab==='dh') runDh();
   else if (tab==='nt') runNotes();
@@ -8042,7 +8068,7 @@ function render(){
   else if (tab==='yr') { initYear(); runYear(); }
   else if (tab==='ai') { initAI(); runDejavu(); }
   else if (tab==='sky') runSky();
-  else if (tab==='cyc') INTX.runCyc();
+  else if (tab==='cyc') { INTX.runCyc(); runDoynov(); }
   else if (tab==='jr') INTX.renderJr();
 }
 
@@ -8174,6 +8200,102 @@ function eclTable(list){
   return `<thead><tr><th class="t l">Дата</th><th class="t l">Затъмнение</th><th class="t">Позиция</th><th class="t l">Докосва</th></tr></thead><tbody>`+
     list.map(e=>`<tr><td class="l">${fmtD(e.date)}</td><td class="l" style="font-family:var(--f-body)">${e.kind==='solEcl'?'Слънчево':'Лунно'} (${ECL_BG[e.type]||e.type})</td><td>${L(e.lon)}</td><td class="l">${e.hits.map(h=>`${aspCell(h.a)} ${nameCell(h.k)} ${h.o.toFixed(1)}°`).join('<br>')}</td></tr>`).join('')+'</tbody>';
 }
+
+// =============== РЕТРОГРАДНИ ПЕРИОДИ И СЯНКА ===============
+let rxInit=false;
+const RX_BODIES=['Mercury','Venus','Mars','Jupiter','Saturn','Uranus','Neptune','Pluto','Chiron'];
+function initRx(){ rxInit=true; $('rxYear').value=new Date().getFullYear(); checks($('rxBodies'), RX_BODIES.map(k=>[k,shortN(k)]), ['Mercury','Venus','Mars','Jupiter','Saturn'], 'rxb'); runRx(); }
+function rxCross(k, target, start, dir, maxDays){ // първата дата от start в посока dir, когато планетата е на target
+  let prev=start, pv=dif(AC.lon(k,AC.T(start)),target);
+  for(let i=1;i<=maxDays;i++){ const d=new Date(start.getTime()+dir*i*864e5), v=dif(AC.lon(k,AC.T(d)),target);
+    if (pv!==0 && (v<0)!==(pv<0) && Math.abs(v-pv)<30){ const a=dir>0?prev:d, b=dir>0?d:prev; return AC.bisect(x=>dif(AC.lon(k,AC.T(x)),target),a,b,1/24); }
+    prev=d; pv=v; }
+  return null;
+}
+function rxLoops(k, y){
+  const from=new Date(Date.UTC(y-1,6,1)), to=new Date(Date.UTC(y+1,0,1)), st=AC.stations(k,from,new Date(Date.UTC(y+1,11,31))), out=[];
+  for(let i=0;i<st.length;i++){ if(st[i].kind!=='stationR') continue; const R=st[i], D=st.slice(i+1).find(x=>x.kind==='stationD'); if(!D) continue;
+    const span={Mercury:60,Venus:120,Mars:200,Chiron:330}[k]||400;
+    const pre=rxCross(k, D.lon, R.date, -1, span), post=rxCross(k, R.lon, D.date, 1, span);
+    const a=pre||R.date, b=post||D.date; if (b<new Date(Date.UTC(y,0,1)) || a>=to) continue;
+    out.push({k,R,D,pre,post}); }
+  return out;
+}
+function runRx(){
+  const p=active(), n=natalOf(p), y=+$('rxYear').value; if(!(y>=1900&&y<=2100)) return;
+  const ks=checked('rxb'), now=new Date(), rows=[];
+  ks.forEach(k=>rxLoops(k,y).forEach(x=>rows.push(x)));
+  rows.sort((a,b)=>(a.pre||a.R.date)-(b.pre||b.R.date));
+  $('rxTable').innerHTML=`<thead><tr><th class="t l">Планета</th><th class="t l">Начало на сянката</th><th class="t l">Ретроградна станция</th><th class="t l">Директна станция</th><th class="t l">Край на сянката</th><th class="t l">Участък във вашата карта</th></tr></thead><tbody>`+
+    rows.map(x=>{ const lo=x.D.lon, hi=x.R.lon, inZone=l=>{ const a=dif(l,lo), w=dif(hi,lo); return a>=-1 && a<=w+1; };
+      const hs=[...new Set([AC.houseOf(lo,n.hs.cusp),AC.houseOf(hi,n.hs.cusp)])], pts=n.points.filter(q=>q.k!=='Lilith'&&q.k!=='SNode'&&inZone(q.lon)).map(q=>yrPN(q.k));
+      const cur=now>=(x.pre||x.R.date) && now<=(x.post||x.D.date);
+      return `<tr${cur?' class="rxnow"':''}><td class="l">${nameCell(x.k)}${cur?'<div class="ecsub">сега</div>':''}</td><td class="l">${x.pre?fmtD(x.pre):'—'}<div class="ecsub">${L(lo)}</div></td><td class="l"><b>${fmtD(x.R.date)}</b><div class="ecsub">${L(hi)}</div></td><td class="l"><b>${fmtD(x.D.date)}</b><div class="ecsub">${L(lo)}</div></td><td class="l">${x.post?fmtD(x.post):'—'}<div class="ecsub">${L(hi)}</div></td><td class="l">${hs.map(h=>h+' дом').join(' и ')}${pts.length?`<div class="ecsub">тройно преминава през: ${pts.join(', ')}</div>`:''}</td></tr>`; }).join('')+'</tbody>'
+    + (rows.length?'':'<tbody><tr><td class="l">Няма ретроградни периоди на избраните планети през годината.</td></tr></tbody>');
+}
+$('rxRun').onclick=runRx;
+
+// =============== ИЗБОР НА МОМЕНТ ПО ЛУНАТА ===============
+let elInit=false;
+function initElect(){ elInit=true; const t=new Date(); $('elFrom').value=isoDay(t); $('elTo').value=isoDay(new Date(t.getTime()+60*864e5)); }
+const EL_GOOD_WED=[1,3,6]; // Телец, Рак, Везни
+function elDay(day, tm, purpose, n){
+  const d=localToUTC(day, tm, 'Europe/Sofia', 2), t=AC.T(d), ml=AC.lon('Moon',t), sl=AC.lon('Sun',t), el=((ml-sl)%360+360)%360, ms=sgn(ml);
+  const pro=[], con=[]; let sc=0; const P=(w,x)=>{ sc+=w; pro.push(x); }, C=(w,x)=>{ sc-=w; con.push(x); };
+  const waxing=el<180, balsamic=el>=333||el<=12;
+  if (balsamic) C(3,'невидима Луна около новолуние: не дава плод');
+  if (purpose==='end'){ if(!waxing) P(3,'намаляваща Луна: подходяща за приключване'); else C(2,'растяща Луна: нещата ще продължат да растат'); }
+  else { if(waxing && !balsamic) P(3,'растяща Луна: подходяща за неща, които да се развиват'); else if(!waxing) C(2,'намаляваща Луна: по-добра за приключване'); }
+  if (el>=170&&el<=190) (purpose==='end'?P(1,'около пълнолуние: кулминация'):C(1,'около пълнолуние: емоционален връх, по-добре 1–2 дни преди'));
+  // без курс
+  try{ const tIn=signEdge('Moon',d,-1), tOut=signEdge('Moon',d,1), vo=tIn&&tOut?voidFor(tIn,tOut):null; if (vo && vo.d<d) C(3,`Луната е без курс до ${fmtDT(tOut)}: „нищо няма да последва“`); }catch(e){}
+  if (ml>=195&&ml<225) C(2,'Луната е във Via Combusta (15° Везни до 15° Скорпион)');
+  const lat=moonLat(d), spd=AC.speed('Moon',t);
+  if (lat<0) P(1,'южна ширина на Луната: по-лесна материализация'); else if (purpose!=='end') C(0.5,'северна ширина: идеите по-трудно се материализират');
+  if (spd>=13.5) P(1,`бърза Луна (${spd.toFixed(1)}° на ден)`); else if (spd<12.2) C(0.5,`бавна Луна (${spd.toFixed(1)}° на ден)`);
+  if ([7,9].includes(ms)) C(1,`Луната е в ${SIGNS[ms]} (падение или изгнание)`); if (ms===1) P(1,'Луната е в Телец (екзалтация)'); if (ms===3) P(1,'Луната е в Рак (управление)');
+  // аспекти на Луната в момента (прилагащи, орбис 4°)
+  ['Venus','Jupiter','Saturn','Mars'].forEach(k=>{ const pl=AC.lon(k,t), pl2=AC.lon(k,AC.T(new Date(d.getTime()+3600e3))), ml2=AC.lon('Moon',AC.T(new Date(d.getTime()+3600e3)));
+    [0,60,90,120,180].forEach(a=>{ const o=Math.abs(Math.abs(dif(ml,pl))-a), o2=Math.abs(Math.abs(dif(ml2,pl2))-a); if(o<=4 && o2<o){ const good=['Venus','Jupiter'].includes(k)&&a!==90&&a!==180 || (a===60||a===120);
+      if (['Saturn','Mars'].includes(k)&&(a===90||a===180||a===0)) C(1.5,`Луната отива към ${aspOf(a).n} с ${shortN(k)}: пречки или напрежение`); else if (good) P(1.5,`Луната отива към ${aspOf(a).n} с ${shortN(k)}`); } }); });
+  const rx=k=>AC.speed(k,t)<0, st=k=>Math.abs(AC.speed(k,t))<0.12*(k==='Mercury'?1:0.6);
+  if (['contract','grow','move'].includes(purpose)){ if (rx('Mercury')) C(2,'ретрограден Меркурий: документи и уговорки се преразглеждат'); else if (st('Mercury')) C(1.5,'Меркурий е почти стационарен'); }
+  if (purpose==='wedding'){ if(rx('Venus')) C(3,'ретроградна Венера'); if(rx('Mars')) C(2,'ретрограден Марс'); if (EL_GOOD_WED.includes(ms)) P(2,`Луната е в ${SIGNS[ms]}: знак на хармония`); }
+  const wd=new Date(Date.UTC(...day.split('-').map((x,i)=>i===1?x-1:+x))).getUTCDay(), WD=['неделя','понеделник','вторник','сряда','четвъртък','петък','събота'];
+  if (purpose==='wedding' && (wd===6||wd===2)) C(2,`${WD[wd]}: по традиция неподходящ за сватба (${wd===6?'Сатурн':'Марс'})`);
+  if (purpose==='move' && [5,1,0].includes(wd)) P(1,`${WD[wd]}: подходящ ден за нанасяне`);
+  if (purpose==='move' && (wd===6||wd===2)) C(1,`${WD[wd]}: по традиция по-неподходящ`);
+  const h=AC.houseOf(ml,n.hs.cusp);
+  return {day, d, sc, pro, con, ms, el, h, wd:WD[wd]};
+}
+function runElect(){
+  const p=active(), n=natalOf(p), a=$('elFrom').value, b=$('elTo').value, tm=$('elTime').value||'10:00', pur=$('elPurpose').value;
+  if(!a||!b||b<a){ $('elStatus').textContent='Изберете период.'; return; }
+  const days=[]; for(let t=Date.parse(a+'T00:00Z'); t<=Date.parse(b+'T00:00Z') && days.length<185; t+=864e5) days.push(new Date(t).toISOString().slice(0,10));
+  $('elStatus').textContent='Изчислявам…';
+  setTimeout(()=>{ const R=days.map(dd=>elDay(dd,tm,pur,n)); const top=R.slice().sort((x,y)=>y.sc-x.sc).slice(0,8).sort((x,y)=>x.day<y.day?-1:1);
+    $('elStatus').textContent=`Прегледани ${R.length} дни в ${tm} ч. Показани са 8-те с най-добра оценка, подредени по дата. Луната е в натален дом според вашата карта.`;
+    $('elList').innerHTML=top.map(r=>`<article class="ntcard"><h3 class="ntt">${r.day.split('-').reverse().join('.')} <span class="ntpos">${r.wd} · оценка ${r.sc.toFixed(1)}</span></h3><div class="ntchips"><span class="chip gold">Луна ${/^[ВФ]/.test(SIGNS[r.ms])?'във':'в'} ${SIGNS[r.ms]}</span><span class="chip">${r.el<180?'растяща':'намаляваща'}</span><span class="chip">${r.h} натален дом</span></div><ul class="ntul">${r.pro.map(x=>`<li class="elpro">${x}</li>`).join('')}${r.con.map(x=>`<li class="elcon">${x}</li>`).join('')}</ul></article>`).join('');
+  },30);
+}
+$('elRun').onclick=runElect;
+
+// =============== СИМВОЛИЧНИ ГОДИНИ (Н. ДОЙНОВ) ===============
+const DN_A={0:'съвпад',30:'полусекстил',45:'полуквадрат',60:'секстил',90:'квадрат',120:'тригон',135:'сескиквадрат',150:'квинконс',180:'опозиция'};
+function runDoynov(){
+  const p=active(), n=natalOf(p), max=+$('dnMax').value||90, minor=$('dnMinor').checked, minN=+$('dnMin').value;
+  const P=['Sun','Moon','Mercury','Venus','Mars','Jupiter','Saturn','Uranus','Neptune','Pluto'].map(k=>n.pts.find(x=>x.k===k)).filter(Boolean);
+  const asps=minor?[0,30,45,60,90,120,135,150,180]:[0,60,90,120,180], Y={};
+  for(let i=0;i<P.length;i++) for(let j=i+1;j<P.length;j++){ const d=Math.abs(dif(P[i].lon,P[j].lon));
+    asps.forEach(a=>{ const age=Math.abs(a-d); if(age<0.5||age>max) return; const yr=Math.round(age); (Y[yr]=Y[yr]||[]).push({a,i:P[i].k,j:P[j].k,ex:age}); }); }
+  const ageNow=(Date.now()-n.date)/(365.2422*864e5), birthY=n.date.getUTCFullYear();
+  const yrs=Object.keys(Y).map(Number).sort((a,b)=>a-b).filter(y=>Y[y].length>=minN || Math.floor(ageNow)===y);
+  const cls=a=>[90,180,45,135].includes(a)?'hard':[60,120,30].includes(a)?'easy':'gold';
+  $('dnOut').innerHTML = yrs.length ? `<p class="note">Сега сте на ${Math.floor(ageNow)} години. Възрастта е символична (1° = 1 година), затова темата е около цялата година.</p><div class="dngrid">`+yrs.map(y=>{ const L=Y[y].sort((a,b)=>a.ex-b.ex), maj=L.filter(x=>[0,60,90,120,180].includes(x.a)).length;
+    return `<article class="ntcard${Math.floor(ageNow)===y?' dnnow':''}"><h3 class="ntt">${y} години <span class="ntpos">около ${birthY+y} г. · ${L.length} аспекта${minor?`, ${maj} мажорни`:''}</span></h3><ul class="ntul">${L.map(x=>`<li><span class="chip ${cls(x.a)}" style="margin-left:0">${DN_A[x.a]}</span> ${yrPN(x.i)} – ${yrPN(x.j)}</li>`).join('')}</ul></article>`; }).join('')+'</div>'
+    : '<p class="note">Няма години с толкова много аспекта. Намалете прага.</p>';
+}
+$('dnRun').onclick=runDoynov; $('dnMinor').onchange=runDoynov; $('dnMin').onchange=runDoynov;
 
 // =============== ЗАТЪМНЕНИЯ ===============
 const EC_SYN=29.530588853, EC_ANCH={sol:{t:Date.UTC(2024,3,8,18,17),s:139}, lun:{t:Date.UTC(2025,2,14,6,59),s:123}};
@@ -8365,7 +8487,7 @@ function runTrAnalysis(n, from, to, ecl){
     ['Къде се вижда', `сцената. Транзитната планета сега минава през ${hNow} дом (${HT[hNow]}). Там обикновено започва ситуацията.`],
     ['Кога', `точните дати: ${exD(r0)}. Транзитът действа от ${fmtD(r0.start)} до ${fmtD(r0.end)}.${r0.ex.length>=3?' При три докосвания събитията често са между тях или около последното.':''}`],
     ['Къде отиват резултатите', `в домовете, които управляват двете планети${[...new Set([...rT,...rN])].length?` (${[...new Set([...rT,...rN])].sort((a,b)=>a-b).join(', ')} дом)`:''}, и се събират там, където стои наталната точка${h0?` (${h0} дом, ${HT[h0]})`:''}.`]];
-  sec('Как да го разчетете сама: 6 въпроса', `<p class="note">Всеки транзит се чете с едни и същи въпроси. Ето пример с най-силния транзит в периода, <b>${tName(r0)}</b>. Натиснете който и да е ред в таблицата отгоре за пълно тълкувание.</p><ol class="int-ol">${steps.map(([a,b])=>`<li><b>${a}:</b> ${b}</li>`).join('')}</ol><p class="note">Изречение по формулата: ${escapeHtml(INT.sentence(r0,n).text.split('\n')[0])}</p><p class="note">Правило: бавните планети (Плутон, Нептун, Уран) показват процес от месеци до години; Сатурн и Юпитер дават ритъма; Марс и бързите планети са спусък за няколко дни. Хармоничните аспекти не правят нищо сами, а напрегнатите не са „лоши“: показват къде е растежът. Юпитер „казва да“ и отваря врати, но не гарантира резултат; Сатурн „казва не“ и винаги дава конкретен резултат. Ред на огледа: от най-бавната планета към най-бързата; Луната и Марс са спусъците.</p>`);
+  sec('Как да го разчетете сама: 6 въпроса', `<p class="note">Всеки транзит се чете с едни и същи въпроси. Ето пример с най-силния транзит в периода, <b>${tName(r0)}</b>. Натиснете който и да е ред в таблицата отгоре за пълно тълкувание.</p><ol class="int-ol">${steps.map(([a,b])=>`<li><b>${a}:</b> ${b}</li>`).join('')}</ol><p class="note">Изречение по формулата: ${escapeHtml(INT.sentence(r0,n).text.split('\n')[0])}</p><p class="note">Правило: бавните планети (Плутон, Нептун, Уран) показват процес от месеци до години; Сатурн и Юпитер дават ритъма; Марс и бързите планети са спусък за няколко дни. Хармоничните аспекти не правят нищо сами, а напрегнатите не са „лоши“: показват къде е растежът. Юпитер „казва да“ и отваря врати, но не гарантира резултат; Сатурн „казва не“ и винаги дава конкретен резултат. Ред на огледа: от най-бавната планета към най-бързата; Луната и Марс са спусъците. Тайминг: Юпитер действа малко преди и след точния аспект, Сатурн точно или със закъснение, Уран малко след. Правило за трите потвърждения: един показател е възможност, два са вероятност, три (от различни техники) позволяват да се говори за събитие. Транзитът не може да даде нещо, което го няма в рождената карта.</p>`);
   // насоки
   const kinds=[...new Set(R.slice(0,6).map(r=>r.k))];
   sec('Практични насоки за периода', `<ul class="ntul">${kinds.map(k=>`<li><b>${nm(k)}:</b> ${TRA_DO[k]||''}.</li>`).join('')}</ul>`);
@@ -10337,9 +10459,10 @@ const AI_RULES=`Ти си опитен астролог-консултант. П
 1. Тежест на техниките: прогресиите (особено на Слънцето, Асцендента, MC и прогресивната Луна) показват основния фон; бавните транзити (Плутон, Нептун, Уран, Хирон) показват процесите; Сатурн и Юпитер дават ритъма и влизането в домове; затъмненията върху натални точки са силни отделни събития с действие около 6 месеца; Марс е спусък за вече активни теми. Тема, потвърдена от няколко техники едновременно, е най-важна.
 2. Всяка планета се тълкува чрез дома, в който е, и домовете, които управлява в наталната карта (виж управителите). Свързвай аспекта с конкретна област от живота: работа, пари, дом, отношения, здраве, вътрешно развитие.
 3. Къде: събитието е в дома, през който минава транзитната планета, и в темата на засегнатата точка; резултатите отиват в домовете, които управляват двете планети, и се събират там, където стои наталната планета. Юпитер отваря врати, но не гарантира резултат; Сатурн винаги дава конкретен резултат.
-4. Многократните транзити са процес: първо докосване (темата се появява), ретроградно (преразглеждане), последно (решение и нова форма). Казвай в коя фаза е.
-5. Свързвай с реалния живот на човека, ако е описан в данните. Показвай кое подкрепя и кое изисква внимание, и как най-добре да се използва периодът.
-6. Не изчислявай позиции и дати наум. Използвай САМО данните отдолу или инструментите. Ако нещо липсва, кажи „Не намирам информация“.
+4. Синтез: започни от най-бавния активен транзит (домът му и противоположният дом са фонът), после Нептун и Уран, после Сатурн и Юпитер, накрая бързите планети за тайминга. Търси общата тема, която се повтаря. Правило за трите потвърждения: един показател е възможност, два са вероятност, три са основание да се говори за събитие. Транзитът не дава нещо, което го няма в рождената карта; за събитие с човека участват Асцендентът и Десцендентът, за кариера MC и управителите му.
+5. Многократните транзити са процес: първо докосване (темата се появява), ретроградно (преразглеждане), последно (решение и нова форма). Казвай в коя фаза е.
+6. Свързвай с реалния живот на човека, ако е описан в данните. Показвай кое подкрепя и кое изисква внимание, и как най-добре да се използва периодът.
+7. Не изчислявай позиции и дати наум. Използвай САМО данните отдолу или инструментите. Ако нещо липсва, кажи „Не намирам информация“.
 
 КАК ПИШЕШ
 - Започни с „Накратко:“ и 2–3 изречения с извода.
