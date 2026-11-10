@@ -509,6 +509,18 @@ th{background:var(--panel)}
       <div id="cycNotes" style="margin-top:12px"></div>
     </div>
     <div class="panel" style="margin-top:18px">
+      <h2>Сатурнова история на една точка</h2>
+      <p class="int-hint">Транзитният Сатурн се чете като свързана история от около 7-годишни глави: съвпадът „влага“ темата, първият квадрат (около 7 г.) показва проблема, опозицията (около 14 г.) показва резултата, вторият квадрат (около 21 г.) довършва, новият съвпад (около 29 г.) отваря ново „изречение“. При текущ съвпад погледнете 14 години назад: темата се повтаря. Входът на Сатурн на върховете на 1, 4, 7 и 10 дом отваря нова тема за целия квадрант.</p>
+      <div class="controls"><label class="field"><span>Натална точка</span><select id="shPoint"></select></label><button class="primary" type="button" id="shRun">Покажи</button></div>
+      <div id="shOut" style="margin-top:10px"></div>
+    </div>
+    <div class="panel" style="margin-top:18px">
+      <h2>Мунданни цикли на бавните планети</h2>
+      <p class="int-hint">Съвпадът е начало на процес, квадратът е сблъсък със съпротива, опозицията е изпит дали процесът ще издържи, вторият квадрат е последна проверка, а новият съвпад затваря темата и отваря нова. Цикълът Сатурн–Уран (около 45 години) се смята за най-точния „часовник“ на обществените процеси. Знакът показва темата, а домът на активната карта показва къде тя засяга човека или държавата.</p>
+      <div class="controls"><label class="field"><span>От година</span><input type="number" id="muFrom" min="1900" max="2100" style="width:6.5em"></label><label class="field"><span>До година</span><input type="number" id="muTo" min="1900" max="2100" style="width:6.5em"></label><div class="checks" id="muPairs"></div><button class="primary" type="button" id="muRun">Покажи</button></div>
+      <div id="muOut" style="margin-top:10px"></div>
+    </div>
+    <div class="panel" style="margin-top:18px">
       <h2>Символични години (метод на Николай Дойнов)</h2>
       <p class="int-hint">Ъгълът между всеки две натални планети се „движи“ с 1° на година. Когато разликата до точен аспект стане равна на възрастта, двете планети символично образуват този аспект. Важни са годините, в които се натрупват много аспекти. По опита от лекцията най-силно работят мажорните: квадратът (90°) работи винаги, тригонът (120°) дава лекота, секстилът (60°) иска стимул.</p>
       <div class="controls"><label class="field"><span>До възраст</span><input type="number" id="dnMax" value="90" min="20" max="110" style="width:5em"></label><label class="flex" style="font-size:13px;align-self:flex-end;margin-bottom:8px"><input type="checkbox" id="dnMinor"> и минорни (30°, 45°, 135°, 150°)</label><label class="field"><span>Покажи години с поне</span><select id="dnMin"><option>1</option><option selected>3</option><option>4</option><option>5</option></select></label><button class="primary" type="button" id="dnRun">Изчисли</button></div>
@@ -8068,7 +8080,7 @@ function render(){
   else if (tab==='yr') { initYear(); runYear(); }
   else if (tab==='ai') { initAI(); runDejavu(); }
   else if (tab==='sky') runSky();
-  else if (tab==='cyc') { INTX.runCyc(); runDoynov(); }
+  else if (tab==='cyc') { INTX.runCyc(); runDoynov(); if(!shInit) initSatHist(); else runSatHist(); }
   else if (tab==='jr') INTX.renderJr();
 }
 
@@ -8279,6 +8291,58 @@ function runElect(){
   },30);
 }
 $('elRun').onclick=runElect;
+
+// =============== САТУРНОВА ИСТОРИЯ ===============
+let shInit=false;
+function groupHits(arr, gapDays){ const G=[]; arr.sort((a,b)=>a.d-b.d).forEach(h=>{ const g=G[G.length-1]; if(g && g.kind===h.kind && (h.d-g.list[g.list.length-1].d)/864e5<gapDays) g.list.push(h); else G.push({kind:h.kind, list:[h]}); }); return G; }
+function initSatHist(){ shInit=true; const n=natalOf(active());
+  $('shPoint').innerHTML=n.points.filter(q=>!['Lilith','SNode'].includes(q.k)).map(q=>`<option value="${q.k}">${yrPN(q.k)}</option>`).join('');
+  $('shPoint').value='Saturn'; $('muFrom').value=Math.max(1900,n.date.getUTCFullYear()-10); $('muTo').value=Math.min(2100,new Date().getFullYear()+15);
+  checks($('muPairs'), MU_PAIRS.map(([a,b])=>[a+'|'+b, `${shortN(a)}–${shortN(b)}`]), ['Jupiter|Saturn','Saturn|Uranus','Saturn|Neptune','Saturn|Pluto'], 'mup');
+  runSatHist(); runMundane(); }
+const SH_PH={0:['Съвпад','начало на цикъла, темата се „влага“'],90:['Първи квадрат','вижда се ефектът и най-големият проблем от срещата'],180:['Опозиция','вижда се резултатът'],270:['Втори квадрат','неплатените сметки се плащат; опитът става вътрешно притежание']};
+function runSatHist(){
+  const p=active(), n=natalOf(p), k=$('shPoint').value||'Saturn', pt=n.points.find(q=>q.k===k); if(!pt) return;
+  const from=n.date, to=new Date(Math.min(Date.UTC(2100,0,1), n.date.getTime()+95*365.25*864e5)), H=[];
+  [0,90,180].forEach(a=>AC.transitHits('Saturn',pt.lon,a,from,to).forEach(h=>{ let kind=a; if(a===90){ const sep=((AC.lon('Saturn',AC.T(h.date))-pt.lon)%360+360)%360; kind = sep<180?90:270; } H.push({d:h.date,kind,rx:AC.speed('Saturn',AC.T(h.date))<0}); }));
+  const G=groupHits(H,300), now=new Date(), age=d=>((d-n.date)/(365.2422*864e5)).toFixed(1);
+  const rows=G.map(g=>{ const a=g.list[0].d, z=g.list[g.list.length-1].d, cur=now>=new Date(a-120*864e5)&&now<=new Date(z.getTime()+120*864e5);
+    return `<tr${cur?' class="rxnow"':''}><td class="l"><b>${SH_PH[g.kind][0]}</b><div class="ecsub">${SH_PH[g.kind][1]}</div></td><td class="l">${g.list.map(x=>fmtD(x.d)+(x.rx?' R':'')).join(', ')}</td><td>${age(a)} г.</td><td class="l">${AC.houseOf(AC.lon('Saturn',AC.T(a)),n.hs.cusp)} дом</td></tr>`; }).join('');
+  // текущ или последен съвпад и правилото за 14-те години
+  const conj=G.filter(g=>g.kind===0), last=conj.filter(g=>g.list[0].d<=new Date(now.getTime()+365*864e5)).pop();
+  let note='';
+  if (last){ const opp=G.filter(g=>g.kind===180 && g.list[0].d<last.list[0].d).pop(); const ru=k==='ASC'||k==='MC'||k==='Node'?[]:(INT.ctx(n).rules[k]||[]).filter(x=>!x.trad).map(x=>x.h), rs=(INT.ctx(n).rules.Saturn||[]).filter(x=>!x.trad).map(x=>x.h);
+    const asp=courseAspects(n).filter(x=>x.a===k||x.b===k).map(x=>`${yrPN(x.a===k?x.b:x.a)} (${aspOf(x.asp).n})`);
+    note=`<div class="ecbox"><p><b>Последният съвпад</b> е ${fmtD(last.list[0].d)} в ${AC.houseOf(pt.lon,n.hs.cusp)} дом.${opp?` <b>Правилото за 14-те години:</b> опозицията преди него беше ${opp.list.map(x=>fmtD(x.d)).join(', ')}; потърсете повтарящата се тема.`:''}</p><p><b>Трите въпроса:</b> домът на срещата е ${AC.houseOf(pt.lon,n.hs.cusp)} (${KW.houses[AC.houseOf(pt.lon,n.hs.cusp)-1].area[0]}); Сатурн управлява ${rs.join(' и ')} дом${k==='Saturn'?'':`; ${yrPN(k)} ${ru.length?'управлява '+ru.join(' и ')+' дом':'не управлява дом'}`}. Плодът отива в дома, който Сатурн управлява.${asp.length?` Натални аспекти на ${yrPN(k)}: ${asp.join(', ')}. Когато Сатурн мине през точката, „токът тече“ по целия аспект: шанс напрегнатият аспект да се разреши.`:''}</p></div>`; }
+  // върхове на квадрантите
+  const cusps=[];
+  [1,4,7,10].forEach(c=>{ AC.transitHits('Saturn',n.hs.cusp[c],0,from,to).forEach(h=>cusps.push({c,d:h.date})); });
+  const cg=[]; cusps.sort((a,b)=>a.d-b.d).forEach(x=>{ const g=cg[cg.length-1]; if(g&&g.c===x.c&&(x.d-g.d[g.d.length-1])/864e5<300) g.d.push(x.d); else cg.push({c:x.c,d:[x.d]}); });
+  const QN={1:'1–3 дом: кой съм, какво ценя, как общувам',4:'4–6 дом: корен и семейство, творчество, работа и здраве',7:'7–9 дом: партньор, общи ресурси, големи цели',10:'10–12 дом: отговорност, приятели и каузи, завършване'};
+  $('shOut').innerHTML=note+`<div class="scroll"><table class="ectab"><thead><tr><th class="t l">Фаза: Сатурн към ${yrPN(k)}</th><th class="t l">Точни дати</th><th class="t">Възраст</th><th class="t l">Сатурн минава през</th></tr></thead><tbody>${rows}</tbody></table></div>`+
+    `<h3 style="margin:14px 0 6px">Входове на Сатурн в ъгловите домове (нов квадрант)</h3><ul class="evlist">${cg.map(g=>`<li><time>${fmtD(g.d[0])}</time><span>Връх на ${g.c} дом (${age(g.d[0])} г.)${g.d.length>1?', докосвания и '+g.d.slice(1).map(fmtD).join(', '):''}: ${QN[g.c]}.</span></li>`).join('')}</ul>`;
+}
+$('shRun').onclick=runSatHist; $('shPoint').onchange=runSatHist;
+
+// =============== МУНДАННИ ЦИКЛИ ===============
+const MU_PAIRS=[['Jupiter','Saturn'],['Saturn','Uranus'],['Saturn','Neptune'],['Saturn','Pluto'],['Jupiter','Uranus'],['Uranus','Neptune'],['Uranus','Pluto'],['Neptune','Pluto']];
+const MU_PH={0:'Съвпад',90:'Растящ квадрат',180:'Опозиция',270:'Намаляващ квадрат'};
+function runMundane(){
+  const p=active(), n=natalOf(p), y0=+$('muFrom').value, y1=+$('muTo').value; if(!(y0>=1900&&y1<=2100&&y1>=y0)) return;
+  const from=new Date(Date.UTC(y0,0,1)), to=new Date(Date.UTC(y1+1,0,1)), now=new Date();
+  const out=checked('mup').map(pr=>{ const [A,B]=pr.split('|'), sep=d=>((AC.lon(A,AC.T(d))-AC.lon(B,AC.T(d)))%360+360)%360, H=[];
+    let prev=from, ps=sep(from);
+    for(let t=from.getTime()+5*864e5;t<=to.getTime();t+=5*864e5){ const d=new Date(t), v=sep(d);
+      [0,90,180,270].forEach(ph=>{ const a0=((ps-ph+540)%360)-180, a1=((v-ph+540)%360)-180; if((a0<0)!==(a1<0) && Math.abs(a0-a1)<30){ const x=AC.bisect(dd=>((sep(dd)-ph+540)%360)-180,prev,d,1/24); H.push({d:x,kind:ph}); } });
+      prev=d; ps=v; }
+    const G=groupHits(H,400), curS=sep(now), curPh=curS<90?'растяща фаза след съвпада':curS<180?'растяща фаза след квадрата':curS<270?'намаляваща фаза след опозицията':'намаляваща фаза към новия съвпад';
+    const rows=G.map(g=>{ const d0=g.list[0].d, la=AC.lon(A,AC.T(d0)), lb=AC.lon(B,AC.T(d0)), hA=AC.houseOf(la,n.hs.cusp), hB=AC.houseOf(lb,n.hs.cusp);
+      const hits=n.points.filter(q=>!['Lilith','SNode'].includes(q.k)).filter(q=>[la,lb].some(l=>[0,180].some(a=>Math.abs(Math.abs(dif(l,q.lon))-a)<=3))).map(q=>yrPN(q.k));
+      return `<tr><td class="l"><b>${MU_PH[g.kind]}</b></td><td class="l">${g.list.map(x=>fmtD(x.d)).join(', ')}</td><td class="l">${shortN(A)} ${/^[ВФ]/.test(SIGNS[sgn(la)])?'във':'в'} ${SIGNS[sgn(la)]}${g.kind?`, ${shortN(B)} ${/^[ВФ]/.test(SIGNS[sgn(lb)])?'във':'в'} ${SIGNS[sgn(lb)]}`:''}<div class="ecsub">${L(la)}${g.kind?' · '+L(lb):''}</div></td><td class="l">${hA===hB?hA+' дом':hA+' и '+hB+' дом'}${hits.length?`<div class="ecsub">докосва: ${hits.join(', ')}</div>`:''}</td></tr>`; }).join('');
+    return `<article class="ntcard" style="margin-bottom:14px"><h3 class="ntt">${nameCell(A)} – ${nameCell(B)} <span class="ntpos">сега: ${curPh} (${Math.round(curS)}°)</span></h3><div class="scroll"><table class="ectab"><thead><tr><th class="t l">Фаза</th><th class="t l">Точни дати</th><th class="t l">Знаци</th><th class="t l">В картата на ${escapeHtml(p.name)}</th></tr></thead><tbody>${rows||'<tr><td class="l">Няма фази в избрания период.</td></tr>'}</tbody></table></div></article>`; }).join('');
+  $('muOut').innerHTML=out||'<p class="note">Изберете поне една двойка планети.</p>';
+}
+$('muRun').onclick=runMundane;
 
 // =============== СИМВОЛИЧНИ ГОДИНИ (Н. ДОЙНОВ) ===============
 const DN_A={0:'съвпад',30:'полусекстил',45:'полуквадрат',60:'секстил',90:'квадрат',120:'тригон',135:'сескиквадрат',150:'квинконс',180:'опозиция'};
@@ -9834,7 +9898,7 @@ function runNotes(){
     const nt=Nn?aspNote(x.a,x.b,x.asp):'';
     return `<tr><td class="l">${PN(x.a)} <span class="pg ${aspCls(x.asp)}">${g(aspOf(x.asp).g)}</span> ${PN(x.b)} <span style="font-family:var(--f-body)">${shortN(x.a)} ${aspOf(x.asp).n} ${shortN(x.b)}</span></td><td>${x.o.toFixed(1)}°</td><td class="l" style="font-family:var(--f-body)">${x.str}</td><td class="l" style="font-family:var(--f-body)">${x.app?'сходящ: засилва се с годините':'разходящ: по-силен в детството'}</td><td class="l" style="font-family:var(--f-body);white-space:normal;min-width:14em">${nt?`<details><summary>Бележка</summary><div class="ntx">${escapeHtml(nt).replace(/\n/g,'<br>')}</div></details>`:''}</td></tr>`;
   }).join('')+'</tbody>';
-  $('ntGAsp').innerHTML = (NOTES&&NOTES.gAsp) ? `<div class="ntgrid" style="margin-bottom:10px">${[0,90,180,150].map(a=>`<div class="ntcard">${det(`${aspOf(a).n} по Г. Герасимова`, NOTES.gAsp[a])}</div>`).join('')}</div>` : '';
+  $('ntGAsp').innerHTML = (NOTES&&NOTES.gAsp) ? `<div class="ntgrid" style="margin-bottom:10px">${[0,60,90,180,150].filter(a=>NOTES.gAsp[a]).map(a=>`<div class="ntcard">${det(`${aspOf(a).n} по Г. Герасимова`, NOTES.gAsp[a])}</div>`).join('')}</div>` : '';
   // ---------- семейни показатели ----------
   const li=(t,v,c)=>`<li><time>${t}</time><span>${c?`<span class="chip ${c}" style="margin:0 6px 0 0">${c==='easy'?'да':c==='hard'?'внимание':'инфо'}</span>`:''}${v}</span></li>`;
   // братя и сестри
