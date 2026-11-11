@@ -7104,7 +7104,8 @@ function initPass(){
   const items=[['manual','Ръчно въведен градус']];
   items.push(['ASC','Асцендент (връх 1 дом) · '+Ltxt(n.hs.asc)], ['MC','MC (връх 10 дом) · '+Ltxt(n.hs.mc)]);
   for (let h=2;h<=12;h++) if (h!==10) items.push(['c'+h, `Връх ${h} дом · `+Ltxt(n.hs.cusp[h])]);
-  n.pts.forEach(x=>items.push([x.k, BY[x.k].n.replace(' (истински)','').replace(' (средна)','')+' · '+Ltxt(x.lon)]));
+  n.pts.forEach(x=>{ items.push([x.k, BY[x.k].n.replace(' (истински)','').replace(' (средна)','')+' · '+Ltxt(x.lon)]);
+    if (x.k==='Node') items.push(['SNode', 'Южен възел · '+Ltxt((x.lon+180)%360)]); });
   fillSelect($('psPoint'), items, 'ASC');
   const by=+p.date.slice(0,4); $('psFrom').value=by; $('psTo').value=Math.min(2100, by+90);
   $('psManual').hidden=true;
@@ -7117,6 +7118,7 @@ function psTarget(){
   if (v==='ASC') return {lon:n.hs.asc, name:'Асцендент'};
   if (v==='MC') return {lon:n.hs.mc, name:'MC'};
   if (v[0]==='c') return {lon:n.hs.cusp[+v.slice(1)], name:'връх на '+v.slice(1)+' дом'};
+  if (v==='SNode') return {lon:(n.pts.find(x=>x.k==='Node').lon+180)%360, name:'Южен възел'};
   return {lon:n.pts.find(x=>x.k===v).lon, name:BY[v].n.replace(' (истински)','').replace(' (средна)','')};
 }
 $('psRun').onclick=async()=>{
