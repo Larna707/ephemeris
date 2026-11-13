@@ -205,7 +205,32 @@ th{background:var(--panel)}
 .grpgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;margin-top:8px}.grpul{list-style:none;margin:6px 0 0;padding:0}.grpul li{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:5px 0;border-top:1px solid var(--soft)}.grpul li:first-child{border-top:0}.grpul li>span{min-width:0;overflow:hidden;text-overflow:ellipsis}.grpmv{max-width:46%}.grpact{gap:6px;margin:4px 0 2px;flex-wrap:wrap}.grpact button{font-size:12px;padding:3px 9px}
 .rxnow td{background:color-mix(in srgb,var(--gold) 10%,transparent)}.elpro{color:inherit}.elpro::marker{content:'+  ';color:var(--ok)}.elcon::marker{content:'−  ';color:var(--hard)}.elcon{color:var(--muted)}.dngrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}.dnnow{outline:2px solid var(--gold)}
 .hmcard{display:flex;gap:16px;padding:16px 18px;margin:0 0 16px;border-radius:16px;background:var(--panel);border:1px solid var(--soft);box-shadow:0 2px 10px rgba(0,0,0,.04)}.hmnum{flex:0 0 52px;height:52px;border-radius:50%;display:grid;place-items:center;font-family:var(--f-head);font-size:20px;font-weight:700;color:#fff;background:linear-gradient(135deg,#7a6cf0,#e8a33d)}.hmbody{flex:1;min-width:0}.hmbody h3{margin:2px 0 2px;font-family:var(--f-head);font-size:22px}.hmmotto{margin:0 0 8px;font-style:italic;color:var(--muted)}.hmh{margin:14px 0 6px;font-size:15px}.hmq{margin:12px 0 0;padding:8px 12px;border-radius:10px;background:color-mix(in srgb,var(--gold) 12%,transparent)}.hmchains{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:4px 14px;font-size:13px;color:var(--muted);margin:6px 0}.hmaxes{display:grid;gap:6px}.hmaxis{display:grid;grid-template-columns:1fr 140px 1fr;gap:8px;align-items:center;font-size:13px}.hmaxis .l{text-align:right}.hmaxis b{display:inline-block;min-width:1.4em;text-align:center;margin:0 6px;font-size:15px}.hmaxis .bar,.hmyy .bar{height:10px;border-radius:5px;background:color-mix(in srgb,#7a6cf0 30%,transparent);overflow:hidden}.hmaxis .bar i,.hmyy .bar i{display:block;height:100%;background:#e8a33d}.hmyy{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;margin:4px 0}.hmyy span{margin-left:8px;font-size:18px;font-weight:700}.hmbig{font-size:16px}.hmrud{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.hmrud span{font-size:12px;padding:2px 9px;border-radius:10px;border:1px solid var(--soft)}.hmrud span.on{background:#7a6cf0;color:#fff;border-color:#7a6cf0}.hmcard .ectab td{font-family:var(--f-body)}
-@media (max-width:640px){.hmcard{flex-direction:column}.hmaxis{grid-template-columns:1fr;text-align:left}.hmaxis .l{text-align:left}}
+.mdwarn{margin:0 0 16px;padding:10px 14px;border-radius:12px;border-left:4px solid #d0603a;background:color-mix(in srgb,#d0603a 10%,transparent)}
+.mdnum{background:linear-gradient(135deg,#2f9e8f,#d0603a)}
+.mdgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;margin:10px 0}
+.mdz{padding:12px 14px;border-radius:14px;border:1px solid var(--line);background:var(--bg);min-width:0;display:flex;flex-direction:column;gap:4px}
+.mdz h4{margin:0;font-family:var(--f-head);font-size:18px;display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.mdz h4 small{font-family:var(--f-body);font-size:12px;color:var(--muted);font-weight:400}
+.mdz .zone{font-size:13px;color:var(--muted)}
+.mdz ul{margin:4px 0 0;padding-left:18px;font-size:13px}
+.mdz .bar{height:8px;border-radius:4px;background:color-mix(in srgb,#2f9e8f 22%,transparent);overflow:hidden}
+.mdz .bar i{display:block;height:100%;background:linear-gradient(90deg,#e8a33d,#d0603a)}
+.mdz .q{margin-top:auto;padding-top:6px;font-size:13px;font-style:italic;color:var(--ink)}
+.mdz .sup{font-size:12px;color:#2f9e8f}
+.mdtemp{display:grid;grid-template-columns:240px 1fr;gap:18px;align-items:start}
+.mdtemp svg{width:100%;height:auto;max-width:240px}
+.mdsys{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px}
+.mdsys > div{padding:10px 12px;border-radius:12px;border:1px solid var(--line);min-width:0}
+.mdsys b.n{float:right;font-size:13px;padding:1px 8px;border-radius:9px;background:var(--soft)}
+.mdsys .hi b.n{background:#d0603a;color:#fff}
+.mdsys ul{margin:6px 0 0;padding-left:18px;font-size:13px}
+.mdsys li.off{color:var(--muted);opacity:.7}
+.mdsys .q{font-size:13px;font-style:italic;margin-top:6px}
+.mdstep{margin:0 0 12px;padding:10px 12px;border-radius:12px;background:var(--bg);border:1px solid var(--line)}
+.mdstep h4{margin:0 0 4px;font-size:15px}
+.mdstep p{margin:2px 0;font-size:14px}
+@media (max-width:640px){.mdtemp{grid-template-columns:1fr}}
+@media (max-width:640px){.hmcard{flex-direction:column}.hmnum{flex:0 0 auto;width:52px;align-self:flex-start}.hmaxis{grid-template-columns:1fr;text-align:left}.hmaxis .l{text-align:left}}
 .aimsg{border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin:0 0 12px;background:var(--panel)}
 .aiq{font-weight:600;margin-bottom:6px;color:var(--accent)}
 .aia{font-size:14.5px;line-height:1.6;max-width:75ch;overflow-wrap:anywhere}
@@ -251,6 +276,7 @@ th{background:var(--panel)}
     <button role="tab" data-tab="ai">Дежавю и AI анализ</button>
     <button role="tab" data-tab="kw">Ключови думи</button>
     <button role="tab" data-tab="herm">Херметични принципи</button>
+    <button role="tab" data-tab="med">Медицинска астрология</button>
     <button role="tab" data-tab="syn">Синастрия</button>
     <button role="tab" data-tab="hor">Хорар</button>
     <button role="tab" data-tab="rect">Ректификация</button>
@@ -658,6 +684,15 @@ th{background:var(--panel)}
   </section>
 
   <!-- KEYWORDS -->
+  <section id="tab-med" role="tabpanel" hidden>
+    <div class="panel">
+      <h2 id="mdHead">Медицинска астрология</h2>
+      <p class="int-hint">Разделът показва <b>чувствителните зони</b> в картата: части на тялото и системи, които носят повече напрежение и имат нужда от повече грижа. Методът следва К. Стойчев („Астромедицина за всеки“): наранени знаци, домовете 6, 8 и 12, злосторниците, темпераментът и цикличността.</p>
+      <p class="mdwarn"><b>Това не е диагноза и не замества лекар.</b> Картата показва предразположение, а не съдба. Сайтът нарочно не назовава болести: говори за зони, теми и грижа за себе си.</p>
+      <div id="mdOut"></div>
+    </div>
+  </section>
+
   <section id="tab-herm" role="tabpanel" hidden>
     <div class="panel">
       <h2 id="hmHead">Седемте херметични принципа</h2>
@@ -8063,7 +8098,7 @@ INTX.initUI();
 
 
 // =============== TABS ===============
-const TABS=['eph','moon','ecl','herm','chart','nt','pr','ps','yr','ai','dh','sky','an','tr','pass','hs','sr','pd','kw','syn','hor','rect','cyc','jr'];
+const TABS=['eph','moon','ecl','herm','med','chart','nt','pr','ps','yr','ai','dh','sky','an','tr','pass','hs','sr','pd','kw','syn','hor','rect','cyc','jr'];
 tab = store.get('tab','eph'); if (!TABS.includes(tab)) tab='eph';
 function showTab(t){
   tab=t; store.set('tab',t);
@@ -8083,6 +8118,7 @@ function render(){
   else if (tab==='rect') initRect();
   else if (tab==='kw') { kwRender(); refRender(); hrRender(); }
   else if (tab==='herm') runHerm();
+  else if (tab==='med') runMed();
   else if (tab==='syn') runSyn();
   else if (tab==='hor') { initHor(); runHor(); }
   else if (tab==='moon') { runMoon(); if(!elInit) initElect(); }
@@ -8494,6 +8530,232 @@ function runHerm(){
    'Кое начало използвам повече: да действам или да приемам? Къде ми трябва другото?'));
   $('hmOut').innerHTML=H.join('');
   const jb=$('hmJr'); if (jb) jb.onclick=()=>showTab('jr');
+}
+
+
+// =============== МЕДИЦИНСКА АСТРОЛОГИЯ ===============
+const MD_ZONE=['главата, лицето, мозъка','гърлото, шията, щитовидната жлеза, гласа','ръцете, раменете, белите дробове','гърдите, стомаха, гръдния кош','сърцето, гърба, гръбначния стълб','тънките черва, храносмилането, далака','бъбреците, кожата, кръста','половата система, дебелото черво, носа','бедрата, ханша, черния дроб, артериите','костите, ставите, коленете, зъбите','прасците, глезените, вените','стъпалата, лимфата, течностите'];
+const MD_SYS3=['ян (дишане и кръв)','ин (храносмилане)','ян (дишане и кръв)','ин (храносмилане)','ян (дишане и кръв)','ин (храносмилане)','ян (дишане и кръв)','ин (храносмилане)','движение','движение','движение','движение'];
+const MD_PL={Sun:'жизнената сила, сърцето, кръвообращението, зрението',Moon:'течностите, стомаха, лимфата, женския цикъл',Mercury:'нервната система, дишането, ръцете, слуха, речта',Venus:'бъбреците, кожата, гърлото, вкуса и осезанието',Mars:'мускулите, имунната защита, главата, обонянието',Jupiter:'черния дроб, артериите, растежа, теглото',Saturn:'костите, ставите, зъбите, „твърдото“ в тялото',Uranus:'ритъма, нервите, вените (чрез Водолей)',Neptune:'лимфата, имунитета, стъпалата (чрез Риби)',Pluto:'половата система и възстановяването (чрез Скорпион)'};
+const MD_MAL=['Mars','Saturn','Uranus','Neptune','Pluto'];
+const MD_ACT={Mars:'нагрява и възпалява',Saturn:'стяга и ограничава',Uranus:'разстройва ритъма, напряга',Neptune:'отслабва',Pluto:'изтощава, пресилва'};
+const MD_EXA={Sun:0,Moon:1,Mercury:5,Venus:11,Mars:9,Jupiter:3,Saturn:6};
+const MD_ELEM=['огън','земя','въздух','вода'];
+const MD_T={0:['Холерик','огън','топло и сухо','„животът е борба“: енергичен, амбициозен, нетърпелив; бързо се дразни'],2:['Сангвиник','въздух','топло и влажно','„животът е игра“: общителен, оптимист, отзивчив; преобладават положителните емоции'],3:['Флегматик','вода','студено и влажно','„животът е низ от правила“: спокоен, търпелив, грижовен; пести силите си'],1:['Меланхолик','земя','студено и сухо','„животът е задача“: задълбочен, чувствителен, перфекционист; лесно се притеснява']};
+const MD_PATH={0:'Добавете „влажното“: грижа за някого (партньор, дете, родител, домашен любимец), спокойствие, приемане.',3:'Добавете „топлото“: активност, движение, спорт, изява, пътуване.',1:'Добавете и двете, едно след друго: първо топлина (движение, светлина), после влага (грижа, приемане).',2:'Вие сте в здравия сектор „топло и влажно“. Пазете го с радост и редуване на активност и почивка.'};
+const MD_DIR={0:'охлаждане и овлажняване',3:'стопляне и изсушаване',1:'стопляне и овлажняване',2:'поддържане, сезонно редуване'};
+
+function mdCtx(n){
+  const P=k=>k==='ASC'?{k:'ASC',lon:n.hs.asc,house:1}:n.pts.find(x=>x.k===k);
+  const pts=P10.map(P).concat([P('ASC')]);
+  const asp=(a,b,list,orbF)=>{ const d=Math.abs(dif(a.lon,b.lon)); for(const x of list){ const o=Math.abs(d-x); if(o<=orbF(x)) return {a:x,o}; } return null; };
+  const hard=[0,90,180,150], orbH=a=>a===150?3:5, soft=[60,120,0];
+  const affl=k=>{ const p=P(k); return MD_MAL.filter(m=>m!==k).map(m=>{ const r=asp(p,P(m),hard,orbH); return r?{m,...r}:null; }).filter(Boolean)
+    .filter(x=>!(k==='ASC'&&x.a===150)); };
+  const supp=k=>{ const p=P(k), out=[]; ['Jupiter','Venus'].filter(b=>b!==k).forEach(b=>{ const r=asp(p,P(b),soft,()=>5); if(r) out.push({b,...r}); });
+    const sg=sgn(p.lon); if(k!=='ASC'){ if(RUL_MOD[sg]===k||RUL_TRAD[sg]===k) out.push({dig:'в своя знак'}); else if(MD_EXA[k]===sg) out.push({dig:'в екзалтация'}); } return out; };
+  const mids=[]; for(let i=0;i<MD_MAL.length;i++) for(let j=i+1;j<MD_MAL.length;j++){ const a=P(MD_MAL[i]).lon, b=P(MD_MAL[j]).lon, m=norm(b+dif(a,b)/2);
+    pts.forEach(p=>{ if([MD_MAL[i],MD_MAL[j]].includes(p.k)) return; const o=Math.min(Math.abs(dif(p.lon,m)),Math.abs(dif(p.lon,m+180))); if(o<=1.5) mids.push({k:p.k,a:MD_MAL[i],b:MD_MAL[j],o}); }); }
+  // конфигурации
+  const pl=P10.map(P), conf=[]; const near=(x,y,a,o)=>Math.abs(Math.abs(dif(x.lon,y.lon))-a)<=o;
+  for(let i=0;i<pl.length;i++) for(let j=i+1;j<pl.length;j++){ if(!near(pl[i],pl[j],180,7)) continue;
+    pl.forEach(c=>{ if(c===pl[i]||c===pl[j]) return; if(near(c,pl[i],90,7)&&near(c,pl[j],90,7)) conf.push({t:'Тау квадрат',apex:c.k,base:[pl[i].k,pl[j].k]}); }); }
+  const gx=[]; conf.forEach(c=>{ const other=conf.find(d=>d!==c && d.base.includes(c.apex) && !c.base.includes(d.apex)); if(other){ const set=[...new Set([...c.base,c.apex,other.apex])].sort().join(); if(set.split(',').length===4 && !gx.includes(set)) gx.push(set); } });
+  const yods=[]; for(let i=0;i<pl.length;i++) for(let j=i+1;j<pl.length;j++){ if(!near(pl[i],pl[j],60,3)) continue; pl.forEach(c=>{ if(c===pl[i]||c===pl[j]) return; if(near(c,pl[i],150,2.5)&&near(c,pl[j],150,2.5)) yods.push({t:'Йод (пръст на съдбата)',apex:c.k,base:[pl[i].k,pl[j].k]}); }); }
+  const TS=conf.filter(c=>!gx.some(g=>g.split(',').includes(c.apex)&&c.base.every(b=>g.split(',').includes(b))));
+  const tsU=[]; TS.forEach(c=>{ if(!tsU.some(d=>d.apex===c.apex&&d.base.join()===c.base.join())) tsU.push(c); });
+  // включени знаци
+  const icp={}; for(let h=1;h<=12;h++){ const s1=sgn(n.hs.cusp[h]), s2=sgn(n.hs.cusp[h%12+1]); let k=(s1+1)%12; while(s1!==s2&&k!==s2){ icp[k]=h; k=(k+1)%12; } }
+  const cuspS=h=>sgn(n.hs.cusp[h]), rulOf=h=>RUL_MOD[cuspS(h)];
+  return {P,pts,affl,supp,mids,tsq:tsU,gx:gx.map(g=>g.split(',')),yods,icp,cuspS,rulOf};
+}
+const mdS=k=>/^[СсЗз]/.test(yrPN(k))?'със':'с';
+const mdAffTxt=x=>`${aspOf(x.a).n} ${mdS(x.m)} ${yrPN(x.m)} ${x.o.toFixed(1)}° (${MD_ACT[x.m]})`;
+const mdSupTxt=x=>x.dig?x.dig:`${aspOf(x.a).n} ${mdS(x.b)} ${yrPN(x.b)}`;
+const mdSigns=k=>RUL_MOD.map((r,i)=>r===k||RUL_TRAD[i]===k?i:-1).filter(i=>i>=0);
+
+function mdZones(n,C){
+  const Z=Array.from({length:12},()=>({sc:0,f:[],sp:[]})), add=(s,v,t)=>{ Z[s].sc+=v; if(!Z[s].f.includes(t)) Z[s].f.push(t); };
+  const ascS=sgn(n.hs.asc), aR=RUL_MOD[ascS];
+  add(ascS,2,'Асцендентът (тялото) е в този знак');
+  add(sgn(C.P(aR).lon),1,`управителят на Асцендента (${yrPN(aR)}) е тук`);
+  [[6,2],[8,1.5],[12,1]].forEach(([h,v])=>add(C.cuspS(h),v,`на върха на ${h} дом`));
+  Object.entries(C.icp).forEach(([s,h])=>{ if([1,6,8,12].includes(h)) add(+s,1,`включен (интерсептиран) в ${h} дом`); });
+  ['Mars','Saturn'].forEach(m=>add(sgn(C.P(m).lon),1,`${yrPN(m)} е в знака (${MD_ACT[m]})`));
+  const keyR={[aR]:'управител на Асцендента',[C.rulOf(6)]:'управител на 6 дом',[C.rulOf(8)]:'управител на 8 дом'};
+  C.pts.forEach(p=>{ const A=C.affl(p.k); if(!A.length) return; const w=Math.min(2,A.reduce((s,x)=>s+(x.o<1?1:0.7),0))+(keyR[p.k]?0.5:0)+(['Sun','Moon'].includes(p.k)?0.3:0);
+    const who=p.k==='ASC'?'Асцендентът':yrPN(p.k);
+    add(sgn(p.lon),w,`${who}${keyR[p.k]?' ('+keyR[p.k]+')':''}: ${A.map(mdAffTxt).join('; ')}`);
+    if(p.k!=='ASC') mdSigns(p.k).filter(s=>s!==sgn(p.lon)).forEach(s=>add(s,0.5,`знакът се управлява от наранения ${yrPN(p.k)}`)); });
+  C.mids.forEach(m=>add(sgn(C.P(m.k).lon),0.5,`${yrPN(m.k)} в средната точка ${yrPN(m.a)}/${yrPN(m.b)} (${m.o.toFixed(1)}°)`));
+  [...C.tsq.map(c=>({...c,t:'Тау квадрат'})),...C.yods].forEach(c=>add(sgn(C.P(c.apex).lon),1,`${yrPN(c.apex)} е връх на ${c.t.toLowerCase()} (${c.base.map(yrPN).join(' – ')})`));
+  C.gx.forEach(g=>g.forEach(k=>add(sgn(C.P(k).lon),0.7,`${yrPN(k)} е в голям кръст`)));
+  P10.forEach(k=>{ const p=C.P(k), sp=C.supp(k); if(sp.length) Z[sgn(p.lon)].sp.push(`${yrPN(k)}: ${sp.map(mdSupTxt).join(', ')}`); });
+  return Z.map((z,i)=>({...z,s:i})).sort((a,b)=>b.sc-a.sc);
+}
+
+function mdSystems(n,C){
+  const P=C.P, sg=k=>sgn(P(k).lon), A=k=>C.affl(k), cusp=s=>[1,6,8].filter(h=>C.cuspS(h)===s||C.icp[s]===h);
+  const inSignAff=s=>P10.filter(k=>sg(k)===s&&A(k).length), malIn=(s,ms)=>ms.filter(m=>sg(m)===s);
+  const aspBetween=(a,b,list,o)=>{ const d=Math.abs(dif(P(a).lon,P(b).lon)); return list.some(x=>Math.abs(d-x)<=o); };
+  const midIs=(k,a,b)=>{ const m=norm(P(b).lon+dif(P(a).lon,P(b).lon)/2); return Math.min(Math.abs(dif(P(k).lon,m)),Math.abs(dif(P(k).lon,m+180)))<=1.5; };
+  const it=(ok,t)=>({ok:!!ok,t});
+  const ascS=sgn(n.hs.asc), r1=C.rulOf(1), r6=C.rulOf(6);
+  const outerHard=k=>['Uranus','Neptune','Pluto'].filter(m=>m!==k&&aspBetween(k,m,[0,90,180],5));
+  const S=[
+   {k:'imm',t:'Имунна защита',sub:'Марс, Овен, подвижният кръст',items:[
+     it(A('Mars').length,`Марс е нараняван: ${A('Mars').map(mdAffTxt).join('; ')||'не'}`),
+     it([2,5,8,11].includes(ascS)||[2,5,8,11].includes(C.cuspS(6)),'подвижен знак на Асцендента или на върха на 6 дом'),
+     it([r1,r6,'Mars','Mercury'].some(k=>outerHard(k).length),`Уран, Нептун или Плутон в напрегнат аспект с управителя на 1 или 6 дом, Марс или Меркурий${[...new Set([r1,r6,'Mars','Mercury'])].filter(k=>outerHard(k).length).map(k=>' ('+yrPN(k)+': '+outerHard(k).map(yrPN).join(', ')+')').join('')}`),
+     it(P10.some(k=>k!=='Neptune'&&k!=='Saturn'&&aspBetween(k,'Neptune',[0,90,180],5)&&aspBetween(k,'Saturn',[0,90,180],5)),'една планета едновременно в напрегнат аспект с Нептун и със Сатурн'),
+     it(aspBetween('Mercury','Neptune',[0,90,180],5),'Меркурий в напрегнат аспект с Нептун (обмен на информация в тялото)')]},
+   {k:'resp',t:'Дишане',sub:'Меркурий, Близнаци',items:[
+     it(A('Mercury').length,`Меркурий е нараняван${A('Mercury').length?': '+A('Mercury').map(mdAffTxt).join('; '):''}`),
+     it(inSignAff(2).filter(k=>k!=='Mercury').length||malIn(2,['Mars','Saturn']).length,'планети в Близнаци са наранени, или Марс или Сатурн са в Близнаци'),
+     it(Math.abs(dif(P('Mercury').lon,P('Sun').lon))<=8,'Меркурий е „изгорен“ (до 8° от Слънцето)'),
+     it(MD_MAL.some((a,i)=>MD_MAL.slice(i+1).some(b=>midIs('Mercury',a,b))),'Меркурий в средна точка на злосторници'),
+     it(cusp(2).length,'Близнаци на върха на (или включени в) 1, 6 или 8 дом'),
+     it(aspBetween('Mercury','Moon',[90,180],5),'Меркурий в напрегнат аспект с Луната')]},
+   {k:'heart',t:'Сърце и кръвообращение',sub:'Слънце, Юпитер, Лъв, Стрелец',items:[
+     it(cusp(4).length||cusp(8).length,'Лъв или Стрелец на върха на (или включени в) 1, 6 или 8 дом'),
+     it(A('Sun').length,`Слънцето е наранявано${A('Sun').length?': '+A('Sun').map(mdAffTxt).join('; '):''}`),
+     it(A('Jupiter').length,`Юпитер е нараняван${A('Jupiter').length?': '+A('Jupiter').map(mdAffTxt).join('; '):''}`),
+     it(inSignAff(4).length||inSignAff(8).length,'наранена планета в Лъв или Стрелец'),
+     it(aspBetween('Mars','Sun',[90],5),'Марс в квадрат със Слънцето (най-честият показател)'),
+     it(aspBetween('Saturn','Sun',[0,90,180,150],5),'Сатурн в аспект със Слънцето')]},
+   {k:'rhythm',t:'Ритъм и главата',sub:'Марс, Уран, Овен',items:[
+     it(aspBetween('Mars','Uranus',[0,90],5),'Марс в съвпад или квадрат с Уран'),
+     it([1,6,8].includes(P('Mars').house)&&[1,6,8].includes(P('Uranus').house),'Марс и Уран в 1, 6 или 8 дом'),
+     it(inSignAff(0).length,'наранена планета в Овен'),
+     it([0,8,10].includes(ascS),'Асцендент в Овен, Стрелец или Водолей')]},
+   {k:'kid',t:'Бъбреци и баланс на течностите',sub:'Венера, Везни',items:[
+     it(A('Venus').length,`Венера е наранявана${A('Venus').length?': '+A('Venus').map(mdAffTxt).join('; '):''}`),
+     it(MD_MAL.some((a,i)=>MD_MAL.slice(i+1).some(b=>midIs('Venus',a,b))),'Венера в средна точка на злосторници'),
+     it(inSignAff(6).length,'наранена планета във Везни'),
+     it(malIn(6,['Mars','Saturn']).length,'Марс или Сатурн във Везни'),
+     it(cusp(6).length,'Везни на върха на (или включени в) 1, 6 или 8 дом')]},
+   {k:'stom',t:'Стомах и храносмилане',sub:'Луна, Рак, Дева',items:[
+     it(A('Moon').length,`Луната е наранявана${A('Moon').length?': '+A('Moon').map(mdAffTxt).join('; '):''}`),
+     it(cusp(3).length,'Рак на върха на (или включен в) 1, 6 или 8 дом'),
+     it(sg('Mars')===3,'Марс в Рак'),
+     it(inSignAff(3).length||inSignAff(5).length,'наранена планета в Рак или Дева'),
+     it(P('Moon').house===6,'Луната е в 6 дом')]},
+   {k:'skin',t:'Кожа и чувствителност',sub:'Венера, Марс',items:[
+     it(A('Venus').length||[9,10].includes(sg('Venus')),`Венера е наранявана или е в Козирог или Водолей`),
+     it(aspBetween('Venus','Moon',[90,180],5),'Венера в напрегнат аспект с Луната'),
+     it(aspBetween('Mars','Venus',[0,90,180],5),'Марс в напрегнат аспект с Венера (свръхчувствителност)'),
+     it([0,4].includes(sg('Venus')),'Венера в Овен или Лъв'),
+     it(sgn(n.hs.asc)%4===0,'Асцендент в огнен знак'),
+     it(midIs('Venus','Sun','Mars'),'Венера в средната точка Слънце/Марс')]},
+   {k:'liver',t:'Черен дроб',sub:'Юпитер, Стрелец, Дева, Водолей',items:[
+     it([5,8,10].includes(C.cuspS(6))||[5,8,10].includes(C.cuspS(8)),'Дева, Стрелец или Водолей на върха на 6 или 8 дом'),
+     it(aspBetween('Mercury','Jupiter',[90,180],5)||aspBetween('Jupiter','Uranus',[90,180],5)||aspBetween('Mercury','Uranus',[90,180],5),'напрегнати аспекти между Меркурий, Юпитер и Уран'),
+     it(A('Jupiter').length,'Юпитер е нараняван')]},
+   {k:'bone',t:'Кости и стави',sub:'Сатурн, Козирог, Стрелец',items:[
+     it(A('Saturn').length,`Сатурн е нараняван${A('Saturn').length?': '+A('Saturn').map(mdAffTxt).join('; '):''}`),
+     it(inSignAff(9).length||inSignAff(8).length,'наранена планета в Козирог или Стрелец'),
+     it(cusp(9).length,'Козирог на върха на (или включен в) 1, 6 или 8 дом'),
+     it(A('Jupiter').length&&A('Saturn').length,'и двата управителя (Юпитер и Сатурн) са наранени')]}
+  ];
+  return S.map(x=>({...x,n:x.items.filter(i=>i.ok).length}));
+}
+
+function mdTemp(n){
+  const W={ASC:2,Sun:2,Moon:2,Mercury:1,Venus:1,Mars:1}, el=[0,0,0,0], who=[[],[],[],[]];
+  Object.entries(W).forEach(([k,w])=>{ const l=k==='ASC'?n.hs.asc:n.pts.find(x=>x.k===k).lon, e=sgn(l)%4; el[e]+=w; who[e].push(yrPN(k)); });
+  const tot=el.reduce((a,b)=>a+b,0), ord=[0,1,2,3].sort((a,b)=>el[b]-el[a]);
+  const hot=el[0]+el[2], cold=el[1]+el[3], moist=el[2]+el[3], dry=el[0]+el[1];
+  return {el,who,tot,main:ord[0],second:el[ord[1]]>=el[ord[0]]-1?ord[1]:null,x:(moist-dry)/tot,y:(hot-cold)/tot};
+}
+function mdTempSvg(T){
+  const cx=120, cy=120, R=96, px=cx+T.x*R, py=cy-T.y*R, lab=(x,y,t,s,c)=>`<text x="${x}" y="${y}" text-anchor="middle" font-size="${s||11}" fill="${c||'var(--muted)'}">${t}</text>`;
+  return `<svg viewBox="0 0 240 240" role="img" aria-label="Темперамент"><rect x="${cx}" y="${cy-R}" width="${R}" height="${R}" fill="#2f9e8f" opacity=".12"/><line x1="${cx}" y1="14" x2="${cx}" y2="226" stroke="var(--line)" stroke-width="2"/><line x1="14" y1="${cy}" x2="226" y2="${cy}" stroke="var(--line)" stroke-width="2"/>
+  ${lab(cx,10,'Топло')}${lab(cx,238,'Студено')}${lab(22,cy-6,'Сухо')}${lab(212,cy-6,'Влажно')}
+  ${lab(70,60,'Холерик',13,'var(--ink)')}${lab(70,74,'огън')}${lab(172,60,'Сангвиник',13,'var(--ink)')}${lab(172,74,'въздух')}${lab(70,176,'Меланхолик',13,'var(--ink)')}${lab(70,190,'земя')}${lab(172,176,'Флегматик',13,'var(--ink)')}${lab(172,190,'вода')}
+  <circle cx="${px.toFixed(1)}" cy="${py.toFixed(1)}" r="9" fill="#d0603a" stroke="#fff" stroke-width="2"/></svg>`;
+}
+
+function mdCare(n,C){
+  const now=new Date(), to=new Date(now.getTime()+365*864e5), out=[];
+  const tg=[['ASC',n.hs.asc,'Асцендента (тялото)'],['Sun',C.P('Sun').lon,'Слънцето (жизнената сила)'],['Moon',C.P('Moon').lon,'Луната (течностите и емоциите)']];
+  const r1=C.rulOf(1), r6=C.rulOf(6); [[r1,'управителя на Асцендента'],[r6,'управителя на 6 дом']].forEach(([k,t])=>{ if(!tg.some(x=>x[0]===k)) tg.push([k,C.P(k).lon,`${yrPN(k)}, ${t}`]); else { const x=tg.find(x=>x[0]===k); x[2]+=`, ${t}`; } });
+  ['Saturn','Uranus','Neptune','Pluto'].forEach(m=>tg.forEach(([k,l,t])=>{ if(k===m) return; [0,90,180].forEach(a=>AC.transitHits(m,l,a,now,to).forEach(h=>out.push({d:h.date,t:`${yrPN(m)} ${aspOf(a).n} ${t}`,m}))); }));
+  const to3=new Date(now.getTime()+3*365*864e5);
+  ['Saturn','Uranus','Neptune','Pluto'].forEach(m=>[1,6,12].forEach(h=>AC.transitHits(m,n.hs.cusp[h],0,now,to3).forEach(x=>out.push({d:x.date,t:`${yrPN(m)} влиза в ${h} дом${h===1?' (минава през Асцендента)':''}`,m,ing:true}))));
+  const seen=new Set(); const L2=out.sort((a,b)=>a.d-b.d).filter(x=>{ const key=x.t+'|'+Math.round(x.d/(40*864e5)); if(seen.has(key)) return false; seen.add(key); return true; });
+  const lun=AC.lunations(now,new Date(now.getTime()+120*864e5)).filter(x=>x.kind==='phase'&&(x.q===2||x.q===0)).sort((a,b)=>a.date-b.date);
+  const wan=[]; lun.forEach((x,i)=>{ if(x.q===2){ const nx=lun.slice(i+1).find(y=>y.q===0); if(nx) wan.push([x.date,nx.date]); } });
+  return {list:L2,wan};
+}
+
+function runMed(){
+  const p=active(), n=natalOf(p), C=mdCtx(n), H=[], kb=KB||{}, Q=kb.MEDCAUSE, J=kb.MEDJOY;
+  $('mdHead').textContent=`Медицинска астрология: ${p.name}`;
+  const card=(num,title,motto,body)=>`<article class="hmcard"><div class="hmnum mdnum">${num}</div><div class="hmbody"><h3>${title}</h3>${motto?`<p class="hmmotto">${motto}</p>`:''}${body}</div></article>`;
+  // 1. Рамка
+  H.push(card('1','Как да се чете','Причина, а не симптом.',`<ul class="ntul"><li><b>Четири предпоставки.</b> За сериозен проблем трябва да се съберат едновременно: показатели в картата, неблагоприятна външна среда, вътрешна причина (стрес, неизразени емоции, „зацикляне“) и неправилно хранене или дишане. Картата е само едната от четирите.</li>
+   <li><b>Три условия.</b> Предразположение в картата, отключващо събитие и липса на адекватна реакция. Третото условие е във вашите ръце.</li>
+   <li><b>Тялото е сигнално табло.</b> Чувствителната зона показва къде първо се отразява напрежението от живота. Сигналът подсказва каква промяна е нужна в мисленето и поведението.</li>
+   <li><b>Не вреди.</b> Резултатите тук са въпроси за размисъл и посоки за грижа, а не изводи за болести.</li></ul>`));
+  // 2. Темперамент
+  const T=mdTemp(n), tm=MD_T[T.main], t2=T.second!=null?MD_T[T.second]:null;
+  const ju=C.P('Jupiter'), sn=['Saturn','Neptune'].filter(m=>{ const d=Math.abs(dif(ju.lon,C.P(m).lon)); return [0,90,180].some(a=>Math.abs(d-a)<=5); });
+  const juSoft=['Sun','Moon',C.rulOf(1)].filter((k,i,a)=>k!=='Jupiter'&&a.indexOf(k)===i).filter(k=>{ const d=Math.abs(dif(ju.lon,C.P(k).lon)); return [60,120].some(a=>Math.abs(d-a)<=5)||(d<=5); });
+  const luSN=['Sun','Moon',C.rulOf(1)].filter((k,i,a)=>a.indexOf(k)===i&&!['Saturn','Neptune'].includes(k)).filter(k=>['Saturn','Neptune'].some(m=>{ const d=Math.abs(dif(C.P(k).lon,C.P(m).lon)); return [0,90,180].some(a=>Math.abs(d-a)<=5); }));
+  const joy=J?[['Слънцето',sgn(C.P('Sun').lon)],['Луната',sgn(C.P('Moon').lon)],['Асцендента',sgn(n.hs.asc)]].map(([w,s])=>`<li><b>${SIGNS[s]}</b> (${w}): ${J[s]}</li>`).join(''):'';
+  const age=(Date.now()-n.date)/(365.2422*864e5), agePh=age<14?['детство','сангвинично']:age<35?['младост','холерично']:age<63?['зрялост','меланхолично']:['старост','флегматично'];
+  H.push(card('2','Темперамент','Устойчивата реакция на човека при сблъсъка със средата.',`<div class="mdtemp">${mdTempSvg(T)}<div>
+    <p class="hmbig">Вроденият темперамент е <b>${tm[0]}${t2?'–'+t2[0].toLowerCase():''}</b> (${tm[1]}${t2?' и '+t2[1]:''}: ${tm[2]}${t2?'; '+t2[2]:''}).</p>
+    <p>${tm[3]}.</p>
+    <p class="note">Изчислено по стихиите на Асцендента, Слънцето и Луната (двойна тежест), Меркурий, Венера и Марс: ${[0,2,3,1].map(e=>`${MD_ELEM[e]} ${T.el[e]}${T.who[e].length?' ('+T.who[e].join(', ')+')':''}`).join('; ')}.</p>
+    <p class="note">Темпераментът се променя с възрастта, средата и болестите. Естествената окраска на вашата възраст (${Math.floor(age)} г., ${agePh[0]}) е ${agePh[1]}.</p></div></div>
+    <h4 class="hmh">Юпитер: черният дроб и радостта</h4>
+    <ul class="ntul"><li>${sn.length?`Юпитер е в напрегнат аспект с ${sn.map(yrPN).join(' и ')}: склонност към меланхолична реакция. Радостта трябва да се „поддържа“ съзнателно.`:'Юпитер няма напрегнати аспекти със Сатурн и Нептун: няма вграден показател за меланхолична реакция.'}</li>
+    ${luSN.length?`<li>Сатурн или Нептун в напрегнат аспект с ${luSN.map(yrPN).join(', ')}: подобна тенденция, по-слаба.</li>`:''}
+    ${juSoft.length?`<li>Юпитер подкрепя ${juSoft.map(yrPN).join(', ')}: опора за сангвиничната (здравата) реакция.</li>`:''}</ul>
+    <h4 class="hmh">Пътят към сектора „топло и влажно“</h4>
+    <p>${MD_PATH[T.main]} Посока на природните методи: <b>${MD_DIR[T.main]}</b>.${kb.MEDCLEAN&&kb.MEDCLEAN[T.main]?' '+kb.MEDCLEAN[T.main]:''}</p>
+    <p class="hmq"><b>Най-краткият път за всеки темперамент е радостта.</b> Активност увеличава „топлото“, доволството и благодарността увеличават „влажното“.</p>
+    ${joy?`<h4 class="hmh">Вашите източници на радост</h4><ul class="ntul">${joy}</ul>`:''}`));
+  // 3. Анализ по реда
+  const aR=C.rulOf(1), stepPl=(k,lab)=>{ const q=C.P(k), A=C.affl(k), Sp=C.supp(k); return `<p><b>${lab}</b>: ${yrPN(k)} ${vIn2(SIGNS[sgn(q.lon)])}, ${q.house} дом. ${A.length?`Нараняван: ${A.map(mdAffTxt).join('; ')}.`:'Няма напрегнати аспекти от злосторници.'}${Sp.length?` Подкрепа: ${Sp.map(mdSupTxt).join(', ')}.`:''}</p>`; };
+  const houseStep=h=>{ const s=C.cuspS(h), r=C.rulOf(h), ins=n.pts.filter(x=>x.house===h&&P10.includes(x.k)), ic=Object.entries(C.icp).filter(([,hh])=>hh===h).map(([ss])=>+ss);
+    return `<p>На върха е <b>${SIGNS[s]}</b>: ${MD_ZONE[s]}.${ic.length?` Включен знак: <b>${ic.map(x=>SIGNS[x]).join(', ')}</b> (${ic.map(x=>MD_ZONE[x]).join('; ')}).`:''}${ins.length?` Планети в дома: ${ins.map(x=>yrPN(x.k)).join(', ')} (${ins.map(x=>MD_PL[x.k].split(',')[0]).join('; ')}).`:''}</p>${stepPl(r,`Управител на ${h} дом`)}`; };
+  const AA=C.affl('ASC');
+  H.push(card('3','Анализ стъпка по стъпка','Редът, по който се чете карта за здраве.',`
+   <div class="mdstep"><h4>1. Асцендентът и неговият управител: тялото</h4><p>Асцендент в <b>${SIGNS[sgn(n.hs.asc)]}</b>: ${MD_ZONE[sgn(n.hs.asc)]}. ${AA.length?`Злосторници към Асцендента: ${AA.map(mdAffTxt).join('; ')}.`:''}</p>${stepPl(aR,'Управител на Асцендента')}</div>
+   <div class="mdstep"><h4>2. Светилата: жизнената сила</h4>${stepPl('Sun','Слънце')}${stepPl('Moon','Луна')}</div>
+   <div class="mdstep"><h4>3. 6 дом: слабото място („бушонът“)</h4><p class="note">Знакът на върха на 6 дом показва зоната, която първа реагира при напрежение, често свързана с работата и ежедневието.</p>${houseStep(6)}</div>
+   <div class="mdstep"><h4>4. 8 дом: „червената лампа“</h4><p class="note">Сигнал тук означава, че начинът на живот има нужда от по-сериозна промяна.</p>${houseStep(8)}</div>
+   <div class="mdstep"><h4>5. 12 дом: дълбоките, натрупани напрежения</h4><p class="note">Свързан е с хроничното и с напрежението, което се трупа дълго и не се изразява.</p>${houseStep(12)}</div>
+   ${C.tsq.length||C.gx.length||C.yods.length||C.mids.length?`<div class="mdstep"><h4>6. Конфигурации и средни точки</h4>${C.tsq.map(c=>`<p>Тау квадрат: ${c.base.map(yrPN).join(' – ')}, връх <b>${yrPN(c.apex)}</b> (${MD_PL[c.apex]}).</p>`).join('')}${C.gx.map(g=>`<p>Голям кръст: ${g.map(yrPN).join(', ')}.</p>`).join('')}${C.yods.map(c=>`<p>Йод: ${c.base.map(yrPN).join(' – ')}, връх <b>${yrPN(c.apex)}</b> (${MD_PL[c.apex]}).</p>`).join('')}${C.mids.map(m=>`<p>${yrPN(m.k)} в средната точка ${yrPN(m.a)}/${yrPN(m.b)} (${m.o.toFixed(1)}°).</p>`).join('')}</div>`:''}`));
+  // 4. Зони
+  const Z=mdZones(n,C), mx=Z[0].sc||1, top=Z.filter(z=>z.sc>=2.5).slice(0,6), shown=top.length?top:Z.slice(0,3);
+  const cross=s=>[0,3,6,9].map(x=>(x+s%3)%12).filter(x=>x!==s);
+  H.push(card('4','Чувствителни зони','Наранен знак: зоната, в която напрежението се проявява първо.',`<p class="note">Точките се събират от правилата на метода: знак на Асцендента и на върховете на 6, 8 и 12 дом, Марс и Сатурн по знак, напрегнати аспекти и квинконси от злосторниците (орбис 5°), средни точки и конфигурации. Колкото повече фактори, толкова по-важна е зоната.</p>
+   <div class="mdgrid">${shown.map(z=>`<div class="mdz"><h4>${SIGNS[z.s]} <small>${MD_SYS3[z.s]}</small></h4><div class="zone">${MD_ZONE[z.s]}</div><div class="bar"><i style="width:${Math.min(100,z.sc/mx*100)}%"></i></div><ul>${z.f.map(x=>`<li>${x}</li>`).join('')}</ul>${z.sp.length?`<div class="sup">Подкрепа: ${z.sp.join('; ')}</div>`:''}<div class="note" style="font-size:12px">Същият кръст (${['кардинален','неподвижен','подвижен'][z.s%3]}): напрежението може да се прехвърли към ${cross(z.s).map(x=>SIGNS[x]).join(', ')}.</div>${Q?`<div class="q">Езикът на тялото: ${Q[z.s]}</div>`:''}</div>`).join('')}</div>
+   ${Q?'':'<p class="note">Въпросите „езикът на тялото“ се показват, когато са заредени личните бележки.</p>'}
+   <details><summary>Всички знаци по натоварване</summary><div class="hmchains">${Z.map(z=>`<div>${SIGNS[z.s]}: ${z.sc.toFixed(1)}</div>`).join('')}</div></details>`));
+  // 5. Системи
+  const SY=mdSystems(n,C).sort((a,b)=>b.n/b.items.length-a.n/a.items.length), SQ=kb.MEDSYSQ||{};
+  H.push(card('5','Системи в тялото','Показатели по системи. Колкото повече съвпадения, толкова по-важна е темата.',`<div class="mdsys">${SY.map(x=>`<div class="${x.n>=2?'hi':''}"><b class="n">${x.n} от ${x.items.length}</b><b>${x.t}</b><div class="note" style="font-size:12px">${x.sub}</div><ul>${x.items.map(i=>`<li class="${i.ok?'':'off'}">${i.ok?'да':'не'}: ${i.t}</li>`).join('')}</ul>${SQ[x.k]&&x.n>=2?`<div class="q">${SQ[x.k]}</div>`:''}</div>`).join('')}</div>`));
+  // 6. Време
+  const CR=mdCare(n,C);
+  const ageNow=age, uPh=ageNow<42?'първата половина на цикъла на Уран (до 42 г.): тялото естествено натрупва':'втората половина на цикъла на Уран (след 42 г.): тялото естествено губи влага, затова движението и пиенето на вода стават по-важни';
+  H.push(card('6','Време за повече грижа','Небето задава ритъм; грижата е наш избор.',`
+   <h4 class="hmh">Следващите 12 месеца: бавни планети към ключовите точки за здраве</h4>
+   ${CR.list.filter(x=>!x.ing).length?`<ul class="ntul">${CR.list.filter(x=>!x.ing).map(x=>`<li><b>${fmtD(x.d)}</b>: ${x.t}</li>`).join('')}</ul>`:'<p>Няма точни аспекти от Сатурн, Уран, Нептун или Плутон към Асцендента, светилата и управителите на 1 и 6 дом.</p>'}
+   <h4 class="hmh">Следващите 3 години: преминаване през 1, 6 и 12 дом</h4>
+   ${CR.list.filter(x=>x.ing).length?`<ul class="ntul">${CR.list.filter(x=>x.ing).map(x=>`<li><b>${fmtD(x.d)}</b>: ${x.t}</li>`).join('')}</ul>`:'<p>Няма такива преминавания.</p>'}
+   <p class="note">Това са периоди, в които е разумно да намалите натоварването, да спите повече и да не отлагате профилактичните прегледи.</p>
+   <h4 class="hmh">Ритъмът на тялото</h4>
+   <ul class="ntul"><li><b>Луната:</b> при растяща Луна тялото задържа, при намаляваща по-лесно се освобождава. Подходящи периоди за олекотяване: ${CR.wan.map(([a,b])=>`${fmtD(a)} – ${fmtD(b)}`).join('; ')}. Най-подходящи са късната есен, зимата и ранната пролет.</li>
+   <li><b>Денят:</b> храна в светлата част на деня. <b>Сезонът:</b> лятото е за напълване и движение, зимата за олекотяване и покой.</li>
+   <li><b>Уран (84 г.):</b> вие сте във ${uPh}.</li></ul>`));
+  // 7. Планети и органи (справка)
+  H.push(card('7','Справка: планети и тяло','„Както горе, така и долу.“',`<div class="scroll"><table class="ectab"><thead><tr><th class="t l">Планета</th><th class="t l">Свързана с</th><th class="t l">Във вашата карта</th><th class="t l">Състояние</th></tr></thead><tbody>${P10.map(k=>{ const q=C.P(k), A=C.affl(k), Sp=C.supp(k); return `<tr${A.length?' class="rxnow"':''}><td class="l">${nameCell(k)}</td><td class="l">${MD_PL[k]}</td><td class="l">${SIGNS[sgn(q.lon)]}, ${q.house} дом</td><td class="l">${A.length?A.map(mdAffTxt).join('<br>'):'<span class="ecsub">без напрегнати аспекти от злосторници</span>'}${Sp.length?`<div class="ecsub">подкрепа: ${Sp.map(mdSupTxt).join(', ')}</div>`:''}</td></tr>`; }).join('')}</tbody></table></div>
+   ${kb.MEDREF?`<details><summary>Справочник за консултации (лични бележки)</summary><div class="ntx">${kb.MEDREF}</div></details>`:''}`));
+  $('mdOut').innerHTML=H.join('');
 }
 
 // =============== ЗАТЪМНЕНИЯ ===============
