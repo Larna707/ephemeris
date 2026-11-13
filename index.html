@@ -204,6 +204,8 @@ th{background:var(--panel)}
 .ectab td{vertical-align:top}.ectab .ecsign{font-family:var(--f-body);font-weight:600}.ectab .ecsub{font-size:11.5px;color:var(--muted);margin-top:2px;font-family:var(--f-body)}.ectab td.l{white-space:normal}.ectab td:first-child{white-space:nowrap}.ectab .ecvis{white-space:normal;display:inline-block}.ectab tr.ecdet td{text-align:left;white-space:normal;font-family:var(--f-body);background:color-mix(in srgb,var(--gold) 5%,transparent)}.ecrow{cursor:pointer}.ecrow:hover td{background:color-mix(in srgb,var(--gold) 8%,transparent)}.ecdot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;vertical-align:middle}.ecdot.sol{background:#e8a33d}.ecdot.lun{background:#7a6cf0}.ecvis{padding:1px 7px;border-radius:9px;font-size:12px;white-space:nowrap}.ecvis.ok{background:color-mix(in srgb,var(--ok) 18%,transparent)}.ecvis.part{background:color-mix(in srgb,var(--gold) 20%,transparent)}.ecvis.no{color:var(--muted)}.ecbox{padding:4px 6px 8px;font-size:14px;line-height:1.55}.ecbox p{margin:4px 0}.ecchip{display:inline-block;margin:2px 4px 2px 0;padding:1px 8px;border-radius:10px;font-size:12px;white-space:nowrap;border:1px solid}.ecchip.sol{border-color:#e8a33d;background:color-mix(in srgb,#e8a33d 12%,transparent)}.ecchip.lun{border-color:#7a6cf0;background:color-mix(in srgb,#7a6cf0 12%,transparent)}
 .grpgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;margin-top:8px}.grpul{list-style:none;margin:6px 0 0;padding:0}.grpul li{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:5px 0;border-top:1px solid var(--soft)}.grpul li:first-child{border-top:0}.grpul li>span{min-width:0;overflow:hidden;text-overflow:ellipsis}.grpmv{max-width:46%}.grpact{gap:6px;margin:4px 0 2px;flex-wrap:wrap}.grpact button{font-size:12px;padding:3px 9px}
 .rxnow td{background:color-mix(in srgb,var(--gold) 10%,transparent)}.elpro{color:inherit}.elpro::marker{content:'+  ';color:var(--ok)}.elcon::marker{content:'−  ';color:var(--hard)}.elcon{color:var(--muted)}.dngrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}.dnnow{outline:2px solid var(--gold)}
+.hmcard{display:flex;gap:16px;padding:16px 18px;margin:0 0 16px;border-radius:16px;background:var(--panel);border:1px solid var(--soft);box-shadow:0 2px 10px rgba(0,0,0,.04)}.hmnum{flex:0 0 52px;height:52px;border-radius:50%;display:grid;place-items:center;font-family:var(--f-head);font-size:20px;font-weight:700;color:#fff;background:linear-gradient(135deg,#7a6cf0,#e8a33d)}.hmbody{flex:1;min-width:0}.hmbody h3{margin:2px 0 2px;font-family:var(--f-head);font-size:22px}.hmmotto{margin:0 0 8px;font-style:italic;color:var(--muted)}.hmh{margin:14px 0 6px;font-size:15px}.hmq{margin:12px 0 0;padding:8px 12px;border-radius:10px;background:color-mix(in srgb,var(--gold) 12%,transparent)}.hmchains{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:4px 14px;font-size:13px;color:var(--muted);margin:6px 0}.hmaxes{display:grid;gap:6px}.hmaxis{display:grid;grid-template-columns:1fr 140px 1fr;gap:8px;align-items:center;font-size:13px}.hmaxis .l{text-align:right}.hmaxis b{display:inline-block;min-width:1.4em;text-align:center;margin:0 6px;font-size:15px}.hmaxis .bar,.hmyy .bar{height:10px;border-radius:5px;background:color-mix(in srgb,#7a6cf0 30%,transparent);overflow:hidden}.hmaxis .bar i,.hmyy .bar i{display:block;height:100%;background:#e8a33d}.hmyy{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;margin:4px 0}.hmyy span{margin-left:8px;font-size:18px;font-weight:700}.hmbig{font-size:16px}.hmrud{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.hmrud span{font-size:12px;padding:2px 9px;border-radius:10px;border:1px solid var(--soft)}.hmrud span.on{background:#7a6cf0;color:#fff;border-color:#7a6cf0}.hmcard .ectab td{font-family:var(--f-body)}
+@media (max-width:640px){.hmcard{flex-direction:column}.hmaxis{grid-template-columns:1fr;text-align:left}.hmaxis .l{text-align:left}}
 .aimsg{border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin:0 0 12px;background:var(--panel)}
 .aiq{font-weight:600;margin-bottom:6px;color:var(--accent)}
 .aia{font-size:14.5px;line-height:1.6;max-width:75ch;overflow-wrap:anywhere}
@@ -248,6 +250,7 @@ th{background:var(--panel)}
     <button role="tab" data-tab="yr">Годишна прогноза</button>
     <button role="tab" data-tab="ai">Дежавю и AI анализ</button>
     <button role="tab" data-tab="kw">Ключови думи</button>
+    <button role="tab" data-tab="herm">Херметични принципи</button>
     <button role="tab" data-tab="syn">Синастрия</button>
     <button role="tab" data-tab="hor">Хорар</button>
     <button role="tab" data-tab="rect">Ректификация</button>
@@ -655,6 +658,14 @@ th{background:var(--panel)}
   </section>
 
   <!-- KEYWORDS -->
+  <section id="tab-herm" role="tabpanel" hidden>
+    <div class="panel">
+      <h2 id="hmHead">Седемте херметични принципа</h2>
+      <p class="int-hint">Херметичните принципи са основата, на която стои астрологията: „Както горе, така и долу“. Тук всеки принцип е свързан с изчисление от активната карта, за да се види как работи на практика, и завършва с въпрос за размисъл.</p>
+      <div id="hmOut"></div>
+    </div>
+  </section>
+
   <section id="tab-kw" role="tabpanel" hidden>
     <div class="panel">
       <h2>Конструктор на изречения</h2>
@@ -8052,7 +8063,7 @@ INTX.initUI();
 
 
 // =============== TABS ===============
-const TABS=['eph','moon','ecl','chart','nt','pr','ps','yr','ai','dh','sky','an','tr','pass','hs','sr','pd','kw','syn','hor','rect','cyc','jr'];
+const TABS=['eph','moon','ecl','herm','chart','nt','pr','ps','yr','ai','dh','sky','an','tr','pass','hs','sr','pd','kw','syn','hor','rect','cyc','jr'];
 tab = store.get('tab','eph'); if (!TABS.includes(tab)) tab='eph';
 function showTab(t){
   tab=t; store.set('tab',t);
@@ -8071,6 +8082,7 @@ function render(){
   else if (tab==='pd') runPD();
   else if (tab==='rect') initRect();
   else if (tab==='kw') { kwRender(); refRender(); hrRender(); }
+  else if (tab==='herm') runHerm();
   else if (tab==='syn') runSyn();
   else if (tab==='hor') { initHor(); runHor(); }
   else if (tab==='moon') { runMoon(); if(!elInit) initElect(); }
@@ -8362,6 +8374,127 @@ function runDoynov(){
     : '<p class="note">Няма години с толкова много аспекта. Намалете прага.</p>';
 }
 $('dnRun').onclick=runDoynov; $('dnMinor').onchange=runDoynov; $('dnMin').onchange=runDoynov;
+
+// =============== ХЕРМЕТИЧНИ ПРИНЦИПИ ===============
+const BEHEN=[ // дължина J2000, природа (по Хермес/Агрипа), камък, билка, действие според текста на Хермес
+ ['Алдебаран',69.79,['Mars','Venus'],'рубин (карбункул)','млечка','богатство и почести'],
+ ['Плеядите (Алкионе)',59.98,['Moon','Mars'],'кристал','копър','засилва зрението, разкрива тайни и скрити неща'],
+ ['Алгол',56.17,['Saturn','Jupiter'],'диамант','черен кукуряк','смелост и великодушие, успех в молбите; противодейства на враждебни усилия'],
+ ['Капела',81.86,['Jupiter','Saturn'],'сапфир','бял пчелник (марубиум)','милост и почит, издигане пред силните'],
+ ['Сириус',104.08,['Venus'],'берил','савина (казашка хвойна)','чест, добра воля и благоразположение на хората; помирява'],
+ ['Процион',115.79,['Mercury','Mars'],'ахат','невен','благоволение на хората'],
+ ['Регул',149.83,['Jupiter','Mars'],'гранат','змийско мляко (целидония)','прави човека мек, отнема гнева, дава благоволение'],
+ ['Алгораб (Крилото на гарвана)',193.45,['Saturn','Mars'],'оникс','голям киселец','смелост, но и раздразнителност; защита от човешката злоба'],
+ ['Спика',203.84,['Venus','Mercury'],'изумруд','салвия','богатство, победа в спорове, отнема трудностите'],
+ ['Арктур',204.23,['Mars','Jupiter'],'яспис','живовляк','действа срещу клюки и злословие'],
+ ['Алкаид',176.93,['Venus','Moon'],'магнетит','цикория','безопасност при пътуване'],
+ ['Алфека',222.30,['Venus','Mars'],'топаз','розмарин','добра воля и любов на хората'],
+ ['Антарес',249.76,['Mars','Jupiter'],'сардоникс и аметист','дълга вълча ябълка','разбиране и памет'],
+ ['Вега',285.32,['Mercury','Venus'],'хризолит','чубрица','великодушие и превъзходство'],
+ ['Денеб Алгеди',323.54,['Saturn','Mercury'],'халцедон','риган (майорана)','благоденствие и увеличаване на богатството']];
+const CORR={Sun:['неделя','злато','сърце, жизненост','XIX Слънцето'],Moon:['понеделник','сребро','стомах, течности','XVIII Луната'],Mercury:['сряда','живак','нервна система, бели дробове','I Магьосникът'],Venus:['петък','мед','бъбреци, гърло','III Императрицата'],Mars:['вторник','желязо','мускули, кръв','XVI Кулата'],Jupiter:['четвъртък','калай','черен дроб','X Колелото на съдбата'],Saturn:['събота','олово','кости, кожа, зъби','XXI Светът'],Uranus:['—','—','нервни импулси','0 Глупакът'],Neptune:['—','—','имунитет, чувствителност','XII Обесеният'],Pluto:['—','—','регенерация','XX Съдът']};
+const MEANSPD={Sun:0.9856,Moon:13.18,Mercury:1.38,Venus:1.2,Mars:0.524,Jupiter:0.083,Saturn:0.0335,Uranus:0.0117,Neptune:0.006,Pluto:0.004};
+const RUD=[['Нова фаза','засяване: нов импулс, действате инстинктивно, още без ясна посока'],['Сърповидна','усилие да се откъснете от старото и да утвърдите новото'],['Първа четвърт','криза в действие: изграждате структура, решавате'],['Изпъкнала','усъвършенстване, анализ, подготовка за резултата'],['Пълна','осъзнаване и плод: виждате смисъла, важни са отношенията'],['Разпръскваща','споделяне: предавате опита си, учите другите'],['Последна четвърт','криза в съзнанието: преоценка, освобождаване от изчерпани форми'],['Балсамична','завършване и пускане; в тишина се заражда семето на следващия цикъл']];
+const P10=['Sun','Moon','Mercury','Venus','Mars','Jupiter','Saturn','Uranus','Neptune','Pluto'];
+function vIn2(x){ return (/^[ВФвф]/.test(x)?'във ':'в ')+x; }
+function hmCard(num,title,motto,course,body,q){ return `<article class="hmcard"><div class="hmnum">${num}</div><div class="hmbody"><h3>${title}</h3><p class="hmmotto">${motto}</p>${course?`<p class="note" style="margin:0 0 8px">${course}</p>`:''}${body}<p class="hmq"><b>Въпрос за размисъл:</b> ${q}</p></div></article>`; }
+function dispositors(n, rul){
+  const P=P10.map(k=>n.pts.find(x=>x.k===k)), disp={}; P.forEach(p=>disp[p.k]=rul[sgn(p.lon)]);
+  const chains=P.map(p=>{ const c=[p.k]; let k=p.k; for(let i=0;i<12;i++){ k=disp[k]; if(c.includes(k)){ c.push(k); break; } c.push(k); } return c; });
+  const own=P.filter(p=>disp[p.k]===p.k).map(p=>p.k);
+  const ends=new Set(chains.map(c=>c[c.length-1]));
+  const finalD = own.length===1 && [...ends].every(e=>e===own[0]) ? own[0] : null;
+  const mutual=[]; P.forEach(p=>{ const d=disp[p.k]; if(d!==p.k && disp[d]===p.k && !mutual.some(m=>m.includes(p.k))) mutual.push([p.k,d]); });
+  const loops=[]; chains.forEach(c=>{ const last=c[c.length-1], i=c.indexOf(last); if(i<c.length-1){ const lp=c.slice(i,c.length-1); if(lp.length>1 && !loops.some(l=>l.length===lp.length && lp.every(x=>l.includes(x)))) loops.push(lp); } });
+  return {chains, own, finalD, mutual, loops};
+}
+function progLunarPhases(n){
+  const el=d=>{ const pr=progAt(n,d,'sa').pts; return ((pr.find(x=>x.k==='Moon').lon-pr.find(x=>x.k==='Sun').lon)%360+360)%360; };
+  const out=[], b=n.date.getTime(), end=Math.min(Date.UTC(2100,0,1), b+95*365.25*864e5);
+  let prev=new Date(b), pv=el(prev);
+  for(let t=b+60*864e5;t<=end;t+=60*864e5){ const d=new Date(t), v=el(d);
+    for(let k=0;k<8;k++){ const tg=k*45, a=((pv-tg+540)%360)-180, c=((v-tg+540)%360)-180; if(a<0 && c>=0 && Math.abs(c-a)<30){ const x=AC.bisect(dd=>((el(dd)-tg+540)%360)-180,prev,d,1); out.push({k,d:x}); } }
+    prev=d; pv=v; }
+  return {out, nowEl:el(new Date()), birthEl:el(n.date)};
+}
+function runHerm(){
+  const p=active(), n=natalOf(p), now=new Date(), T=AC.T(now), P=k=>n.pts.find(x=>x.k===k), H=[];
+  $('hmHead').textContent=`Седемте херметични принципа: ${p.name}`;
+  const ctx=INT.ctx(n), ru=k=>(ctx.rules[k]||[]).filter(x=>!x.trad).map(x=>x.h);
+  // I. Ментализъм
+  const me=P('Mercury'), mo=P('Moon'), mnow=AC.lon('Moon',T), sNow=AC.lon('Sun',T), elg=((mnow-sNow)%360+360)%360;
+  const asp=courseAspects(n), aOf=k=>asp.filter(x=>x.a===k||x.b===k).map(x=>`${aspOf(x.asp).n} ${yrPN(x.a===k?x.b:x.a)}`);
+  H.push(hmCard('I','Ментализъм','„Всичко е ум; Вселената е ментална.“','В курса: Вселената е ментална (разумна), Творецът. Човекът твори чрез мисълта си.',
+   `<ul class="ntul"><li><b>Как мислите</b>: Меркурий ${vIn2(SIGNS[sgn(me.lon)])}, ${me.house} дом (${KW.houses[me.house-1].area[0]}): ${KW.signs[sgn(me.lon)].adv.slice(0,3).join(', ')}.${aOf('Mercury').length?' Аспекти: '+aOf('Mercury').join(', ')+'.':''}</li>
+    <li><b>Как чувствате и реагирате</b>: Луна ${vIn2(SIGNS[sgn(mo.lon)])}, ${mo.house} дом: ${KW.signs[sgn(mo.lon)].adv.slice(0,3).join(', ')}.</li>
+    <li><b>Умът днес</b>: Луната е ${vIn2(SIGNS[sgn(mnow)])}, ${elg<180?'растяща':'намаляваща'}, минава през вашия ${AC.houseOf(mnow,n.hs.cusp)} дом (${KW.houses[AC.houseOf(mnow,n.hs.cusp)-1].area[0]}): там е вниманието ви днес.</li></ul>`,
+   'Коя мисъл повтарям тази седмица и какво „създава“ тя в живота ми?'));
+  // II. Съответствие
+  const yrs=(now.getUTCFullYear()+now.getUTCMonth()/12)-2000, prec=50.29/3600*yrs, precN=50.29/3600*((n.date.getUTCFullYear()+n.date.getUTCMonth()/12)-2000);
+  const npts=n.pts.filter(x=>P10.includes(x.k)||x.k==='Node').map(x=>({k:x.k,lon:x.lon})).concat([{k:'ASC',lon:n.hs.asc},{k:'MC',lon:n.hs.mc}]);
+  const bRows=BEHEN.map(([nm,l0,nat,stone,herb,eff])=>{ const ln=(l0+precN)%360, lnow=(l0+prec)%360; const hits=npts.filter(q=>Math.abs(dif(q.lon,ln))<=2).map(q=>`${yrPN(q.k)} ${Math.abs(dif(q.lon,ln)).toFixed(1)}°`);
+    return {nm,ln,lnow,nat,stone,herb,eff,hits}; }).sort((a,b)=>a.lnow-b.lnow);
+  const D=dispositors(n,RUL_MOD), Dt=dispositors(n,RUL_TRAD);
+  const dTxt=(X,lab)=>`<p><b>${lab}:</b> ${X.finalD?`краен диспозитор е <b>${yrPN(X.finalD)}</b>: всички вериги стигат до него, това е „главният двигател“ на картата.`:X.own.length?`планети в собствен знак: ${X.own.map(yrPN).join(', ')}; няма един краен диспозитор, картата има няколко центъра.`:'няма планета в собствен знак, затова няма един краен диспозитор.'}${!X.finalD&&X.loops.filter(l=>l.length>2).length?` Веригите се събират в затворен кръг: <b>${X.loops.filter(l=>l.length>2).map(l=>l.concat([l[0]]).map(yrPN).join(' → ')).join('; ')}</b>. Тези планети заедно са центърът на картата: всяка зависи от следващата и те работят като едно цяло.`:''}${X.mutual.length?` Взаимна рецепция: ${X.mutual.map(m=>m.map(yrPN).join(' и ')).join('; ')} (двете планети си помагат, всяка е „гост“ в дома на другата).`:''}</p>`;
+  const asc=RUL_MOD[sgn(n.hs.asc)];
+  H.push(hmCard('II','Съответствие','„Както горе, така и долу; както вътре, така и вън.“','В курса: макрокосмос, човешки свят и елементарни частици (микрокосмос) си съответстват; звездите горе, човекът, Таро долу.',
+   `<h4 class="hmh">Веригата на диспозиторите</h4><p class="note">Всяка планета е „гост“ в знака си и зависи от управителя на този знак. Следвайки управителите, стигаме до центъра на картата.</p>${dTxt(D,'По модерните управители')}${dTxt(Dt,'По традиционните управители')}
+    <div class="hmchains">${D.chains.map(c=>`<div>${c.map(k=>yrPN(k)).join(' → ')}</div>`).join('')}</div>
+    <h4 class="hmh">Съответствия на планетите</h4><div class="scroll"><table class="ectab"><thead><tr><th class="t l">Планета</th><th class="t l">Ден</th><th class="t l">Метал</th><th class="t l">Тяло</th><th class="t l">Таро</th><th class="t l">Във вашата карта</th></tr></thead><tbody>${P10.map(k=>`<tr${k===asc?' class="rxnow"':''}><td class="l">${nameCell(k)}${k===asc?'<div class="ecsub">управител на Асцендента</div>':''}</td><td class="l">${CORR[k][0]}</td><td class="l">${CORR[k][1]}</td><td class="l">${CORR[k][2]}</td><td class="l">${CORR[k][3]}</td><td class="l">${SIGNS[sgn(P(k).lon)]}, ${P(k).house} дом</td></tr>`).join('')}</tbody></table></div>
+    <h4 class="hmh">15-те звезди на Хермес (бехенийските звезди)</h4><p class="note">По „Книгата на Хермес за петнадесетте неподвижни звезди“: всяка звезда има природа на планети, свой камък и своя билка. Звезда в съвпад (до 2°) с натална точка оцветява тази точка с качествата си.</p>
+    <div class="scroll"><table class="ectab"><thead><tr><th class="t l">Звезда</th><th class="t l">Положение сега</th><th class="t l">Природа</th><th class="t l">Камък · билка</th><th class="t l">Според Хермес дава</th><th class="t l">Във вашата карта</th></tr></thead><tbody>${bRows.map(b=>`<tr${b.hits.length?' class="rxnow"':''}><td class="l"><b>${b.nm}</b></td><td class="l">${L(b.lnow)}</td><td class="l">${b.nat.map(k=>nameCell(k)).join(' ')}</td><td class="l">${b.stone}<div class="ecsub">${b.herb}</div></td><td class="l">${b.eff}</td><td class="l">${b.hits.length?'съвпад с '+b.hits.join(', '):'<span class="ecsub">—</span>'}</td></tr>`).join('')}</tbody></table></div>`,
+   'Коя планета е центърът на моята карта и как я усещам в живота си?'));
+  // III. Вибрация
+  const vib=P10.map(k=>{ const sp=AC.speed(k,T), r=sp/MEANSPD[k]; const st=Math.abs(r)<0.12&&!['Sun','Moon'].includes(k);
+    const pers=['Mercury','Venus','Mars'].includes(k);
+    const t= st?'почти неподвижна (станция)':sp<0?'ретроградна':pers&&r>1.15?'бърза':pers&&r<0.6?'бавна':'директна'; return {k,sp,t}; });
+  const natR=P10.filter(k=>AC.speed(k,AC.T(n.date))<0), natSt=P10.filter(k=>!['Sun','Moon'].includes(k) && Math.abs(AC.speed(k,AC.T(n.date))/MEANSPD[k])<0.12);
+  const ph=planetHour(now,42.6977,23.3219);
+  H.push(hmCard('III','Вибрация','„Нищо не е в покой; всичко се движи, всичко вибрира.“','',
+   `<ul class="ntul"><li><b>Небето сега</b>: ${vib.map(v=>`${yrPN(v.k)} ${v.t}`).join('; ')}.</li>
+    ${ph?`<li><b>Ритъмът на деня (София)</b>: ден на ${yrPN(ph.dayRuler)}, сега е ${ph.n}-и час на ${yrPN(ph.hourRuler)} (${fmtDT(ph.from).slice(-5)}–${fmtDT(ph.to).slice(-5)}).</li>`:''}
+    <li><b>При раждането ви</b>: ${natR.length?'ретроградни '+natR.map(yrPN).join(', '):'няма ретроградни планети'}${natSt.length?'; почти стационарни (особено силни) '+natSt.map(yrPN).join(', '):''}. Ретроградната планета работи навътре: темата ѝ се преработва, преди да се изрази.</li></ul>`,
+   'Кое в живота ми сега „вибрира“ бързо и кое е в застой?'));
+  // IV. Полярност
+  const hc=Array(13).fill(0); P10.forEach(k=>hc[P(k).house]++);
+  const el=[0,0,0,0], md=[0,0,0]; P10.forEach(k=>{ const sg=sgn(P(k).lon); el[sg%4]++; md[sg%3]++; });
+  const EN=['Огън','Земя','Въздух','Вода'], MN=['Кардинален','Фиксиран','Подвижен'];
+  const opp=asp.filter(x=>x.asp===180 && [x.a,x.b].every(k=>P10.includes(k)||['Node','ASC','MC','Chiron'].includes(k))).map(x=>`${yrPN(x.a)} – ${yrPN(x.b)}`);
+  H.push(hmCard('IV','Полярност','„Всичко е двойствено; противоположностите са едно и също по природа, различни по степен.“','',
+   `<h4 class="hmh">Осите на домовете</h4><div class="hmaxes">${[1,2,3,4,5,6].map(h=>{ const a=hc[h], b=hc[h+6], t=a+b; return `<div class="hmaxis"><span class="l">${h} дом · ${KW.houses[h-1].area[0]}<b>${a}</b></span><span class="bar"${t?'':' style="opacity:.35"'}><i style="width:${t?a/t*100:0}%"></i></span><span class="r"><b>${b}</b>${h+6} дом · ${KW.houses[h+5].area[0]}</span></div>`; }).join('')}</div>
+    <p class="note">Натоварената страна на оста е мястото, където действате; празната е полюсът, който се учите да балансирате.</p>
+    <ul class="ntul"><li><b>Стихии</b>: ${EN.map((x,i)=>`${x} ${el[i]}`).join(', ')}${el.some(x=>x===0)?`. Липсва ${EN.filter((x,i)=>!el[i]).join(' и ')}: съзнателна задача за развитие`:''}.</li><li><b>Кръстове</b>: ${MN.map((x,i)=>`${x} ${md[i]}`).join(', ')}.</li>${opp.length?`<li><b>Опозиции в картата</b>: ${opp.join('; ')}. Опозицията е огледало: другият показва вашата втора страна.</li>`:''}</ul>`,
+   'Коя противоположност в мен се опитвам да изключа, вместо да я включа?'));
+  // V. Ритъм
+  const PL=progLunarPhases(n), cur=PL.out.filter(x=>x.d<=now).pop(), nxt=PL.out.find(x=>x.d>now), curK=cur?cur.k:Math.floor(PL.birthEl/45);
+  const lastNew=PL.out.filter(x=>x.k===0&&x.d<=now).pop(), nextNew=PL.out.find(x=>x.k===0&&x.d>now);
+  H.push(hmCard('V','Ритъм','„Всичко тече навън и навътре; има приливи и отливи.“','',
+   `<p>Прогресивната лунна фаза (по Д. Ръдхиър) е големият ви личен ритъм: около 30 години от едно прогресивно новолуние до следващото, в 8 фази по около 3,5 години.</p>
+    <p class="hmbig">Сега сте във фаза <b>${RUD[curK][0]}</b>${cur?` (от ${fmtD(cur.d)})`:''}: ${RUD[curK][1]}.${nxt?` Следва ${RUD[nxt.k][0].toLowerCase()} от ${fmtD(nxt.d)}.`:''}</p>
+    <p class="note">${lastNew?`Последното прогресивно новолуние: ${fmtD(lastNew.d)}, на ${((lastNew.d-n.date)/(365.2422*864e5)).toFixed(0)} г. Тогава е засято семето на сегашния 30-годишен цикъл.`:''}${nextNew?` Следващото: ${fmtD(nextNew.d)}.`:''}</p>
+    <div class="hmrud">${PL.out.map(x=>`<span class="${x===cur?'on':''}" title="${RUD[x.k][1]}">${fmtD(x.d).slice(-4)} ${RUD[x.k][0]}</span>`).join('')}</div>`,
+   'Във фазата, в която съм, какво е естествено да правя: да засявам, да изграждам, да жъна или да пускам?'));
+  // VI. Причина и следствие
+  const nn=P('Node'), snl=(nn.lon+180)%360, snh=AC.houseOf(snl,n.hs.cusp), sa=P('Saturn');
+  H.push(hmCard('VI','Причина и следствие','„Всяка причина има своето следствие; случайността е само непознат закон.“','В астрологията: транзитът не може да даде нещо, което го няма в рождената карта; той само задейства обещанието.',
+   `<ul class="ntul"><li><b>Откъде идвате</b>: Южният възел ${vIn2(SIGNS[sgn(snl)])}, ${snh} дом (${KW.houses[snh-1].area.slice(0,2).join(', ')}): навици и умения, които вече имате.</li>
+    <li><b>Накъде вървите</b>: Северният възел ${vIn2(SIGNS[sgn(nn.lon)])}, ${nn.house} дом (${KW.houses[nn.house-1].area.slice(0,2).join(', ')}): посоката на растеж.</li>
+    <li><b>Законът на последствията</b>: Сатурн ${vIn2(SIGNS[sgn(sa.lon)])}, ${sa.house} дом, управлява ${ru('Saturn').join(' и ')} дом. Там всяко усилие дава резултат, но бавно и сигурно.</li></ul>
+    <button type="button" id="hmJr">Отвори дневника на транзитите</button> <span class="note">Записвайте очакването и какво се е случило: така виждате причината и следствието в своя живот.</span>`,
+   'Кое мое днешно действие ще бъде причина за това, което искам след 7 години?'));
+  // VII. Пол
+  const W=k=>['Sun','Moon'].includes(k)?2:1; let mas=0, fem=0; P10.forEach(k=>{ if(sgn(P(k).lon)%2===0) mas+=W(k); else fem+=W(k); }); if(sgn(n.hs.asc)%2===0) mas+=2; else fem+=2;
+  const day=P('Sun').house>=7;
+  const ve=P('Venus'), ma=P('Mars');
+  H.push(hmCard('VII','Пол','„Всичко има мъжко и женско начало.“','В курса: орехът, черупка и ядка; ин и ян. Мъжките (активни) знаци са Овен, Близнаци, Лъв, Везни, Стрелец, Водолей; женските (възприемчиви) са Телец, Рак, Дева, Скорпион, Козирог, Риби. В Везни и Скорпион е семето на противоположното: Венера управлява мъжкия знак Везни, а Марс управлява женския знак Скорпион.',
+   `<div class="hmyy"><div><b>Мъжко начало</b><span>${mas}</span></div><div class="bar"><i style="width:${mas/(mas+fem)*100}%"></i></div><div><b>Женско начало</b><span>${fem}</span></div></div>
+    <p class="note">Слънцето, Луната и Асцендентът се броят двойно.</p>
+    <ul class="ntul"><li><b>Секта</b>: картата е <b>${day?'дневна':'нощна'}</b>, защото Слънцето е ${day?'над':'под'} хоризонта (${P('Sun').house} дом). Светилото на сектата е ${day?'Слънцето':'Луната'}; благодетелят, който помага най-много, е ${day?'Юпитер':'Венера'}, а трудната планета, която е по-мека към вас, е ${day?'Сатурн':'Марс'}. По-трудна е ${day?'Марс':'Сатурн'} (извън сектата).</li>
+    <li><b>Венера</b> (женско начало) е ${vIn2(SIGNS[sgn(ve.lon)])}, ${sgn(ve.lon)%2===0?'мъжки знак: възприемчивото се изразява активно':'женски знак: в своята природа'}. <b>Марс</b> (мъжко начало) е ${vIn2(SIGNS[sgn(ma.lon)])}, ${sgn(ma.lon)%2===0?'мъжки знак: в своята природа':'женски знак: действието минава през чувството и интуицията'}.</li></ul>`,
+   'Кое начало използвам повече: да действам или да приемам? Къде ми трябва другото?'));
+  $('hmOut').innerHTML=H.join('');
+  const jb=$('hmJr'); if (jb) jb.onclick=()=>showTab('jr');
+}
 
 // =============== ЗАТЪМНЕНИЯ ===============
 const EC_SYN=29.530588853, EC_ANCH={sol:{t:Date.UTC(2024,3,8,18,17),s:139}, lun:{t:Date.UTC(2025,2,14,6,59),s:123}};
