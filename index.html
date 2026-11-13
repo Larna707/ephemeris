@@ -983,7 +983,7 @@ th{background:var(--panel)}
       <h2>Избор на момент по Луната</h2>
       <p class="int-hint">Елективна астрология: първо решете какво искате, нещо да расте или да приключи. Растящата Луна „пълни“, намаляващата „изпразва“; невидимата Луна около новолуние не дава плод; празната Луна (без курс) значи „нищо няма да последва“; Via Combusta (15° Везни до 15° Скорпион) е неблагоприятна зона. Южната ширина помага на материализацията, бързата Луна ускорява. Денят се оценява за избрания час.</p>
       <div class="controls">
-        <label class="field"><span>Цел</span><select id="elPurpose"><option value="grow">Начало на нещо, което да расте</option><option value="end">Приключване, премахване</option><option value="contract">Договор, документи, важен разговор</option><option value="wedding">Сватба</option><option value="move">Нанасяне в жилище</option></select></label>
+        <label class="field"><span>Цел</span><select id="elPurpose"><option value="grow">Начало на нещо, което да расте</option><option value="end">Приключване, премахване</option><option value="contract">Договор, документи, важен разговор</option><option value="wedding">Сватба</option><option value="job">Нова работа, бизнес, интервю</option><option value="travel">Пътуване</option><option value="move">Нанасяне в жилище</option></select></label>
         <label class="field"><span>От</span><input type="date" id="elFrom"></label>
         <label class="field"><span>До</span><input type="date" id="elTo"></label>
         <label class="field"><span>Час</span><input type="time" id="elTime" value="10:00" step="60"></label>
@@ -8403,7 +8403,7 @@ function elDay(day, tm, purpose, n){
     [0,60,90,120,180].forEach(a=>{ const o=Math.abs(Math.abs(dif(ml,pl))-a), o2=Math.abs(Math.abs(dif(ml2,pl2))-a); if(o<=4 && o2<o){ const good=['Venus','Jupiter'].includes(k)&&a!==90&&a!==180 || (a===60||a===120);
       if (['Saturn','Mars'].includes(k)&&(a===90||a===180||a===0)) C(1.5,`Луната отива към ${aspOf(a).n} с ${shortN(k)}: пречки или напрежение`); else if (good) P(1.5,`Луната отива към ${aspOf(a).n} с ${shortN(k)}`); } }); });
   const rx=k=>AC.speed(k,t)<0, st=k=>Math.abs(AC.speed(k,t))<0.12*(k==='Mercury'?1:0.6);
-  if (['contract','grow','move'].includes(purpose)){ if (rx('Mercury')) C(2,'ретрограден Меркурий: документи и уговорки се преразглеждат'); else if (st('Mercury')) C(1.5,'Меркурий е почти стационарен'); }
+  if (['contract','grow','move','job','travel'].includes(purpose)){ if (rx('Mercury')) C(2,'ретрограден Меркурий: документи и уговорки се преразглеждат'); else if (st('Mercury')) C(1.5,'Меркурий е почти стационарен'); }
   if (purpose==='wedding'){ if(rx('Venus')) C(3,'ретроградна Венера'); if(rx('Mars')) C(2,'ретрограден Марс'); if (EL_GOOD_WED.includes(ms)) P(2,`Луната е в ${SIGNS[ms]}: знак на хармония`); }
   const wd=new Date(Date.UTC(...day.split('-').map((x,i)=>i===1?x-1:+x))).getUTCDay(), WD=['неделя','понеделник','вторник','сряда','четвъртък','петък','събота'];
   if (purpose==='wedding' && (wd===6||wd===2)) C(2,`${WD[wd]}: по традиция неподходящ за сватба (${wd===6?'Сатурн':'Марс'})`);
@@ -8412,14 +8412,28 @@ function elDay(day, tm, purpose, n){
   const h=AC.houseOf(ml,n.hs.cusp);
   return {day, d, sc, pro, con, ms, el, h, wd:WD[wd]};
 }
+const EL_HOUSE={grow:10,end:12,contract:3,wedding:7,move:4,job:10,travel:9};
+function elHour(day,pur){
+  let best=null;
+  for(let m=7*60;m<=21*60;m+=15){ const tm=`${String(Math.floor(m/60)).padStart(2,'0')}:${String(m%60).padStart(2,'0')}`, d=localToUTC(day,tm,'Europe/Sofia',2), c=AC.chart(d,42.6977,23.3219), P=k=>c.pts.find(x=>x.k===k);
+    let sc=0; const why=[]; const ang=(k,l)=>Math.abs(dif(P(k).lon,l))<=8;
+    ['Venus','Jupiter'].forEach(k=>{ const q=P(k); if([1,10].includes(q.house)){ sc+=2; why.push(`${shortN(k)} в ${q.house} дом`); } else if(q.house===EL_HOUSE[pur]){ sc+=1; why.push(`${shortN(k)} в дома на целта`); } if(ang(k,c.hs.asc)||ang(k,c.hs.mc)){ sc+=1; } });
+    ['Mars','Saturn'].forEach(k=>{ const q=P(k); if([1,10,7].includes(q.house)||ang(k,c.hs.asc)||ang(k,c.hs.mc)){ sc-=2; why.push(`внимание: ${shortN(k)} на ъгъл`); } });
+    const ar=RUL_TRAD[sgn(c.hs.asc)], aq=P(ar); if([6,8,12].includes(aq.house)){ sc-=1; why.push(`управителят на Асцендента е в ${aq.house} дом`); } else { sc+=1; }
+    if (AC.speed(ar,AC.T(d))<0 && !['Sun','Moon'].includes(ar)){ sc-=1; why.push('управителят на Асцендента е ретрограден'); }
+    const mq=P('Moon'); if([6,8,12].includes(mq.house)){ sc-=1; why.push(`Луната е в ${mq.house} дом`); } else if([1,4,7,10].includes(mq.house)){ sc+=1; why.push('Луната е на ъгъл'); }
+    const fx=sgn(c.hs.asc)%3===1; if(['grow','wedding','move','job'].includes(pur)&&fx){ sc+=0.5; why.push('неподвижен знак на Асцендента: трайност'); } if(pur==='travel'&&sgn(c.hs.asc)%3===0){ sc+=0.5; why.push('кардинален Асцендент: бързо начало'); }
+    if(!best||sc>best.sc) best={tm,sc,why,as:sgn(c.hs.asc)}; }
+  return best;
+}
 function runElect(){
   const p=active(), n=natalOf(p), a=$('elFrom').value, b=$('elTo').value, tm=$('elTime').value||'10:00', pur=$('elPurpose').value;
   if(!a||!b||b<a){ $('elStatus').textContent='Изберете период.'; return; }
   const days=[]; for(let t=Date.parse(a+'T00:00Z'); t<=Date.parse(b+'T00:00Z') && days.length<185; t+=864e5) days.push(new Date(t).toISOString().slice(0,10));
   $('elStatus').textContent='Изчислявам…';
-  setTimeout(()=>{ const R=days.map(dd=>elDay(dd,tm,pur,n)); const top=R.slice().sort((x,y)=>y.sc-x.sc).slice(0,8).sort((x,y)=>x.day<y.day?-1:1);
+  setTimeout(()=>{ const R=days.map(dd=>elDay(dd,tm,pur,n)); const top=R.slice().sort((x,y)=>y.sc-x.sc).slice(0,8).sort((x,y)=>x.day<y.day?-1:1); top.forEach(r=>{ try{ r.best=elHour(r.day,pur); }catch(e){} });
     $('elStatus').textContent=`Прегледани ${R.length} дни в ${tm} ч. Показани са 8-те с най-добра оценка, подредени по дата. Луната е в натален дом според вашата карта.`;
-    $('elList').innerHTML=top.map(r=>`<article class="ntcard"><h3 class="ntt">${r.day.split('-').reverse().join('.')} <span class="ntpos">${r.wd} · оценка ${r.sc.toFixed(1)}</span></h3><div class="ntchips"><span class="chip gold">Луна ${/^[ВФ]/.test(SIGNS[r.ms])?'във':'в'} ${SIGNS[r.ms]}</span><span class="chip">${r.el<180?'растяща':'намаляваща'}</span><span class="chip">${r.h} натален дом</span></div><ul class="ntul">${r.pro.map(x=>`<li class="elpro">${x}</li>`).join('')}${r.con.map(x=>`<li class="elcon">${x}</li>`).join('')}</ul></article>`).join('');
+    $('elList').innerHTML=top.map(r=>`<article class="ntcard"><h3 class="ntt">${r.day.split('-').reverse().join('.')} <span class="ntpos">${r.wd} · оценка ${r.sc.toFixed(1)}</span></h3><div class="ntchips"><span class="chip gold">Луна ${/^[ВФ]/.test(SIGNS[r.ms])?'във':'в'} ${SIGNS[r.ms]}</span><span class="chip">${r.el<180?'растяща':'намаляваща'}</span><span class="chip">${r.h} натален дом</span></div><ul class="ntul">${r.pro.map(x=>`<li class="elpro">${x}</li>`).join('')}${r.con.map(x=>`<li class="elcon">${x}</li>`).join('')}</ul>${r.best?`<p class="note" style="margin:6px 0 0"><b>Най-добър час (Дж. Хампар):</b> ${r.best.tm} ч., Асцендент ${SIGNS[r.best.as]}: ${r.best.why.join('; ')||'без особени показатели'}.</p>`:''}</article>`).join('');
   },30);
 }
 $('elRun').onclick=runElect;
