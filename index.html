@@ -10141,6 +10141,7 @@ function runHor(){
   else add(true,'Луната има курс','До края на знака прави аспекти. Нещата се движат.');
   const ml=norm(P('Moon').lon);
   if (ml>=195 && ml<=225) add(false,'Луната е в „изгорелия път“','Между 15° Везни и 15° Скорпион. По традиция ситуацията е объркана или напрегната. Тълкувайте внимателно.');
+  const mDeg=norm(P('Moon').lon)-mS*30; if (mDeg>=29) add(false,'Луната е в последния градус на знака','Ситуацията е към края си; промяна е вече в ход.');
   const sat=P('Saturn').house;
   if (sat===1||sat===7) add(false,`Сатурн в ${sat} дом`, sat===7?'По традиция предупреждение към астролога: преценката може да е затруднена.':'Питащият може да е притеснен или ситуацията да е тежка.');
   const ph=planetHour(t0,lat,lon);
@@ -10181,12 +10182,19 @@ function runHor(){
       verdict = [0,60,120].includes(first.asp) ? (first.asp===0?'Да. Значителите се срещат: това, за което питате, по-скоро ще се случи.':'Да, с лекота. Значителите се сближават с хармоничен аспект.')
         : first.asp===90 ? 'Да, но с усилие и забавяне. Значителите се сближават с квадрат.'
         : 'Може да се случи, но с напрежение, или след това да има съжаление. Значителите се сближават с опозиция.';
+      // забрана (А. Луис): трета планета прави аспект с някой от значителите преди тях
+      const proh=TRAD7.filter(k=>![q1,q2].includes(k)).flatMap(k=>[fast,slow].flatMap(sg=>perfs(sg,k,t0,first.d,Math.min(FSTEP[sg]||1,FSTEP[k]||1)).filter(x=>x.d<first.d).map(x=>({...x,sg,k})))).sort((a,b)=>a.d-b.d)[0];
+      if (proh && ['Mars','Saturn'].includes(proh.k)) verdict+=` Внимание, забрана: ${pn(proh.k)} прави ${aspOf(proh.asp).n} с ${pn(proh.sg)} по-рано (${fmtD(proh.d)}): нещо или някой може да попречи, преди нещата да се случат.`;
+      else if (proh) asTxt+=` Преди точния аспект ${pn(proh.k)} прави ${aspOf(proh.asp).n} с ${pn(proh.sg)} (${fmtD(proh.d)}): намеса на трето лице или обстоятелство.`;
       if (P(fast).spd<0||P(slow).spd<0) verdict+=' Един от значителите е ретрограден: възможни са забавяне, преразглеждане или връщане към старото.';
     } else {
       verdict='Значителите не се сближават, преди да сменят знака. Отговорът по-скоро е „не“ или „не сега“.';
       asTxt = first ? `Следващият аспект между ${pn(q1)} и ${pn(q2)} (${aspOf(first.asp).n}) става чак след смяна на знака (${fmtD(first.d)}).` : `Няма аспект между ${pn(q1)} и ${pn(q2)} в близкото време.`;
       const prevSep=[0,60,90,120,180].find(a=>Math.abs(sep-a)<=3);
       if (prevSep!=null) asTxt+=` Сега са на ${Math.abs(sep-prevSep).toFixed(1)}° от ${aspOf(prevSep).n}, но се раздалечават: това описва минало, не бъдеще.`;
+      // събиране на светлина: и двата значителя отиват към по-бавна трета планета в своите знаци
+      const coll=['Saturn','Jupiter','Mars'].filter(k=>![q1,q2].includes(k)&&(FSTEP[k]||1)>Math.max(FSTEP[q1]||1,FSTEP[q2]||1)).find(k=>[q1,q2].every(sg=>{ const ex=signEdge(sg,t0,1)||new Date(t0.getTime()+200*864e5); return perfs(sg,k,t0,ex,FSTEP[sg]||1).length>0; }));
+      if (coll){ verdict=`Възможно е чрез посредник: и двата значителя отиват към ${pn(coll)} (събиране на светлина). Трето лице или по-висока инстанция може да ги събере.`; }
       // пренасяне на светлина от Луната
       const last=moonPrev.filter(x=>TRAD7.includes(x.k)).pop(), next=moonNext.find(x=>TRAD7.includes(x.k));
       if (last && next && q1!=='Moon' && q2!=='Moon' && new Set([last.k,next.k]).size===2 && [q1,q2].includes(last.k) && [q1,q2].includes(next.k)){
