@@ -8850,11 +8850,13 @@ function runMed(){
    <li><b>Денят:</b> храна в светлата част на деня. <b>Сезонът:</b> лятото е за напълване и движение, зимата за олекотяване и покой.</li>
    <li><b>Уран (84 г.):</b> вие сте във ${uPh}.</li></ul>`));
   // 7. Планети и органи (справка)
-  H.push(card('7','Ден за операция, процедура или преглед','Как изглежда небето в избрания ден спрямо вашата карта.',`<div class="controls"><label class="field"><span>Дата</span><input type="date" id="mdDayD" min="1900-01-01" max="2100-12-31"></label><label class="field"><span>Час</span><input type="time" id="mdDayT"></label><label class="field"><span>Част на тялото</span><select id="mdDayZ">${MD_ZONE.map((z,i)=>`<option value="${i}">${SIGNS[i]}: ${z}</option>`).join('')}</select></label><button type="button" class="primary" id="mdDayGo">Покажи</button></div><div id="mdDayOut"></div>`));
+  H.push(card('7','Ден за операция, процедура или преглед','Как изглежда небето в избрания ден спрямо вашата карта.',`<div class="controls"><label class="field"><span>Дата</span><input type="date" id="mdDayD" min="1900-01-01" max="2100-12-31"></label><label class="field"><span>Час</span><input type="time" id="mdDayT"></label><label class="field"><span>Част на тялото</span><select id="mdDayZ">${MD_ZONE.map((z,i)=>`<option value="${i}">${SIGNS[i]}: ${z}</option>`).join('')}</select></label><label class="field" style="flex-direction:row;align-items:center;gap:6px"><input type="checkbox" id="mdDayNT"> <span>Часът на раждане е неизвестен</span></label><button type="button" class="primary" id="mdDayGo">Покажи</button></div><p class="note" id="mdDayNTn" hidden>При неизвестен час въведете в профила 12:00. Асцендентът, MC и домовете тогава не са верни и не се използват. Наталната Луна е изчислена само приблизително (±7°), затова аспектите към нея се показват с по-широк орбис и само като възможни.</p><div id="mdDayOut"></div>`));
   H.push(card('8','Справка: планети и тяло','„Както горе, така и долу.“',`<div class="scroll"><table class="ectab"><thead><tr><th class="t l">Планета</th><th class="t l">Свързана с</th><th class="t l">Във вашата карта</th><th class="t l">Състояние</th></tr></thead><tbody>${P10.map(k=>{ const q=C.P(k), A=C.affl(k), Sp=C.supp(k); return `<tr${A.length?' class="rxnow"':''}><td class="l">${nameCell(k)}</td><td class="l">${MD_PL[k]}</td><td class="l">${SIGNS[sgn(q.lon)]}, ${q.house} дом</td><td class="l">${A.length?A.map(mdAffTxt).join('<br>'):'<span class="ecsub">без напрегнати аспекти от злосторници</span>'}${Sp.length?`<div class="ecsub">подкрепа: ${Sp.map(mdSupTxt).join(', ')}</div>`:''}</td></tr>`; }).join('')}</tbody></table></div>
    ${kb.MEDREF?`<details><summary>Справочник за консултации (лични бележки)</summary><div class="ntx">${kb.MEDREF}</div></details>`:''}`));
   $('mdOut').innerHTML=H.join('');
   const dd=store.get('mdDay',null); $('mdDayD').value=dd&&dd.d||new Date(Date.now()+864e5).toISOString().slice(0,10); $('mdDayT').value=dd&&dd.t||'09:00'; $('mdDayZ').value=dd&&dd.z!=null?dd.z:9;
+  const ntK='notime_'+p.id; $('mdDayNT').checked=!!store.get(ntK,false); $('mdDayNTn').hidden=!$('mdDayNT').checked;
+  $('mdDayNT').onchange=()=>{ store.set(ntK,$('mdDayNT').checked); $('mdDayNTn').hidden=!$('mdDayNT').checked; mdDay(n); };
   $('mdDayGo').onclick=()=>{ store.set('mdDay',{d:$('mdDayD').value,t:$('mdDayT').value,z:$('mdDayZ').value}); mdDay(n); };
   if(dd) mdDay(n);
 }
@@ -8890,15 +8892,16 @@ function mdDay(n){
   ['Mercury','Venus','Mars'].forEach(k=>{ const t=tr.find(x=>x.k===k); if(t.s<0) warn.push(`${yrPN(k)} е ретрограден: ${k==='Mercury'?'проверете два пъти документи и указания':k==='Mars'?'енергията за възстановяване е по-бавна':'по-малко удоволствие от нещата, повече търпение'}.`); });
   if (!['Mercury','Mars'].some(k=>tr.find(x=>x.k===k).s<0)) good.push('Меркурий и Марс са директни.');
   // транзити към наталната карта
-  const NP=n.points.filter(p=>!['Lilith','SNode'].includes(p.k)), hits=[];
-  tr.forEach(t=>NP.forEach(np=>[0,60,90,120,180,150].forEach(a=>{ const o=Math.abs(Math.abs(dif(t.l,np.lon))-a), orb=t.k==='Moon'?4:['Sun','Mercury','Venus','Mars'].includes(t.k)?2:1.5; if(o<=orb) hits.push({t:t.k,np:np.k,a,o}); })));
+  const noT=!!($('mdDayNT')&&$('mdDayNT').checked);
+  const NP=n.points.filter(p=>!['Lilith','SNode'].includes(p.k)&&!(noT&&['ASC','MC'].includes(p.k))), hits=[];
+  tr.forEach(t=>NP.forEach(np=>[0,60,90,120,180,150].forEach(a=>{ const o=Math.abs(Math.abs(dif(t.l,np.lon))-a), orb=(t.k==='Moon'?4:['Sun','Mercury','Venus','Mars'].includes(t.k)?2:1.5)+(noT&&np.k==='Moon'?6:0); if(o<=orb) hits.push({t:t.k,np:np.k,a,o,unc:noT&&np.k==='Moon'}); })));
   const slow=['Jupiter','Saturn','Uranus','Neptune','Pluto'];
   const easy=x=>[60,120].includes(x.a)||(x.a===0&&['Venus','Jupiter','Sun'].includes(x.t)), hard=x=>[90,180,150].includes(x.a)||(x.a===0&&['Mars','Saturn','Uranus','Neptune','Pluto'].includes(x.t));
   const span=(x)=>{ if(!slow.includes(x.t)) return ''; const np=NP.find(p=>p.k===x.np), H=AC.transitHits(x.t,np.lon,x.a,new Date(d.getTime()-730*864e5),new Date(d.getTime()+730*864e5)); if(H.length<2) return ''; return ` Бавен транзит: точни преминавания ${H.map(h=>fmtD(h.date)).join(', ')}. Това е фон за целия период, не за конкретния ден.`; };
   const zr=RUL_MOD[z], zrT=RUL_TRAD[z];
-  const row=x=>{ const zone=[zr,zrT].includes(x.np)?` <b>(${yrPN(x.np)} управлява ${SIGNS[z]}: пряко към избраната зона)</b>`:''; return `<li class="${easy(x)?'ruplus':hard(x)?'ruminus':''}">${yrPN(x.t)} ${aspOf(x.a).n} натален ${yrPN(x.np)} (${x.o.toFixed(1)}°)${zone}.${span(x)}</li>`; };
+  const row=x=>{ const zone=[zr,zrT].includes(x.np)?` <b>(${yrPN(x.np)} управлява ${SIGNS[z]}: пряко към избраната зона)</b>`:''; return `<li class="${easy(x)?'ruplus':hard(x)?'ruminus':''}">${yrPN(x.t)} ${aspOf(x.a).n} натален ${yrPN(x.np)} (${x.unc?'възможен, Луната при раждане е неточна':x.o.toFixed(1)+'°'})${zone}.${x.unc?'':span(x)}</li>`; };
   const H2=hits.sort((a,b)=>(slow.includes(b.t)-slow.includes(a.t))||a.o-b.o);
-  const tipK=[...new Set(H2.filter(hard).map(x=>x.t))].filter(k=>MD_TIP[k]);
+  const tipK=[...new Set(H2.filter(x=>hard(x)&&!x.unc).map(x=>x.t))].filter(k=>MD_TIP[k]);
   out.innerHTML=`<div class="srgrid">
     <div><h4>Подкрепящо <span class="srok">${good.length}</span></h4><ul>${good.map(x=>`<li>${x}</li>`).join('')}</ul></div>
     <div><h4>За внимание <span class="${warn.length?'srmid':'srok'}">${warn.length}</span></h4><ul>${warn.map(x=>`<li>${x}</li>`).join('')||'<li>Няма традиционни възражения за този ден.</li>'}</ul></div>
