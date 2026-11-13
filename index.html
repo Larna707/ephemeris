@@ -239,6 +239,13 @@ th{background:var(--panel)}
 .srtype{display:grid;gap:6px;margin:8px 0}.srtype > div{display:grid;grid-template-columns:190px 1fr 36px;gap:10px;align-items:center;font-size:13px}
 .srtype .bar{height:10px;border-radius:5px;background:var(--soft);overflow:hidden}.srtype .bar i{display:block;height:100%;background:linear-gradient(90deg,#e05a8a,#7a6cf0)}
 @media (max-width:640px){.srtype > div{grid-template-columns:120px 1fr 30px}}
+.runum{background:linear-gradient(135deg,#e8a33d,#7a6cf0)}
+.rutab td{font-family:var(--f-body);white-space:normal}
+#tab-rul .controls,#tab-rul .field,#tab-rul select{max-width:100%;min-width:0}
+.ruempty{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.ruempty > div{padding:12px 14px;border-radius:14px;border:1px solid var(--line);background:var(--bg);min-width:0}
+.ruempty h4{margin:0 0 4px;font-size:15px}.ruempty p,.ruempty li{font-size:13px}.ruempty ul{margin:4px 0 0;padding-left:18px}
+.ruplus{color:#2f9e8f}.ruminus{color:#d0603a}
 .mdwarn{margin:0 0 16px;padding:10px 14px;border-radius:12px;border-left:4px solid #d0603a;background:color-mix(in srgb,#d0603a 10%,transparent)}
 .mdnum{background:linear-gradient(135deg,#2f9e8f,#d0603a)}
 .mdgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;margin:10px 0}
@@ -312,6 +319,7 @@ th{background:var(--panel)}
     <button role="tab" data-tab="herm">Херметични принципи</button>
     <button role="tab" data-tab="med">Медицинска астрология</button>
     <button role="tab" data-tab="apsy">Астропсихология</button>
+    <button role="tab" data-tab="rul">Управители и домове</button>
     <button role="tab" data-tab="syn">Синастрия</button>
     <button role="tab" data-tab="hor">Хорар</button>
     <button role="tab" data-tab="rect">Ректификация</button>
@@ -725,6 +733,14 @@ th{background:var(--panel)}
       <p class="int-hint">Разделът показва <b>чувствителните зони</b> в картата: части на тялото и системи, които носят повече напрежение и имат нужда от повече грижа. Методът следва К. Стойчев („Астромедицина за всеки“): наранени знаци, домовете 6, 8 и 12, злосторниците, темпераментът и цикличността.</p>
       <p class="mdwarn"><b>Това не е диагноза и не замества лекар.</b> Картата показва предразположение, а не съдба. Сайтът нарочно не назовава болести: говори за зони, теми и грижа за себе си.</p>
       <div id="mdOut"></div>
+    </div>
+  </section>
+
+  <section id="tab-rul" role="tabpanel" hidden>
+    <div class="panel">
+      <h2 id="ruHead">Управители и домове</h2>
+      <p class="int-hint">Всеки дом е „стая“, а управителят на знака на върха е „ключът“ за нея. Там, където стои управителят, се решава темата на дома. Методите следват А. Оукън (управители, рецепции, производни домове), А. Руиз (празни домове) и Е. Лейнбах (управител на Асцендента).</p>
+      <div id="ruOut"></div>
     </div>
   </section>
 
@@ -8147,7 +8163,7 @@ INTX.initUI();
 
 
 // =============== TABS ===============
-const TABS=['eph','moon','ecl','herm','med','apsy','chart','nt','pr','ps','yr','ai','dh','sky','an','tr','pass','hs','sr','pd','kw','syn','hor','rect','cyc','jr'];
+const TABS=['eph','moon','ecl','herm','med','apsy','rul','chart','nt','pr','ps','yr','ai','dh','sky','an','tr','pass','hs','sr','pd','kw','syn','hor','rect','cyc','jr'];
 tab = store.get('tab','eph'); if (!TABS.includes(tab)) tab='eph';
 function showTab(t){
   tab=t; store.set('tab',t);
@@ -8169,6 +8185,7 @@ function render(){
   else if (tab==='herm') runHerm();
   else if (tab==='med') runMed();
   else if (tab==='apsy') runAstroPsy();
+  else if (tab==='rul') runRulers();
   else if (tab==='syn') runSyn();
   else if (tab==='hor') { initHor(); runHor(); }
   else if (tab==='moon') { runMoon(); if(!elInit) initElect(); }
@@ -8957,6 +8974,69 @@ function runAstroPsy(){
     <p class="note">Възрастовата точка тук е изчислена с домовете на сайта (Плацидус) и линейно вътре в дома; Хубер използва домове по Кох, затова е възможна разлика до около година.</p>`,
     'Кой стар сценарий се повтаря в живота ми и в коя сфера?'));
   $('apOut').innerHTML=H.join('');
+}
+
+
+// =============== УПРАВИТЕЛИ И ДОМОВЕ ===============
+const RU_ASCH=['Пътят минава през собствената личност: вие сте „автор“ на живота си, важно е да действате от себе си.','Пътят минава през ресурсите и самооценката: изграждането на стабилност и ценности оформя личността.','Пътят минава през ученето и общуването: личността се развива чрез думи, контакти, движение.','Пътят минава през дома и корените: семейството и вътрешната сигурност оформят личността.','Пътят минава през творчеството и изявата: личността расте чрез любов, игра, деца, сцена.','Пътят минава през работата и грижата: личността се оформя чрез полезност, умения, здраве.','Пътят минава през другите: партньорите и договорите са огледалото, в което се откривате.','Пътят минава през кризите и дълбочината: преобразяването и споделените ресурси оформят личността.','Пътят минава през смисъла: пътуване, учене, вяра и широк хоризонт.','Пътят минава през призванието: обществената роля и постиженията оформят личността.','Пътят минава през групите и бъдещето: приятелите, идеите и общите каузи оформят личността.','Пътят минава през вътрешния свят: уединението, служенето и духовността оформят личността.'];
+const RU_DER=[[7,'партньора'],[5,'децата'],[3,'братята и сестрите'],[4,'родителя по линия на 4 дом'],[10,'родителя по линия на 10 дом'],[11,'приятелите'],[6,'колегите и подчинените'],[2,'парите'],[9,'пътуванията и ученето'],[8,'общите ресурси']];
+function ruCtx(n){
+  const P=k=>n.pts.find(x=>x.k===k), csg=h=>sgn(n.hs.cusp[h]), ru=h=>RUL_MOD[csg(h)], ruT=h=>RUL_TRAD[csg(h)];
+  const inH=h=>n.pts.filter(x=>x.house===h&&P10.includes(x.k));
+  const icp={}; for(let h=1;h<=12;h++){ const s1=csg(h), s2=csg(h%12+1); let k=(s1+1)%12; while(s1!==s2&&k!==s2){ (icp[h]=icp[h]||[]).push(k); k=(k+1)%12; } }
+  const rules=k=>{ const o=[]; for(let h=1;h<=12;h++) if(ru(h)===k) o.push(h); return o; };
+  const asp=courseAspects(n).filter(x=>[0,60,90,120,180,150].includes(x.asp));
+  return {P,csg,ru,ruT,inH,icp,rules,asp};
+}
+const ruArea=h=>KW.houses[h-1].area[0];
+function runRulers(){
+  const p=active(), n=natalOf(p), C=ruCtx(n), H=[];
+  $('ruHead').textContent=`Управители и домове: ${p.name}`;
+  const card=(num,title,motto,body,q)=>`<article class="hmcard"><div class="hmnum runum">${num}</div><div class="hmbody"><h3>${title}</h3>${motto?`<p class="hmmotto">${motto}</p>`:''}${body}${q?`<p class="hmq"><b>Въпрос за размисъл:</b> ${q}</p>`:''}</div></article>`;
+  const dg=k=>{ const q=C.P(k), s=sgn(q.lon); return RUL_MOD[s]===k||RUL_TRAD[s]===k?'в своя знак':MD_EXA[k]===s?'в екзалтация':RUL_MOD[(s+6)%12]===k||RUL_TRAD[(s+6)%12]===k?'в изгнание':MD_EXA[k]===(s+6)%12?'в падение':''; };
+  // 1. Карта
+  const rows=[...Array(12).keys()].map(i=>{ const h=i+1, r=C.ru(h), q=C.P(r), to=q.house, pl=C.inH(h), ic=C.icp[h]||[];
+    const own=to===h, link=own?`Темата се решава в самия дом: силна, самостоятелна сфера.`:`„${KW.houses[h-1].name}“ се развива чрез „${KW.houses[to-1].name}“ (${to} дом).`;
+    return `<tr${pl.length?'':' style="opacity:.92"'}><td><b>${h}</b></td><td class="l">${SIGNS[C.csg(h)]}${ic.length?`<div class="ecsub">включен: ${ic.map(x=>SIGNS[x]).join(', ')}</div>`:''}</td><td class="l">${pl.length?pl.map(x=>yrPN(x.k)).join(', '):'<span class="ecsub">празен</span>'}</td><td class="l">${nameCell(r)}${q.spd<0&&!['Sun','Moon'].includes(r)?' R':''}<div class="ecsub">${SIGNS[sgn(q.lon)]}, ${to} дом${dg(r)?', '+dg(r):''}</div></td><td class="l">${link}</td></tr>`; });
+  const exch=[]; for(let a=1;a<=12;a++) for(let b=a+1;b<=12;b++){ if(C.P(C.ru(a)).house===b&&C.P(C.ru(b)).house===a&&C.ru(a)!==C.ru(b)) exch.push([a,b]); }
+  const self=[...Array(12).keys()].map(i=>i+1).filter(h=>C.P(C.ru(h)).house===h);
+  H.push(card('1','Картата на управителите','Къде е ключът за всяка стая.',`<div class="scroll"><table class="ectab rutab"><thead><tr><th class="t">Дом</th><th class="t l">Знак на върха</th><th class="t l">Планети в дома</th><th class="t l">Управител и къде е</th><th class="t l">Връзка</th></tr></thead><tbody>${rows.join('')}</tbody></table></div>
+    <ul class="ntul">${self.length?`<li><b>Самостоятелни домове</b> (управителят е в собствения си дом): ${self.join(', ')}. Тези теми са силни и „се движат сами“.</li>`:''}
+    ${exch.length?`<li><b>Размяна между домове</b> (управителят на единия е в другия и обратно): ${exch.map(([a,b])=>`${a} и ${b} дом (${ruArea(a)} и ${ruArea(b)})`).join('; ')}. Двете сфери са свързани неразделно: промяната в едната веднага засяга другата.</li>`:''}</ul>`,
+    'Коя сфера в живота ми е „ключът“ за най-много други сфери?'));
+  // 2. Празни домове
+  const empty=[...Array(12).keys()].map(i=>i+1).filter(h=>!C.inH(h).length);
+  const benef=['Venus','Jupiter','Sun'], malef=['Mars','Saturn','Uranus','Neptune','Pluto'];
+  H.push(card('2','Празните домове','Празният дом не е празна сфера: просто ключът е другаде (А. Руиз).',`<p class="note">При празен дом управителят на знака на върха става единственият „господар“ на дома. Домът, в който стои, показва къде се срещат възможностите; аспектите към него показват кои други сфери помагат и кои пречат. Хармоничните аспекти (секстил, тригон, съвпад с благодетел) носят лекота, а напрегнатите изискват усилие.</p>
+    <div class="ruempty">${empty.map(h=>{ const r=C.ru(h), q=C.P(r), A=C.asp.filter(x=>(x.a===r||x.b===r)).map(x=>({o:x.a===r?x.b:x.a,asp:x.asp,orb:x.o})).filter(x=>P10.includes(x.o));
+      const plus=A.filter(x=>[60,120].includes(x.asp)||(x.asp===0&&benef.includes(x.o))), minus=A.filter(x=>[90,180,150].includes(x.asp)||(x.asp===0&&malef.includes(x.o)));
+      const hs=k=>C.rules(k); const tr=r!==C.ruT(h)?` (традиционно ${yrPN(C.ruT(h))})`:'';
+      return `<div><h4>${h} дом · ${SIGNS[C.csg(h)]}</h4><p>${cap(KW.houses[h-1].area.slice(0,2).join(', '))}. Господар: <b>${yrPN(r)}</b>${tr} ${vIn2(SIGNS[sgn(q.lon)])}, ${q.house} дом${dg(r)?`, ${dg(r)}`:''}: възможностите идват чрез ${ruArea(q.house)}.</p><ul>${plus.map(x=>`<li class="ruplus">${yrPN(x.o)} (${aspOf(x.asp).n}) помага${hs(x.o).length?`: от сферата на ${hs(x.o).map(h2=>`${h2} дом`).join(', ')}`:''}</li>`).join('')}${minus.map(x=>`<li class="ruminus">${yrPN(x.o)} (${aspOf(x.asp).n}) затруднява${hs(x.o).length?`: чрез ${hs(x.o).map(h2=>`${h2} дом`).join(', ')}`:''}</li>`).join('')}${!A.length?'<li>Господарят няма аспекти: темата тече тихо и независимо от останалите сфери.</li>':''}</ul></div>`; }).join('')}</div>`,
+    'Коя празна стая в живота си пренебрегвам, защото „нищо не се случва“ там?'));
+  // 3. Управител на Асцендента
+  const as=sgn(n.hs.asc), ar=C.ru(1), aq=C.P(ar), aA=C.asp.filter(x=>(x.a===ar||x.b===ar)&&P10.includes(x.a)&&P10.includes(x.b)), arT=C.ruT(1);
+  const strong=[dg(ar)==='в своя знак'||dg(ar)==='в екзалтация',[1,4,7,10].includes(aq.house),aA.filter(x=>[60,120].includes(x.asp)).length>=2].filter(Boolean).length, weak=[dg(ar)==='в изгнание'||dg(ar)==='в падение',[6,8,12].includes(aq.house),aq.spd<0&&!['Sun','Moon'].includes(ar)].filter(Boolean).length;
+  H.push(card('3','Управителят на Асцендента','„Капитанът на кораба“: накъде отива енергията на личността (Е. Лейнбах).',`<p class="hmbig">Асцендент ${SIGNS[as]}, управител <b>${yrPN(ar)}</b> ${vIn2(SIGNS[sgn(aq.lon)])}, ${aq.house} дом${dg(ar)?` (${dg(ar)})`:''}${aq.spd<0&&!['Sun','Moon'].includes(ar)?', ретрограден':''}.</p>
+    <p>${RU_ASCH[aq.house-1]}</p>
+    <p>Знакът на управителя (${SIGNS[sgn(aq.lon)]}) оцветява начина: ${KW.signs[sgn(aq.lon)].adv.slice(0,3).join(', ')}.${sgn(aq.lon)%4!==as%4?` Стихията е различна от тази на Асцендента (${MD_ELEM[as%4]} срещу ${MD_ELEM[sgn(aq.lon)%4]}): външното поведение и вътрешният двигател се различават, другите може да ви виждат иначе, отколкото се чувствате.`:' Стихията съвпада с Асцендента: поведението и двигателят са в съгласие.'}</p>
+    ${arT!==ar?`<p>Традиционен управител: ${yrPN(arT)} ${vIn2(SIGNS[sgn(C.P(arT).lon)])}, ${C.P(arT).house} дом: втори, по-земен пласт на същата тема.</p>`:''}
+    <ul class="ntul"><li><b>Сила</b>: ${strong>weak?'силен: личността има ясна опора':weak>strong?'по-слаб: личността се гради с повече усилие и време':'средна'} (${[dg(ar),[1,4,7,10].includes(aq.house)?'ъглов дом':'',[6,8,12].includes(aq.house)?'скрит дом':'',aA.filter(x=>[60,120].includes(x.asp)).length>=2?'хармонични аспекти':'',aq.spd<0&&!['Sun','Moon'].includes(ar)?'ретрограден':''].filter(Boolean).join(', ')||'без особени достойнства'}).</li>
+    ${aA.length?`<li><b>Аспекти</b>: ${aA.map(x=>`${aspOf(x.asp).n} ${mdS(x.a===ar?x.b:x.a)} ${yrPN(x.a===ar?x.b:x.a)} (${x.o.toFixed(1)}°)`).join('; ')}. Тези планети „говорят“ направо на личността.</li>`:'<li>Управителят няма аспекти: личността е независима, но трудно получава подкрепа от другите си части.</li>'}</ul>`,
+    'Живея ли там, където е управителят на Асцендента ми, или само там, където е Асцендентът?'));
+  // 4. Рецепции и диспозитори
+  const recs=[]; P10.forEach((a,i)=>P10.slice(i+1).forEach(b=>{ const sa=sgn(C.P(a).lon), sb=sgn(C.P(b).lon); if((RUL_MOD[sa]===b||RUL_TRAD[sa]===b)&&(RUL_MOD[sb]===a||RUL_TRAD[sb]===a)) recs.push([a,b]); }));
+  const cnt=P10.map(k=>({k,n:P10.filter(x=>x!==k&&RUL_MOD[sgn(C.P(x).lon)]===k).length})).filter(x=>x.n).sort((a,b)=>b.n-a.n);
+  H.push(card('4','Рецепции и диспозитори','Кой на кого е „домакин“ (А. Оукън).',`<ul class="ntul">${recs.length?recs.map(([a,b])=>`<li><b>Взаимна рецепция ${yrPN(a)} и ${yrPN(b)}</b>: всяка е в знака на другата. Двете функции си помагат и могат да „разменят местата“ си; домовете им (${C.P(a).house} и ${C.P(b).house}) са свързани.</li>`).join(''):'<li>Няма взаимни рецепции.</li>'}
+    <li><b>Най-много „гости“ приема</b>: ${cnt.slice(0,3).map(x=>`${yrPN(x.k)} (${x.n})`).join(', ')}. Тези планети са диспозитори на много други: състоянието им се отразява на цялата карта.</li></ul>`,
+    ''));
+  // 5. Производни домове
+  const sel=store.get('ruDer','7');
+  const der=+sel, dRows=[...Array(12).keys()].map(i=>{ const dh=i+1, nh=((der-1+dh-1)%12)+1, pl=C.inH(nh); return `<tr><td><b>${dh}</b></td><td class="l">${KW.houses[dh-1].area.slice(0,2).join(', ')}</td><td>${nh}</td><td class="l">${SIGNS[C.csg(nh)]}${pl.length?': '+pl.map(x=>yrPN(x.k)).join(', '):''}</td></tr>`; });
+  H.push(card('5','Производни домове','Картата през очите на друг човек или тема: „завъртаме“ колелото (А. Оукън).',`<div class="controls"><label class="field"><span>От гледна точка на</span><select id="ruDer">${RU_DER.map(([h,t])=>`<option value="${h}" ${String(h)===sel?'selected':''}>${t} (${h} дом)</option>`).join('')}</select></label></div>
+    <p class="note">Избраният дом става „първи“. Например парите на партньора са 2 дом от 7, тоест натален 8 дом.</p>
+    <div class="scroll"><table class="ectab rutab"><thead><tr><th class="t">Производен</th><th class="t l">Тема (за ${RU_DER.find(x=>String(x[0])===sel)[1]})</th><th class="t">Натален дом</th><th class="t l">Знак и планети</th></tr></thead><tbody>${dRows.join('')}</tbody></table></div>`,''));
+  $('ruOut').innerHTML=H.join('');
+  const d=$('ruDer'); if(d) d.onchange=()=>{ store.set('ruDer',d.value); runRulers(); };
 }
 
 // =============== ЗАТЪМНЕНИЯ ===============
