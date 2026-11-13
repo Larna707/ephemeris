@@ -249,6 +249,7 @@ th{background:var(--panel)}
 .ltnum{background:linear-gradient(135deg,#e8a33d,#2f9e8f)}
 .lt2{display:grid;grid-template-columns:1fr 1fr;gap:12px}.lt2 > div{padding:12px 14px;border-radius:14px;border:1px solid var(--line);background:var(--bg);min-width:0}
 .lt2 h4{margin:0 0 4px;font-family:var(--f-head);font-size:19px}.lt2 p{margin:4px 0 0;font-size:14px}
+#mdDayOut .srgrid{grid-template-columns:repeat(auto-fill,minmax(240px,1fr))}#tab-med .controls,#tab-med .field,#tab-med select{max-width:100%;min-width:0}
 #tab-lots .ectab td{font-family:var(--f-body);white-space:normal}
 @media (max-width:640px){.lt2{grid-template-columns:1fr}}
 .mdwarn{margin:0 0 16px;padding:10px 14px;border-radius:12px;border-left:4px solid #d0603a;background:color-mix(in srgb,#d0603a 10%,transparent)}
@@ -8849,9 +8850,62 @@ function runMed(){
    <li><b>Денят:</b> храна в светлата част на деня. <b>Сезонът:</b> лятото е за напълване и движение, зимата за олекотяване и покой.</li>
    <li><b>Уран (84 г.):</b> вие сте във ${uPh}.</li></ul>`));
   // 7. Планети и органи (справка)
-  H.push(card('7','Справка: планети и тяло','„Както горе, така и долу.“',`<div class="scroll"><table class="ectab"><thead><tr><th class="t l">Планета</th><th class="t l">Свързана с</th><th class="t l">Във вашата карта</th><th class="t l">Състояние</th></tr></thead><tbody>${P10.map(k=>{ const q=C.P(k), A=C.affl(k), Sp=C.supp(k); return `<tr${A.length?' class="rxnow"':''}><td class="l">${nameCell(k)}</td><td class="l">${MD_PL[k]}</td><td class="l">${SIGNS[sgn(q.lon)]}, ${q.house} дом</td><td class="l">${A.length?A.map(mdAffTxt).join('<br>'):'<span class="ecsub">без напрегнати аспекти от злосторници</span>'}${Sp.length?`<div class="ecsub">подкрепа: ${Sp.map(mdSupTxt).join(', ')}</div>`:''}</td></tr>`; }).join('')}</tbody></table></div>
+  H.push(card('7','Ден за операция, процедура или преглед','Как изглежда небето в избрания ден спрямо вашата карта.',`<div class="controls"><label class="field"><span>Дата</span><input type="date" id="mdDayD" min="1900-01-01" max="2100-12-31"></label><label class="field"><span>Час</span><input type="time" id="mdDayT"></label><label class="field"><span>Част на тялото</span><select id="mdDayZ">${MD_ZONE.map((z,i)=>`<option value="${i}">${SIGNS[i]}: ${z}</option>`).join('')}</select></label><button type="button" class="primary" id="mdDayGo">Покажи</button></div><div id="mdDayOut"></div>`));
+  H.push(card('8','Справка: планети и тяло','„Както горе, така и долу.“',`<div class="scroll"><table class="ectab"><thead><tr><th class="t l">Планета</th><th class="t l">Свързана с</th><th class="t l">Във вашата карта</th><th class="t l">Състояние</th></tr></thead><tbody>${P10.map(k=>{ const q=C.P(k), A=C.affl(k), Sp=C.supp(k); return `<tr${A.length?' class="rxnow"':''}><td class="l">${nameCell(k)}</td><td class="l">${MD_PL[k]}</td><td class="l">${SIGNS[sgn(q.lon)]}, ${q.house} дом</td><td class="l">${A.length?A.map(mdAffTxt).join('<br>'):'<span class="ecsub">без напрегнати аспекти от злосторници</span>'}${Sp.length?`<div class="ecsub">подкрепа: ${Sp.map(mdSupTxt).join(', ')}</div>`:''}</td></tr>`; }).join('')}</tbody></table></div>
    ${kb.MEDREF?`<details><summary>Справочник за консултации (лични бележки)</summary><div class="ntx">${kb.MEDREF}</div></details>`:''}`));
   $('mdOut').innerHTML=H.join('');
+  const dd=store.get('mdDay',null); $('mdDayD').value=dd&&dd.d||new Date(Date.now()+864e5).toISOString().slice(0,10); $('mdDayT').value=dd&&dd.t||'09:00'; $('mdDayZ').value=dd&&dd.z!=null?dd.z:9;
+  $('mdDayGo').onclick=()=>{ store.set('mdDay',{d:$('mdDayD').value,t:$('mdDayT').value,z:$('mdDayZ').value}); mdDay(n); };
+  if(dd) mdDay(n);
+}
+const MD_TIP={Neptune:'кажете на лекаря и анестезиолога за всички лекарства и досегашни реакции; запишете указанията и ги повторете, за да няма неясноти; оставете време за сън и почивка',
+ Mars:'спазвайте стриктно указанията против възпаление и за раната; не бързайте с натоварването',
+ Saturn:'възстановяването може да иска повече търпение и дисциплина; рехабилитацията е ключът',
+ Uranus:'възможни са промени в графика в последния момент; имайте резервен план и спокойствие',
+ Pluto:'дълбоко обновяване: старото си отива, новото иска време да се „сработи“',
+ Jupiter:'подкрепа и добри специалисти; внимание само с прекаляването (храна, натоварване) след това',
+ Venus:'мек, подкрепящ фон; помагат грижата, красотата и приятната среда',
+ Mercury:'проверете документи, часове и указания; задавайте въпроси',
+ Sun:'жизнената сила е в центъра на вниманието; почивката я възстановява',
+ Moon:'емоционалният фон влияе на възстановяването; близките и спокойствието помагат'};
+function mdDay(n){
+  const ds=$('mdDayD').value, tm=$('mdDayT').value||'09:00', z=+$('mdDayZ').value, out=$('mdDayOut');
+  if(!ds){ out.innerHTML='<p class="note">Изберете дата.</p>'; return; }
+  const d=localToUTC(ds,tm,'Europe/Sofia',2), T=AC.T(d), K=['Sun','Moon','Mercury','Venus','Mars','Jupiter','Saturn','Uranus','Neptune','Pluto','Node'];
+  const tr=K.map(k=>({k,l:AC.lon(k,T),s:AC.speed(k,T)})), ml=tr[1].l, sl=tr[0].l, el=((ml-sl)%360+360)%360, ms=sgn(ml);
+  const good=[], warn=[], info=[];
+  // Луната
+  if (ms===z) warn.push(`Луната е в ${SIGNS[ms]}, знака на избраната част на тялото. По традиция (още от Хипократ) това се избягва; ако датата е определена от лекарите, просто бъдете по-внимателни с натоварването в първите дни.`);
+  else good.push(`Луната е ${vIn2(SIGNS[ms])}, не в знака на избраната част (${SIGNS[z]}).`);
+  if (ms===(z+6)%12) info.push(`Луната е в противоположния знак (${SIGNS[ms]}): по традиция също се гледа с внимание, но по-слабо.`);
+  const lun=AC.lunations(new Date(d.getTime()-16*864e5),new Date(d.getTime()+16*864e5)).filter(x=>x.kind==='phase'&&(x.q===0||x.q===2));
+  const nextFull=lun.find(x=>x.q===2&&x.date>d), nextNew=lun.find(x=>x.q===0&&x.date>d), toFull=nextFull?(nextFull.date-d)/864e5:99;
+  info.push(`Луната е ${el<180?'растяща':'намаляваща'}${nextFull?`, пълнолуние на ${fmtD(nextFull.date)}`:''}${nextNew?`, новолуние на ${fmtD(nextNew.date)}`:''}.`);
+  if (toFull<=2||Math.abs(el-180)<25) warn.push('Денят е около пълнолуние: някои школи го избягват заради по-силен оток. Това е народно правило, не изискване.');
+  else if (el>180) good.push('Намаляващата Луна по традиция се смята за по-благоприятна за процедури (по-малко оток).');
+  try{ const tIn=signEdge('Moon',d,-1), tOut=signEdge('Moon',d,1), vo=tIn&&tOut?voidFor(tIn,tOut):null; if(vo&&vo.d<d) warn.push(`Луната е „без курс“ до ${fmtDT(tOut)}: по традиция нещата „не следват плана“; за важни решения е по-добре след това.`); else good.push('Луната има курс (не е „без курс“).');
+    const nxt=['Sun','Mercury','Venus','Mars','Jupiter','Saturn'].flatMap(k=>perfs('Moon',k,d,tOut||new Date(d.getTime()+2*864e5),0.02).map(x=>({...x,k}))).sort((a,b)=>a.d-b.d)[0];
+    if(nxt){ const ok=[60,120].includes(nxt.asp)||(['Venus','Jupiter'].includes(nxt.k)&&nxt.asp===0); (ok?good:info).push(`Луната отива към ${aspOf(nxt.asp).n} ${mdS(nxt.k)} ${yrPN(nxt.k)} (${fmtDT(nxt.d)})${ok?': хармоничен аспект.':'.'}`); }
+  }catch(e){}
+  ['Mercury','Venus','Mars'].forEach(k=>{ const t=tr.find(x=>x.k===k); if(t.s<0) warn.push(`${yrPN(k)} е ретрограден: ${k==='Mercury'?'проверете два пъти документи и указания':k==='Mars'?'енергията за възстановяване е по-бавна':'по-малко удоволствие от нещата, повече търпение'}.`); });
+  if (!['Mercury','Mars'].some(k=>tr.find(x=>x.k===k).s<0)) good.push('Меркурий и Марс са директни.');
+  // транзити към наталната карта
+  const NP=n.points.filter(p=>!['Lilith','SNode'].includes(p.k)), hits=[];
+  tr.forEach(t=>NP.forEach(np=>[0,60,90,120,180,150].forEach(a=>{ const o=Math.abs(Math.abs(dif(t.l,np.lon))-a), orb=t.k==='Moon'?4:['Sun','Mercury','Venus','Mars'].includes(t.k)?2:1.5; if(o<=orb) hits.push({t:t.k,np:np.k,a,o}); })));
+  const slow=['Jupiter','Saturn','Uranus','Neptune','Pluto'];
+  const easy=x=>[60,120].includes(x.a)||(x.a===0&&['Venus','Jupiter','Sun'].includes(x.t)), hard=x=>[90,180,150].includes(x.a)||(x.a===0&&['Mars','Saturn','Uranus','Neptune','Pluto'].includes(x.t));
+  const span=(x)=>{ if(!slow.includes(x.t)) return ''; const np=NP.find(p=>p.k===x.np), H=AC.transitHits(x.t,np.lon,x.a,new Date(d.getTime()-730*864e5),new Date(d.getTime()+730*864e5)); if(H.length<2) return ''; return ` Бавен транзит: точни преминавания ${H.map(h=>fmtD(h.date)).join(', ')}. Това е фон за целия период, не за конкретния ден.`; };
+  const zr=RUL_MOD[z], zrT=RUL_TRAD[z];
+  const row=x=>{ const zone=[zr,zrT].includes(x.np)?` <b>(${yrPN(x.np)} управлява ${SIGNS[z]}: пряко към избраната зона)</b>`:''; return `<li class="${easy(x)?'ruplus':hard(x)?'ruminus':''}">${yrPN(x.t)} ${aspOf(x.a).n} натален ${yrPN(x.np)} (${x.o.toFixed(1)}°)${zone}.${span(x)}</li>`; };
+  const H2=hits.sort((a,b)=>(slow.includes(b.t)-slow.includes(a.t))||a.o-b.o);
+  const tipK=[...new Set(H2.filter(hard).map(x=>x.t))].filter(k=>MD_TIP[k]);
+  out.innerHTML=`<div class="srgrid">
+    <div><h4>Подкрепящо <span class="srok">${good.length}</span></h4><ul>${good.map(x=>`<li>${x}</li>`).join('')}</ul></div>
+    <div><h4>За внимание <span class="${warn.length?'srmid':'srok'}">${warn.length}</span></h4><ul>${warn.map(x=>`<li>${x}</li>`).join('')||'<li>Няма традиционни възражения за този ден.</li>'}</ul></div>
+    <div><h4>Фон</h4><ul>${info.map(x=>`<li>${x}</li>`).join('')}</ul></div></div>
+    <h4 class="hmh">Транзити към вашата карта (${fmtD(d)}, ${tm} ч.)</h4><ul class="ntul">${H2.map(row).join('')||'<li>Няма тесни транзити.</li>'}</ul>
+    ${tipK.length?`<h4 class="hmh">Практично</h4><ul class="ntul">${tipK.map(k=>`<li><b>${yrPN(k)}</b>: ${MD_TIP[k]}.</li>`).join('')}</ul>`:''}
+    <p class="note">Зелено: хармонични аспекти; червено: напрегнати. Бавните транзити (Юпитер до Плутон) траят месеци и описват общия фон, не конкретния ден. Ако датата е определена от лекарите, тя е правилната: картата само подсказва за какво да внимавате и кое ви подкрепя.</p>`;
 }
 
 
