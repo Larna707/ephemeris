@@ -8939,6 +8939,23 @@ function runAstroPsy(){
     <h4 class="hmh">Последни преминати</h4><ul class="ntul">${past.map(x=>`<li><b>${fmtD(x.d)}</b>${x.n>1?` – ${fmtD(x.last)}`:''} (${age(x.d)} г.): ${x.txt}.</li>`).join('')}</ul>
     <h4 class="hmh">Предстоящи</h4><ul class="ntul">${fut.map(x=>`<li><b>${fmtD(x.d)}</b>${x.n>1?` – ${fmtD(x.last)}`:''} (${age(x.d)} г.): ${x.txt}.</li>`).join('')}</ul>`,
     'Какво научих при последния праг и какво искам да взема със себе си в следващия?'));
+  // 8. Хороскоп на лунния възел (Хубер)
+  const NNl=C.P('Node').lon, mnH=l=>Math.floor(norm(NNl-l)/30)+1;
+  const ageY=(Date.now()-n.date)/(365.2422*864e5);
+  const radAP=t=>{ const h=Math.min(12,Math.floor(t/6)+1), fr=(t%6)/6, a=n.hs.cusp[h], b=n.hs.cusp[h%12+1]; return norm(a+norm(b-a)*fr); };
+  const mnAP=t=>norm(NNl-5*t);
+  const meet=[]; let prev=null; for(let t=0;t<=90;t+=0.05){ const d=dif(radAP(t),mnAP(t)); if(prev!=null&&Math.sign(d)!==Math.sign(prev)&&Math.abs(d)<20) meet.push({t,kind:'среща'}); const d2=dif(radAP(t),mnAP(t)+180); if(prev!=null&&t>0.05){ const p2=dif(radAP(t-0.05),mnAP(t-0.05)+180); if(Math.sign(d2)!==Math.sign(p2)&&Math.abs(d2)<20) meet.push({t,kind:'опозиция'}); } prev=d; }
+  const meetU=meet.filter((m,i)=>m.t>=1&&!meet.slice(0,i).some(x=>x.kind===m.kind&&m.t-x.t<4)); meet.length=0; meet.push(...meetU);
+  const mnRows=P10.map(k=>({k,h:mnH(C.P(k).lon)})).sort((a,b)=>a.h-b.h);
+  const apNow=radAP(ageY), mnNow=mnAP(ageY);
+  H.push(card('8','Хороскопът на лунния възел (Б. и Л. Хубер)','Огледалната карта на сянката: какво носим от миналото и не осъзнаваме.',`<p class="note">Северният възел става Асцендент, а домовете (по 30°) вървят по часовниковата стрелка, обратно на зодиака. Планета, която в лунно-възловата карта попада в друг дом, показва несъзнателен мотив: в тази сфера реагираме „по стар сценарий“, често чрез хора и ситуации, които ни се струват дошли отвън.</p>
+    <div class="scroll"><table class="ectab"><thead><tr><th class="t l">Планета</th><th class="t l">Натален дом</th><th class="t l">Дом на сянката</th><th class="t l">Несъзнателен мотив в сферата на</th></tr></thead><tbody>${mnRows.map(r=>`<tr${r.h===C.P(r.k).house?' class="rxnow"':''}><td class="l">${nameCell(r.k)}</td><td class="l">${C.P(r.k).house}</td><td class="l"><b>${r.h}</b></td><td class="l">${KW.houses[r.h-1].area.slice(0,2).join(', ')}${r.h===C.P(r.k).house?' (съвпада с наталния дом: темата е осъзната и цялостна)':''}</td></tr>`).join('')}</tbody></table></div>
+    <h4 class="hmh">Двете възрастови точки</h4>
+    <ul class="ntul"><li><b>Възрастовата точка</b> (съзнателното развитие) минава по 6 години през всеки дом от Асцендента нататък. Сега е в <b>${Math.min(12,Math.floor(ageY/6)+1)} дом</b> (${KW.houses[Math.min(12,Math.floor(ageY/6)+1)-1].area[0]}), ${SIGNS[sgn(apNow)]}.</li>
+    <li><b>Лунно-възловата възрастова точка</b> (несъзнаваното) върви обратно, 5° годишно от Северния възел. Сега е в ${SIGNS[sgn(mnNow)]}, в наталния ${AC.houseOf(mnNow,n.hs.cusp)} дом.</li>
+    ${meet.length?`<li><b>Срещи и опозиции на двете точки</b> (около ±2 години): ${meet.map(m=>`${m.kind} на ${m.t.toFixed(0)} г. (${n.date.getUTCFullYear()+Math.round(m.t)})`).join('; ')}. Това са прагове, на които съзнателното и несъзнаваното се срещат: време за важни вътрешни обрати.</li>`:''}</ul>
+    <p class="note">Възрастовата точка тук е изчислена с домовете на сайта (Плацидус) и линейно вътре в дома; Хубер използва домове по Кох, затова е възможна разлика до около година.</p>`,
+    'Кой стар сценарий се повтаря в живота ми и в коя сфера?'));
   $('apOut').innerHTML=H.join('');
 }
 
