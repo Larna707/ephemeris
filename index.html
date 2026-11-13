@@ -229,6 +229,16 @@ th{background:var(--panel)}
 .pschan > div{display:grid;grid-template-columns:118px 1fr 34px;gap:8px;align-items:center;font-size:13px}
 .pschan .bar{height:9px;border-radius:5px;background:var(--soft);overflow:hidden}.pschan .bar i{display:block;height:100%;background:linear-gradient(90deg,#7a6cf0,#2f9e8f)}
 @media (max-width:640px){.psel{grid-template-columns:1fr 1fr}.pshemi{grid-template-columns:1fr}}
+#synRel .ectab td{font-family:var(--f-body)}#synRel .hmh{font-size:17px;margin:18px 0 6px}#synRel .hmbig{font-size:16px}
+.srgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;margin:10px 0}
+.srgrid > div{padding:12px 14px;border-radius:14px;border:1px solid var(--line);background:var(--bg);min-width:0}
+.srgrid h4{margin:0 0 4px;font-size:15px;display:flex;justify-content:space-between;gap:8px}
+.srgrid h4 span{font-size:12px;padding:1px 9px;border-radius:9px;white-space:nowrap}
+.srok{background:color-mix(in srgb,#2f9e8f 22%,transparent)}.srmid{background:color-mix(in srgb,#e8a33d 25%,transparent)}.srbad{background:color-mix(in srgb,#d0603a 22%,transparent)}
+.srgrid ul{margin:4px 0 0;padding-left:18px;font-size:13px}.srgrid p{margin:4px 0 0;font-size:13px}
+.srtype{display:grid;gap:6px;margin:8px 0}.srtype > div{display:grid;grid-template-columns:190px 1fr 36px;gap:10px;align-items:center;font-size:13px}
+.srtype .bar{height:10px;border-radius:5px;background:var(--soft);overflow:hidden}.srtype .bar i{display:block;height:100%;background:linear-gradient(90deg,#e05a8a,#7a6cf0)}
+@media (max-width:640px){.srtype > div{grid-template-columns:120px 1fr 30px}}
 .mdwarn{margin:0 0 16px;padding:10px 14px;border-radius:12px;border-left:4px solid #d0603a;background:color-mix(in srgb,#d0603a 10%,transparent)}
 .mdnum{background:linear-gradient(135deg,#2f9e8f,#d0603a)}
 .mdgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;margin:10px 0}
@@ -830,6 +840,12 @@ th{background:var(--panel)}
         <h2>Композитна карта</h2>
         <p class="note">Средната точка между планетите на двамата. Описва връзката като отделно цяло: какъв „характер“ има самата връзка.</p>
         <div class="scroll"><table id="synComp"></table></div>
+      </div>
+      <div class="panel" style="margin-top:18px">
+        <h2>Анализ на връзката</h2>
+        <p class="note">Петте условия за устойчив съюз по Шестопалов (орбис 8° за хармоничните и 6° за напрегнатите аспекти), типът на връзката, формулата на любовта и картата на Дейвисън. Това са тенденции, а не присъда: показват къде връзката тече лесно и къде иска съзнателна работа.</p>
+        <div class="controls"><label class="field"><span id="srSexAL">Пол</span><select id="srSexA"><option value="f">жена</option><option value="m">мъж</option></select></label><label class="field"><span id="srSexBL">Пол</span><select id="srSexB"><option value="f">жена</option><option value="m">мъж</option></select></label></div>
+        <div id="synRel"></div>
       </div>
     </div>
   </section>
@@ -9727,10 +9743,99 @@ function runSyn(){
     return `<tr><td class="l">${nameCell(a.k)}</td><td>${L(m)}</td><td class="l" style="font-family:var(--f-body);white-space:normal">${t}</td></tr>`;
   }).join('')+'</tbody>';
   synText=lines.join('\n');
+  synRel(pA,pB,nA,nB,A,B);
 }
 $('synB').onchange=()=>{ store.set('synB',$('synB').value); runSyn(); };
 $('synSwap').onclick=()=>{ const b=$('synB').value; if(!b) return; store.set('synB',activeId); activeId=b; saveProfiles(); renderProfileSel(); profileChanged(); runSyn(); };
 $('synCopy').onclick=()=>copyText(synText);
+
+
+// =============== АНАЛИЗ НА ВРЪЗКАТА ===============
+function srAsp(a,b,list,orb){ const d=Math.abs(dif(a,b)); for(const x of list){ const o=Math.abs(d-x); if(o<=orb) return {asp:x,o}; } return null; }
+function srRel(nA,nB,sexA,sexB,A,B){
+  const P=(n,k)=>k==='ASC'?n.hs.asc:n.pts.find(x=>x.k===k).lon, H=[0,90,180], G=[0,60,120];
+  // 1. конфликтност
+  const CF=['Mars','Jupiter','Saturn','Pluto'], conf=[];
+  CF.forEach(a=>CF.forEach(b=>{ const r=srAsp(P(nA,a),P(nB,b),H,6); if(r) conf.push({a,b,...r}); }));
+  const excited=(n,k)=>CF.filter(x=>x!==k).some(x=>srAsp(P(n,k),P(n,x),H,6));
+  conf.forEach(c=>{ c.exA=excited(nA,c.a); c.exB=excited(nB,c.b); c.soft=!c.exA&&!c.exB; });
+  const confN=conf.filter(c=>!c.soft).length;
+  // 2. привличане
+  const sx=(sex)=>sex==='m'?['Moon','Venus']:['Sun','Mars'];
+  const attr=[]; sx(sexA).forEach(a=>sx(sexB).forEach(b=>{ if(sexA===sexB&&a===b) return; const lA=P(nA,a), lB=P(nB,b); const d=Math.abs(dif(lA,lB)); const r=[0,60,90,120,180].map(x=>({a:x,o:Math.abs(d-x)})).find(x=>x.o<=8);
+    if(r){ const marsConj=r.a===0&&([a,b].includes('Mars'))&&([a,b].some(k=>['Moon','Venus'].includes(k))); attr.push({a,b,asp:r.a,o:r.o,easy:[60,120].includes(r.a)||(r.a===0&&!marsConj)}); } }));
+  const elOf=(n,ks)=>ks.map(k=>sgn(P(n,k))%4), wet=e=>e===1||e===3, lvl=(n,sex)=>{ const e=elOf(n,sx(sex)); const w=e.filter(wet).length; return w===2?'високо':w===0?'по-ниско':'средно'; };
+  // 3. психологическа
+  const psy=['Sun','Moon','Venus'].map(k=>{ const r=srAsp(P(nA,k),P(nB,k),[0,60,90,120,180],8); return {k,r,easy:!!r&&[0,60,120].includes(r.asp)}; });
+  // 4-5. печати
+  const seals=(n1,n2)=>({heavy:['Sun','Moon'].map(k=>{ const r=srAsp(P(n1,'Saturn'),P(n2,k),H,6); return r?{k,...r}:null; }).filter(Boolean),
+    joy:['Sun','Moon'].map(k=>{ const r=srAsp(P(n1,'Jupiter'),P(n2,k),G,8); return r?{k,...r}:null; }).filter(Boolean)});
+  const sAB=seals(nA,nB), sBA=seals(nB,nA);
+  const c1=confN<3, c2=attr.some(x=>x.easy), c3=psy.some(x=>x.easy), c4=!sAB.heavy.length&&!sBA.heavy.length, c5=sAB.joy.length||sBA.joy.length;
+  // тип
+  const pers=['Sun','Moon','Mercury','Venus','Mars','ASC'], all=[];
+  ['Sun','Moon','Mercury','Venus','Mars','Jupiter','Saturn','Uranus','Neptune','Pluto','Node','ASC'].forEach(a=>['Sun','Moon','Mercury','Venus','Mars','Jupiter','Saturn','Uranus','Neptune','Pluto','Node','ASC'].forEach(b=>{ const r=srAsp(P(nA,a),P(nB,b),[0,60,90,120,180],a==='Node'||b==='Node'?4:6); if(r) all.push({a,b,...r}); }));
+  const has=(x,set1,set2)=>(set1.includes(x.a)&&set2.includes(x.b))||(set1.includes(x.b)&&set2.includes(x.a));
+  const sc=f=>all.filter(f).reduce((s,x)=>s+(x.o<2?1.5:1),0);
+  const TY=[['Привличане и романтика',sc(x=>has(x,['Venus'],['Mars'])||has(x,['Venus','Mars'],['Sun','Moon','ASC']))],
+    ['Емоционална близост',sc(x=>has(x,['Moon'],['Sun','Moon','Venus','ASC']))],
+    ['Разбиране и общуване',sc(x=>has(x,['Mercury'],['Sun','Moon','Mercury','Venus','ASC','Jupiter']))],
+    ['Трайност и ангажимент',sc(x=>has(x,['Saturn'],['Sun','Moon','Venus','ASC'])&&[0,60,120].includes(x.asp))+sc(x=>has(x,['Sun'],['Moon'])&&x.asp===0)],
+    ['Растеж и подкрепа',sc(x=>has(x,['Jupiter'],pers))],
+    ['Съдбовност (възли)',sc(x=>has(x,['Node'],pers))],
+    ['Преобразяване (Плутон)',sc(x=>has(x,['Pluto'],pers))],
+    ['Свобода и изненади (Уран)',sc(x=>has(x,['Uranus'],pers))],
+    ['Мечта и идеализация (Нептун)',sc(x=>has(x,['Neptune'],pers))],
+    ['Уроци и граници (Сатурн)',sc(x=>has(x,['Saturn'],pers)&&[90,180].includes(x.asp))]].sort((a,b)=>b[1]-a[1]);
+  // формула на любовта
+  const love=(n)=>{ const el=h=>{ const ks=new Set([RUL_MOD[sgn(n.hs.cusp[h])],RUL_TRAD[sgn(n.hs.cusp[h])]]); n.pts.filter(x=>x.house===h&&P10.includes(x.k)).forEach(x=>ks.add(x.k)); return [...ks]; };
+    const e5=el(5), e7=el(7), hits=[]; e5.forEach(a=>e7.forEach(b=>{ if(a===b) return; const r=srAsp(P(n,a),P(n,b),G,8); if(r) hits.push(`${yrPN(a)} ${aspOf(r.asp).n} ${yrPN(b)}`); }));
+    const ben=[4,7].map(h=>n.pts.filter(x=>x.house===h&&['Sun','Jupiter','Venus'].includes(x.k)).map(x=>`${yrPN(x.k)} в ${h} дом`)).flat();
+    return {e5,e7,hits:[...new Set(hits)],ben}; };
+  const lA=love(nA), lB=love(nB);
+  const ascA=sgn(nA.hs.asc), ascB=sgn(nB.hs.asc), sunA=sgn(P(nA,'Sun')), sunB=sgn(P(nB,'Sun'));
+  const apple=[]; if(ascA===(ascB+6)%12) apple.push('Асцендентът на единия е Десцендентът на другия'); if(ascA===sunB) apple.push(`Асцендентът на ${A} е слънчевият знак на ${B}`); if(ascB===sunA) apple.push(`Асцендентът на ${B} е слънчевият знак на ${A}`);
+  const ascR=srAsp(nA.hs.asc,nB.hs.asc,[0,60,90,120,180],6);
+  // периоди на изостряне
+  const now=new Date(), to=new Date(now.getTime()+365*864e5), hot=[];
+  conf.filter(c=>!c.soft).forEach(c=>[[nA,c.a,A],[nB,c.b,B]].forEach(([n,k,who])=>['Saturn','Jupiter','Mars'].forEach(t=>AC.transitHits(t,P(n,k),0,now,to).forEach(h=>hot.push({d:h.date,t:`транзитен ${yrPN(t)} минава през ${yrPN(k)} на ${who}`})))));
+  const seen=new Set(), HOT=hot.sort((a,b)=>a.d-b.d).filter(x=>{ const k=x.t+Math.round(x.d/(20*864e5)); if(seen.has(k)) return false; seen.add(k); return true; }).slice(0,8);
+  return {conf,confN,attr,lvA:lvl(nA,sexA),lvB:lvl(nB,sexB),psy,sAB,sBA,c:[c1,c2,c3,c4,c5],TY,lA,lB,apple,ascR,HOT};
+}
+function srDavison(pA,pB){
+  const tA=localToUTC(pA.date,pA.time,pA.tz,pA.off), tB=localToUTC(pB.date,pB.time,pB.tz,pB.off), t=new Date((tA.getTime()+tB.getTime())/2);
+  const lat=(+pA.lat + +pB.lat)/2, lon=(+pA.lon + +pB.lon)/2;
+  return {t,lat,lon,n:AC.chart(t,lat,lon)};
+}
+function synRel(pA,pB,nA,nB,A,B){
+  const kA='sex_'+pA.id, kB='sex_'+pB.id; $('srSexA').value=store.get(kA,'f'); $('srSexB').value=store.get(kB,'m');
+  $('srSexAL').textContent=`Пол: ${A}`; $('srSexBL').textContent=`Пол: ${B}`;
+  $('srSexA').onchange=()=>{ store.set(kA,$('srSexA').value); runSyn(); }; $('srSexB').onchange=()=>{ store.set(kB,$('srSexB').value); runSyn(); };
+  const R=srRel(nA,nB,$('srSexA').value,$('srSexB').value,A,B), cnt=R.c.filter(Boolean).length, eA=escapeHtml(A), eB=escapeHtml(B);
+  const tag=(st,t)=>`<span class="${st}">${t}</span>`, an=a=>aspOf(a).n;
+  const H=[];
+  H.push(`<p class="hmbig">Изпълнени са <b>${cnt} от 5</b> условия за устойчив съюз.${R.c[0]&&R.c[3]?' Двете най-важни (малко конфликтни аспекти и без „печат на тежест“) са налице: добра основа за трайност.':' Поне едно от двете най-важни условия (1 и 4) липсва: връзката има нужда от повече съзнателна работа, търпение и уважение към различията.'}</p>`);
+  const confTag=R.confN===0?tag('srok','спокойно'):R.confN<3?tag('srmid','умерено'):tag('srbad','силно');
+  const attrE=R.attr.filter(x=>x.easy), attrH=R.attr.filter(x=>!x.easy);
+  H.push(`<div class="srgrid">
+   <div><h4>1. Конфликтност ${confTag}</h4><p>Напрегнати аспекти между Марс, Юпитер, Сатурн и Плутон на двамата: <b>${R.conf.length}</b>${R.conf.length?`, активни ${R.confN}`:''}.</p>${R.conf.length?`<ul>${R.conf.map(c=>`<li>${yrPN(c.a)} (${eA}) ${an(c.asp)} ${yrPN(c.b)} (${eB}), ${c.o.toFixed(1)}°${c.soft?': смекчен, и двете планети са спокойни в собствените карти':''}</li>`).join('')}</ul>`:''}<p class="note">При 3 и повече активни аспекта търканията стават основна тема. Спокойните планети се помиряват бързо; „възбудените“ (с напрегнати аспекти в собствената карта) помнят дълго.</p></div>
+   <div><h4>2. Привличане ${attrE.length?tag('srok','хармонично'):attrH.length?tag('srmid','само напрегнато'):tag('srbad','слабо')}</h4><p>Планетите на привличането: при мъжа Луна и Венера, при жената Слънце и Марс.</p>${R.attr.length?`<ul>${R.attr.map(x=>`<li>${yrPN(x.a)} (${eA}) ${an(x.asp)} ${yrPN(x.b)} (${eB})${x.easy?'':': искри, но и неравен ритъм'}</li>`).join('')}</ul>`:'<p>Няма мажорни аспекти между тези планети: връзката е по-скоро приятелска, отколкото страстна.</p>'}<p class="note">Ниво на потребност от физическа близост (земя и вода го повишават): ${eA} ${R.lvA}, ${eB} ${R.lvB}.${R.lvA!==R.lvB?' Различието иска договаряне.':''}</p></div>
+   <div><h4>3. Психологическо разбиране ${R.c[2]?tag('srok','има'):tag('srmid','слабо')}</h4><ul>${R.psy.map(x=>`<li>${yrPN(x.k)} – ${yrPN(x.k)}: ${x.r?`${an(x.r.asp)} ${x.r.o.toFixed(1)}° (${x.easy?'хармония':'напрежение'})`:'няма аспект'}: ${({Sun:'разбиране на ниво съзнание и цели',Moon:'емоционален ритъм, бит, навици',Venus:'симпатия и вкусове'})[x.k]}</li>`).join('')}</ul></div>
+   <div><h4>4. „Печат на тежест“ ${R.c[3]?tag('srok','няма'):tag('srbad','има')}</h4><p>Сатурн на единия в напрегнат аспект със Слънцето или Луната на другия.</p>${[...R.sAB.heavy.map(x=>`Сатурн на ${eA} ${an(x.asp)} ${yrPN(x.k)} на ${eB}: по-тежко е за ${eB}`),...R.sBA.heavy.map(x=>`Сатурн на ${eB} ${an(x.asp)} ${yrPN(x.k)} на ${eA}: по-тежко е за ${eA}`)].map(t=>`<p>${t}. Този, чиито светила „притиска“ Сатурн, често се чувства ограничаван или критикуван; другият може и да не го забелязва. Помага открит разговор за свободата и признанието.</p>`).join('')}</div>
+   <div><h4>5. „Печат на щастие“ ${R.c[4]?tag('srok','има'):tag('srmid','няма')}</h4><p>Юпитер на единия в хармоничен аспект със Слънцето или Луната на другия.</p>${[...R.sAB.joy.map(x=>`Юпитер на ${eA} ${an(x.asp)} ${yrPN(x.k)} на ${eB}: ${eB} расте и се чувства подкрепен(а)`),...R.sBA.joy.map(x=>`Юпитер на ${eB} ${an(x.asp)} ${yrPN(x.k)} на ${eA}: ${eA} расте и се чувства подкрепен(а)`)].map(t=>`<p>${t}.</p>`).join('')}</div>
+   <div><h4>Асцендентите</h4><p>${R.ascR?`${an(R.ascR.asp)} между Асцендентите (${R.ascR.o.toFixed(1)}°).`:'Няма аспект между Асцендентите.'}${R.apple.length?` „Половинки на една ябълка“: ${R.apple.join('; ')}.`:''}</p></div>
+  </div>`);
+  const mx=R.TY[0][1]||1;
+  H.push(`<h4 class="hmh">Тип на връзката</h4><p>Водещи теми: <b>${R.TY.filter(x=>x[1]>0).slice(0,3).map(x=>x[0].toLowerCase()).join(', ')||'няма изразени'}</b>.</p><div class="srtype">${R.TY.map(([t,v])=>`<div><span>${t}</span><span class="bar"><i style="width:${v/mx*100}%"></i></span><b>${v.toFixed(1)}</b></div>`).join('')}</div>`);
+  const lv=(L,who)=>`<div><h4>${who} ${L.hits.length>=3?tag('srok','силна'):L.hits.length?tag('srmid','частична'):tag('srbad','няма')}</h4><p>Елементи на 5 дом: ${L.e5.map(yrPN).join(', ')}; на 7 дом: ${L.e7.map(yrPN).join(', ')}.</p>${L.hits.length?`<p>Хармонични връзки: ${L.hits.join('; ')}.</p>`:''}${L.ben.length?`<p>Добри планети в 4 или 7 дом: ${L.ben.join(', ')}: субективно щастлив семеен живот.</p>`:''}</div>`;
+  H.push(`<h4 class="hmh">Формулата на любовта (V+VII) в наталните карти</h4><p class="note">Хармонични аспекти между управителите и планетите на 5 дом (любов) и 7 дом (брак). Три и повече показват силна способност за сериозна любов. Ако е силна само при единия, единият обича повече.</p><div class="srgrid">${lv(R.lA,eA)}${lv(R.lB,eB)}</div>`);
+  if(R.HOT.length) H.push(`<h4 class="hmh">Кога търканията се изострят (следващите 12 месеца)</h4><p class="note">Транзитите през планетите на конфликтните аспекти „включват“ напрежението. Това са дни за повече търпение, не за важни решения.</p><ul class="ntul">${R.HOT.map(x=>`<li><b>${fmtD(x.d)}</b>: ${x.t}</li>`).join('')}</ul>`);
+  const D=srDavison(pA,pB), dn=D.n, dA=courseAspects(dn).filter(x=>P10.concat(['ASC']).includes(x.a)&&P10.concat(['ASC']).includes(x.b)).filter(x=>['Sun','Moon','Venus','Mars','ASC'].includes(x.a)||['Sun','Moon','Venus','Mars','ASC'].includes(x.b)).filter(x=>[0,90,120,180,60].includes(x.asp)).slice(0,8);
+  H.push(`<h4 class="hmh">Карта на Дейвисън</h4><p class="note">Истинска карта, изчислена за средата във времето (${fmtDT(D.t)} UTC) и в пространството (${D.lat.toFixed(2)}°, ${D.lon.toFixed(2)}°) между двете раждания. За разлика от композита тя има реални домове и може да се гледат транзити към нея.</p>
+   <div class="scroll"><table class="ectab"><thead><tr><th class="t l">Точка</th><th class="t l">Знак и дом</th><th class="t l">Значение за връзката</th></tr></thead><tbody>${['Sun','Moon','Mercury','Venus','Mars','Jupiter','Saturn'].map(k=>{ const q=dn.pts.find(x=>x.k===k); return `<tr><td class="l">${nameCell(k)}</td><td class="l">${SIGNS[sgn(q.lon)]}, ${q.house} дом</td><td class="l">${cap(kfn(k))}: ${KW.signs[sgn(q.lon)].adv.slice(0,2).join(', ')}; сфера: ${KW.houses[q.house-1].area[0]}.</td></tr>`; }).join('')}<tr><td class="l">Асцендент</td><td class="l">${SIGNS[sgn(dn.hs.asc)]}</td><td class="l">Как връзката изглежда отвън.</td></tr></tbody></table></div>
+   ${dA.length?`<p>Главни аспекти в картата на връзката: ${dA.map(x=>`${yrPN(x.a)} ${an(x.asp)} ${yrPN(x.b)}`).join('; ')}.</p>`:''}`);
+  $('synRel').innerHTML=H.join('');
+}
 
 // =============== ХОРАР ===============
 const TRAD7=['Sun','Moon','Mercury','Venus','Mars','Jupiter','Saturn'];
