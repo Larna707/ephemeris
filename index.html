@@ -246,6 +246,11 @@ th{background:var(--panel)}
 .ruempty > div{padding:12px 14px;border-radius:14px;border:1px solid var(--line);background:var(--bg);min-width:0}
 .ruempty h4{margin:0 0 4px;font-size:15px}.ruempty p,.ruempty li{font-size:13px}.ruempty ul{margin:4px 0 0;padding-left:18px}
 .ruplus{color:#2f9e8f}.ruminus{color:#d0603a}
+.ltnum{background:linear-gradient(135deg,#e8a33d,#2f9e8f)}
+.lt2{display:grid;grid-template-columns:1fr 1fr;gap:12px}.lt2 > div{padding:12px 14px;border-radius:14px;border:1px solid var(--line);background:var(--bg);min-width:0}
+.lt2 h4{margin:0 0 4px;font-family:var(--f-head);font-size:19px}.lt2 p{margin:4px 0 0;font-size:14px}
+#tab-lots .ectab td{font-family:var(--f-body);white-space:normal}
+@media (max-width:640px){.lt2{grid-template-columns:1fr}}
 .mdwarn{margin:0 0 16px;padding:10px 14px;border-radius:12px;border-left:4px solid #d0603a;background:color-mix(in srgb,#d0603a 10%,transparent)}
 .mdnum{background:linear-gradient(135deg,#2f9e8f,#d0603a)}
 .mdgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;margin:10px 0}
@@ -320,6 +325,7 @@ th{background:var(--panel)}
     <button role="tab" data-tab="med">Медицинска астрология</button>
     <button role="tab" data-tab="apsy">Астропсихология</button>
     <button role="tab" data-tab="rul">Управители и домове</button>
+    <button role="tab" data-tab="lots">Жребии, пари, средни точки</button>
     <button role="tab" data-tab="syn">Синастрия</button>
     <button role="tab" data-tab="hor">Хорар</button>
     <button role="tab" data-tab="rect">Ректификация</button>
@@ -733,6 +739,14 @@ th{background:var(--panel)}
       <p class="int-hint">Разделът показва <b>чувствителните зони</b> в картата: части на тялото и системи, които носят повече напрежение и имат нужда от повече грижа. Методът следва К. Стойчев („Астромедицина за всеки“): наранени знаци, домовете 6, 8 и 12, злосторниците, темпераментът и цикличността.</p>
       <p class="mdwarn"><b>Това не е диагноза и не замества лекар.</b> Картата показва предразположение, а не съдба. Сайтът нарочно не назовава болести: говори за зони, теми и грижа за себе си.</p>
       <div id="mdOut"></div>
+    </div>
+  </section>
+
+  <section id="tab-lots" role="tabpanel" hidden>
+    <div class="panel">
+      <h2 id="ltHead">Жребии, пари, средни точки</h2>
+      <p class="int-hint">Жребиите (арабски части) са чувствителни точки, изчислени от три фактора: Асцендента и две планети. Средните точки показват кои планети „свързват“ двойки други. Разделът за парите следва К. Б. Риске, жребиите на Щастието и Духа следват Ч. Оберт, а средните точки следват школата на Ебертин и Мункаси.</p>
+      <div id="ltOut"></div>
     </div>
   </section>
 
@@ -8163,7 +8177,7 @@ INTX.initUI();
 
 
 // =============== TABS ===============
-const TABS=['eph','moon','ecl','herm','med','apsy','rul','chart','nt','pr','ps','yr','ai','dh','sky','an','tr','pass','hs','sr','pd','kw','syn','hor','rect','cyc','jr'];
+const TABS=['eph','moon','ecl','herm','med','apsy','rul','lots','chart','nt','pr','ps','yr','ai','dh','sky','an','tr','pass','hs','sr','pd','kw','syn','hor','rect','cyc','jr'];
 tab = store.get('tab','eph'); if (!TABS.includes(tab)) tab='eph';
 function showTab(t){
   tab=t; store.set('tab',t);
@@ -8186,6 +8200,7 @@ function render(){
   else if (tab==='med') runMed();
   else if (tab==='apsy') runAstroPsy();
   else if (tab==='rul') runRulers();
+  else if (tab==='lots') runLots();
   else if (tab==='syn') runSyn();
   else if (tab==='hor') { initHor(); runHor(); }
   else if (tab==='moon') { runMoon(); if(!elInit) initElect(); }
@@ -9037,6 +9052,68 @@ function runRulers(){
     <div class="scroll"><table class="ectab rutab"><thead><tr><th class="t">Производен</th><th class="t l">Тема (за ${RU_DER.find(x=>String(x[0])===sel)[1]})</th><th class="t">Натален дом</th><th class="t l">Знак и планети</th></tr></thead><tbody>${dRows.join('')}</tbody></table></div>`,''));
   $('ruOut').innerHTML=H.join('');
   const d=$('ruDer'); if(d) d.onchange=()=>{ store.set('ruDer',d.value); runRulers(); };
+}
+
+
+// =============== ЖРЕБИИ, ПАРИ, СРЕДНИ ТОЧКИ ===============
+const LOTS_H=[['Fortune','Щастие (Фортуна)','тялото, обстоятелствата, материалното, това, което ни „се случва“','Moon','Sun'],
+ ['Spirit','Дух','волята, целите, действията, това, което правим сами','Sun','Moon'],
+ ['Eros','Ерос','желанието, любовта, привличането','Venus','Spirit'],
+ ['Necessity','Необходимост','ограниченията, неизбежното, борбата','Fortune','Mercury'],
+ ['Courage','Смелост','дързостта, конфликтите, силата','Fortune','Mars'],
+ ['Victory','Победа','вярата, успеха, подкрепата','Jupiter','Spirit'],
+ ['Nemesis','Немезида','скритите пречки, наказанието, загубите','Saturn','Fortune']];
+function lotsCalc(n){
+  const P=k=>n.pts.find(x=>x.k===k).lon, asc=n.hs.asc, day=n.pts.find(x=>x.k==='Sun').house>=7, L={};
+  const get=k=>L[k]!=null?L[k]:P(k);
+  LOTS_H.forEach(([k,,,a,b])=>{ const [x,y]=day?[a,b]:[b,a]; L[k]=norm(asc+get(x)-get(y)); });
+  return {L,day};
+}
+function runLots(){
+  const p=active(), n=natalOf(p), H=[], P=k=>n.pts.find(x=>x.k===k), C=ruCtx(n);
+  $('ltHead').textContent=`Жребии, пари, средни точки: ${p.name}`;
+  const card=(num,title,motto,body,q)=>`<article class="hmcard"><div class="hmnum ltnum">${num}</div><div class="hmbody"><h3>${title}</h3>${motto?`<p class="hmmotto">${motto}</p>`:''}${body}${q?`<p class="hmq"><b>Въпрос за размисъл:</b> ${q}</p>`:''}</div></article>`;
+  const {L,day}=lotsCalc(n), ascS=sgn(n.hs.asc), wsH=l=>((sgn(l)-ascS+12)%12)+1;
+  const near=l=>P10.concat(['Node']).map(k=>({k,o:Math.abs(dif(P(k).lon,l))})).filter(x=>x.o<=3).map(x=>`${yrPN(x.k)} ${x.o.toFixed(1)}°`);
+  const lord=l=>{ const r=RUL_TRAD[sgn(l)], q=P(r), d=Math.abs(sgn(q.lon)-sgn(l)), dd=Math.min(d,12-d), see=[0,2,3,4,6].includes(dd); return {r,q,see,dd}; };
+  const dgT=k=>{ const q=P(k), s=sgn(q.lon); return RUL_MOD[s]===k||RUL_TRAD[s]===k?'в своя знак':MD_EXA[k]===s?'в екзалтация':RUL_TRAD[(s+6)%12]===k?'в изгнание':MD_EXA[k]===(s+6)%12?'в падение':''; };
+  // 1. Фортуна и Дух
+  const lotBox=(k,name,mean)=>{ const l=L[k], lo=lord(l), nr=near(l); return `<div><h4>${name}</h4><p><b>${SIGNS[sgn(l)]} ${L_(l)}</b>, ${AC.houseOf(l,n.hs.cusp)} дом (по цели знаци ${wsH(l)}).</p><p>${cap(mean)}.</p><p>Господар: ${yrPN(lo.r)} ${vIn2(SIGNS[sgn(lo.q.lon)])}, ${lo.q.house} дом${dgT(lo.r)?`, ${dgT(lo.r)}`:''}. ${lo.see?'Вижда жребия: управлява го пряко, темата е под контрол.':'Не вижда жребия (аверсия): темата тече по-скоро сама, без пряк контрол.'}</p>${nr.length?`<p>В съвпад: ${nr.join(', ')}.</p>`:''}</div>`; };
+  const f11=(sgn(L.Fortune)+10)%12, f10=(sgn(L.Fortune)+9)%12, inS=s=>n.pts.filter(x=>P10.includes(x.k)&&sgn(x.lon)===s).map(x=>yrPN(x.k));
+  H.push(card('1','Жребиите на Щастието и Духа','Как връзката Слънце–Луна се отразява спрямо Асцендента (Ч. Оберт).',`<p class="note">Картата е ${day?'дневна':'нощна'}: Щастие = Асцендент ${day?'+ Луна − Слънце':'+ Слънце − Луна'}; Дух е огледален от другата страна на хоризонта.</p>
+    <div class="lt2">${lotBox('Fortune','Щастие (Фортуна)',LOTS_H[0][2])}${lotBox('Spirit','Дух',LOTS_H[1][2])}</div>
+    <ul class="ntul"><li><b>11-ият знак от Фортуна</b> (мястото на придобиването): ${SIGNS[f11]}${inS(f11).length?`, там са ${inS(f11).join(', ')}`:''}; управител ${yrPN(RUL_TRAD[f11])} в ${P(RUL_TRAD[f11]).house} дом. Оттук идват ресурсите.</li>
+    <li><b>10-ият знак от Фортуна</b> (действието, което носи плод): ${SIGNS[f10]}${inS(f10).length?`, там са ${inS(f10).join(', ')}`:''}.</li></ul>`,
+    'Кое в живота ми „се случва“ (Фортуна) и кое правя аз (Дух)? Мога ли да ги свържа?'));
+  // 2. Херметичните жребии
+  H.push(card('2','Седемте херметични жребия (Паулус Александрийски)','Всяка планета има своя жребий.',`<div class="scroll"><table class="ectab"><thead><tr><th class="t l">Жребий</th><th class="t l">Тема</th><th class="t l">Положение</th><th class="t l">Господар</th><th class="t l">Съвпади</th></tr></thead><tbody>${LOTS_H.map(([k,name,mean])=>{ const l=L[k], lo=lord(l), nr=near(l); return `<tr${nr.length?' class="rxnow"':''}><td class="l"><b>${name}</b></td><td class="l">${mean}</td><td class="l">${SIGNS[sgn(l)]} ${L_(l)}<div class="ecsub">${AC.houseOf(l,n.hs.cusp)} дом</div></td><td class="l">${yrPN(lo.r)}, ${lo.q.house} дом${lo.see?'':'<div class="ecsub">не вижда жребия</div>'}</td><td class="l">${nr.join(', ')||'<span class="ecsub">—</span>'}</td></tr>`; }).join('')}</tbody></table></div>
+    <p class="note">Жребий в съвпад с планета (до 3°) е силно активен. Транзитите през жребиите (особено през Щастието) често съвпадат със събития в съответната тема.</p>`,''));
+  // 3. Пари
+  const hb=h=>{ const pl=C.inH(h), r=C.ru(h), q=P(r), A=courseAspects(n).filter(x=>(x.a===r||x.b===r)&&P10.includes(x.a)&&P10.includes(x.b)&&[0,60,90,120,180].includes(x.asp)); const plus=A.filter(x=>[60,120].includes(x.asp)).length, minus=A.filter(x=>[90,180].includes(x.asp)).length;
+    return `<div><h4>${h} дом · ${SIGNS[C.csg(h)]}</h4><p>${h===2?'Собствени пари: доход, активи, харчене, самооценка.':'Чужди пари: партньор, кредити, дългове, данъци, наследство, застраховки.'}</p><p>Планети: ${pl.length?pl.map(x=>yrPN(x.k)).join(', '):'няма'}. Управител: ${yrPN(r)} ${vIn2(SIGNS[sgn(q.lon)])}, ${q.house} дом (${KW.houses[q.house-1].area[0]})${dgT(r)?`, ${dgT(r)}`:''}.</p><p>Аспекти към управителя: ${plus} хармонични, ${minus} напрегнати${plus>minus?': парите в тази сфера текат по-леко.':minus>plus?': тук парите изискват повече планиране и дисциплина.':'.'}</p></div>`; };
+  const ve=P('Venus'), ju=P('Jupiter'), vj=courseAspects(n).find(x=>(x.a==='Venus'&&x.b==='Jupiter')||(x.a==='Jupiter'&&x.b==='Venus'));
+  const r2=C.ru(2), r2h=P(r2).house, src={10:'кариерата и обществената роля',6:'работата и уменията',5:'творчеството, децата и рисковите вложения',8:'чужди пари, партньори, кредити',11:'групи, организации, мрежи',4:'имоти и семейство',9:'чужбина, обучение, издаване',3:'търговия, писане, общуване',7:'партньорства и договори',12:'задкулисна работа, институции',1:'собствени усилия и личност',2:'собствени ресурси и ценности'};
+  const now=new Date(), to=new Date(now.getTime()+6*365.25*864e5), ing=[];
+  ['Jupiter','Saturn','Uranus','Pluto'].forEach(m=>[2,8].forEach(h=>AC.transitHits(m,n.hs.cusp[h],0,now,to).forEach(x=>ing.push({d:x.date,m,h}))));
+  const ingU=[]; ing.sort((a,b)=>a.d-b.d).forEach(x=>{ if(!ingU.some(y=>y.m===x.m&&y.h===x.h&&x.d-y.d<400*864e5)) ingU.push(x); });
+  const TR={Jupiter:{2:'доходите обикновено растат, но и харченето; целта е да задържите част',8:'повече пари чрез други хора, кредити, партньор; внимание с дълговете'},Saturn:{2:'време за бюджет, спестяване и реалистични цени',8:'изплащане на задължения, ред в общите финанси, данъци'},Uranus:{2:'резки промени в доходите, нови източници',8:'неочаквани промени в общите финанси'},Pluto:{2:'дълбоко преструктуриране на доходите и ценностите',8:'голяма трансформация на дългове, наследства, общи ресурси'}};
+  H.push(card('3','Картата на парите','Как печелите, как харчите, откъде идват ресурсите (К. Б. Риске).',`<div class="lt2">${hb(2)}${hb(8)}</div>
+    <ul class="ntul"><li><b>Главен източник</b>: управителят на 2 дом е в ${r2h} дом, затова доходът е свързан най-вече ${/^[сз]/.test(src[r2h])?'със':'с'} ${src[r2h]}.</li>
+    <li><b>Паричните планети</b>: Венера (ценности, удоволствие, привличане на пари) ${vIn2(SIGNS[sgn(ve.lon)])}, ${ve.house} дом${dgT('Venus')?`, ${dgT('Venus')}`:''}; Юпитер (растеж, щедрост, възможности) ${vIn2(SIGNS[sgn(ju.lon)])}, ${ju.house} дом${dgT('Jupiter')?`, ${dgT('Jupiter')}`:''}.${vj?` Между тях: ${aspOf(vj.asp).n} (${vj.o.toFixed(1)}°).`:''}</li>
+    <li><b>Други канали</b>: 10 дом (заплата и статус) ${SIGNS[C.csg(10)]}${C.inH(10).length?', '+C.inH(10).map(x=>yrPN(x.k)).join(', '):''}; 6 дом (работа) ${SIGNS[C.csg(6)]}${C.inH(6).length?', '+C.inH(6).map(x=>yrPN(x.k)).join(', '):''}; 5 дом (риск и спекулации) ${SIGNS[C.csg(5)]}${C.inH(5).length?', '+C.inH(5).map(x=>yrPN(x.k)).join(', '):''}.</li></ul>
+    <h4 class="hmh">Финансови тенденции (следващите 6 години)</h4>${ingU.length?`<ul class="ntul">${ingU.map(x=>`<li><b>${fmtD(x.d)}</b>: ${yrPN(x.m)} влиза във ${x.h} дом: ${TR[x.m][x.h]}.</li>`).join('')}</ul>`:'<p>Няма влизания на Юпитер, Сатурн, Уран или Плутон във 2 или 8 дом през този период.</p>'}
+    <p class="note">Това е астрологична картина на нагласите и периодите, не финансов съвет.</p>`,
+    'Какво казват моите пари за това, което ценя?'));
+  // 4. Средни точки
+  const K=['Sun','Moon','Mercury','Venus','Mars','Jupiter','Saturn','Uranus','Neptune','Pluto','ASC','MC','Node'], pos=k=>k==='ASC'?n.hs.asc:k==='MC'?n.hs.mc:P(k).lon, pics=[];
+  for(let i=0;i<K.length;i++) for(let j=i+1;j<K.length;j++){ if(K[i]==='ASC'&&K[j]==='MC') continue; const a=pos(K[i]), b=pos(K[j]), m=norm(b+dif(a,b)/2);
+    K.forEach(c=>{ if(c===K[i]||c===K[j]) return; const d=Math.abs(dif(pos(c),m)), d90=Math.min(...[0,45,90,135,180].map(x=>Math.abs(d-x))); const o=Math.min(d90, 1.5); if(d90<=1.5) pics.push({c,a:K[i],b:K[j],o:d90,dir:[0,180].some(x=>Math.abs(d-x)<=1.5),kind:[0,180].some(x=>Math.abs(d-x)<=1.5)?'':Math.abs(d-90)<=1.5?'квадрат':'полуквадрат'}); }); }
+  const pers=['Sun','Moon','ASC','MC','Venus','Mars'], key=pics.filter(x=>pers.includes(x.c)||[x.a,x.b].some(k=>['Sun','Moon'].includes(k))).sort((x,y)=>x.o-y.o).slice(0,16);
+  const smid=norm(pos('Moon')+dif(pos('Sun'),pos('Moon'))/2), smHit=K.filter(c=>!['Sun','Moon'].includes(c)).map(c=>({c,o:Math.min(...[0,90,180].map(x=>Math.abs(Math.abs(dif(pos(c),smid))-x)))})).filter(x=>x.o<=1.5);
+  H.push(card('4','Средни точки (планетарни картини)','Планетата в средата на две други ги свързва и задейства (Р. Ебертин, М. Мункаси).',`<p class="note">Изчислено по 90° (съвпад, опозиция, квадрат и полуквадрат към средната точка), орбис 1,5°. Показани са картините, в които участват светилата, Асцендентът, MC, Венера или Марс. Пряк контакт (съвпад или опозиция) е по-силен.</p>
+    <p><b>Средна точка Слънце/Луна</b> (вътрешният брак на волята и чувството): ${SIGNS[sgn(smid)]} ${L_(smid)}${smHit.length?`; активирана от ${smHit.map(x=>`${yrPN(x.c)} (${x.o.toFixed(1)}°)`).join(', ')}`:'; няма планета на нея'}.</p>
+    <div class="scroll"><table class="ectab"><thead><tr><th class="t l">Картина</th><th class="t">Орбис</th><th class="t l">Смисъл</th></tr></thead><tbody>${key.map(x=>`<tr><td class="l"><b>${yrPN(x.c)}</b> = ${yrPN(x.a)}/${yrPN(x.b)}${x.kind?` <span class="ecsub">(${x.kind})</span>`:''}</td><td>${x.o.toFixed(1)}°</td><td class="l">${cap(x.c==='ASC'?'личността':x.c==='MC'?'целите':kfn(x.c))} свързва ${x.a==='ASC'?'личността':x.a==='MC'?'целите':kfn(x.a)} и ${x.b==='ASC'?'личността':x.b==='MC'?'целите':kfn(x.b)}: когато транзит докосне една от трите точки, се включват и другите две.</td></tr>`).join('')}</tbody></table></div>`,''));
+  $('ltOut').innerHTML=H.join('');
 }
 
 // =============== ЗАТЪМНЕНИЯ ===============
