@@ -9261,6 +9261,19 @@ function runKarma(){
     <p><b>Една практична стъпка:</b> ${NSx[2]}.</p>
     <p>Сферите на живота: старото в ${sn.house} дом (${hs(sn.house)}), новото в ${nn.house} дом (${hs(nn.house)}).</p>`,
     'Кога за последно избрах удобното от Южния възел, а не новото от Северния?'));
+  { const hq=(nn.house-1)%12, SP=KB.SPILLER, E=escapeHtml, ul=a=>`<ul class="ntul">${a.map(x=>`<li>${E(x)}</li>`).join('')}</ul>`, par=a=>a.map(x=>`<p>${E(x)}</p>`).join('');
+    const block=(i,full)=>{ const x=SP[String(i)]; if(!x) return ''; return `<div class="ka2"><div class="past"><div class="k">От какво да се освободите</div>${ul(x.rel)}</div><div class="fut"><div class="k">Какво да развивате</div>${ul(x.dev)}</div></div>
+      ${x.heel.length?`<p><b>Капанът:</b></p>${par(x.heel)}`:''}${full&&x.want.length?`<p><b>Какво всъщност се търси:</b></p>${par(x.want)}`:''}
+      ${full&&x.tal.length?`<details><summary>Дарби и професия</summary><div class="ntx">${par(x.tal)}</div></details>`:''}
+      ${full&&x.past.length?`<details><summary>${E(x.pt||'Минали животи')}</summary><div class="ntx">${par(x.past)}</div></details>`:''}
+      ${x.aff.length?`<p><b>Изцелителни твърдения:</b></p>${ul(x.aff)}`:''}`; };
+    const intro=`<p>Спилър чете знака и дома на Северния възел с една и съща глава: 1 дом като Овен, 2 дом като Телец и т.н. Северен възел <b>${vIn2(SIGNS[ns])}</b> и в <b>${nn.house} дом</b>${hq!==ns?` (глава „${SIGNS[hq]}“): двете теми се допълват`:': знакът и домът казват едно и също, темата е силно подчертана'}.</p>`;
+    if (SP) H.push(card('','Северният възел по Жан Спилър','„Астрология на душата“: какво носим като навик и какво идваме да развием (от личната библиотека).',
+      intro+`<h4>Северен възел ${vIn2(SIGNS[ns])}</h4>`+block(ns,true)+(hq!==ns?`<details><summary>Северен възел в ${nn.house} дом (глава „${SIGNS[hq]}“)</summary><div class="ntx">${block(hq,false)}</div></details>`:''),
+      'Кое от списъка „да се освободя“ разпознавам в себе си тази седмица?'));
+    else if (hq!==ns) H.push(card('','Северният възел и домът (по Ж. Спилър)','Знакът и домът на възела се четат като две страни на един урок.',
+      intro+`<div class="ka2"><div class="past"><div class="k">Навикът по дом (${SIGNS[(hq+6)%12]})</div><p>${cap(KA_NS[hq][0])}.</p></div><div class="fut"><div class="k">Урокът по дом (${SIGNS[hq]})</div><p>${cap(KA_NS[hq][1])}.</p></div></div><p><b>Стъпка:</b> ${KA_NS[hq][2]}.</p>`,''));
+  }
   H.push(card('','Асцендентът: кармичната врата','Начинът, по който душата излиза в света и чрез който изразява всичко останало в картата (М. Шулман).',`<p>Асцендент <b>${SIGNS[as]}</b>: вратата е ${KA_ASC[as]}.</p><p>Управителят ${yrPN(RUL_MOD[as])} е ${vIn2(SIGNS[sgn(P(RUL_MOD[as]).lon)])}, ${P(RUL_MOD[as]).house} дом: там се насочва енергията, която минава през тази врата.</p>`,''));
   // 2. Плутон и възлите
   const cSN=C.asp(pl.lon,sn.lon,[0],8), cNN=C.asp(pl.lon,nn.lon,[0],8), sq=C.asp(pl.lon,nn.lon,[90],8);
