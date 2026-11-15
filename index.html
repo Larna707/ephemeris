@@ -247,6 +247,34 @@ th{background:var(--panel)}
 .ruempty h4{margin:0 0 4px;font-size:15px}.ruempty p,.ruempty li{font-size:13px}.ruempty ul{margin:4px 0 0;padding-left:18px}
 .ruplus{color:#2f9e8f}.ruminus{color:#d0603a}
 .kanum{background:linear-gradient(135deg,#5b3fa8,#d0603a)}
+.rpnum{background:linear-gradient(135deg,#2e3080,#a2762a)}
+.rpsecs{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:4px 14px;margin:6px 0 12px}
+.rpchk{display:flex;gap:6px;align-items:center;font-size:.92rem}
+.linkbtn{background:none;border:0;padding:0;color:var(--accent);text-decoration:underline;cursor:pointer;font:inherit}
+.rpdoc{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px;margin-top:14px;overflow-wrap:anywhere}
+.rpdoc h2{margin:26px 0 10px;padding-bottom:6px;border-bottom:2px solid var(--gold)}
+.rpdoc h3{margin:18px 0 6px;color:var(--accent)}
+.rpcover{text-align:center;padding:18px 0 22px;border-bottom:1px solid var(--line);margin-bottom:10px}
+.rpcover h1{margin:0 0 6px;font-size:1.7rem;color:var(--accent)}
+.rpname{font-size:1.25rem;font-weight:700;margin:4px 0}
+.rpsum{background:var(--gold-soft);border-left:4px solid var(--gold);border-radius:8px;padding:10px 14px;margin:8px 0 14px}
+.rpsum ul{margin:6px 0 0}
+.rpbody svg{max-width:100%;height:auto}
+.rpbody table{max-width:100%;width:100%;font-size:.86em}
+.rpbody th,.rpbody td{overflow-wrap:anywhere}
+.rpbody .tblwrap,.rpbody .scroll{overflow:visible}
+.rp-cl h3{font-size:1.15rem}
+.rpexport{border:0;border-radius:0;max-width:760px;font-size:13px;background:#fff}
+.rpexport .rpbody table{font-size:11px}
+@media print{
+  body.rp-printing *{visibility:hidden}
+  body.rp-printing #rpDoc, body.rp-printing #rpDoc *{visibility:visible}
+  body.rp-printing #rpDoc{position:absolute;left:0;top:0;width:100%;border:0;margin:0;padding:0}
+  .rpbreak{break-before:page}
+  .rpdoc .hmcard,.rpdoc .rpsum,.rpdoc tr{break-inside:avoid}
+}
+body.rpprint{padding:16px}
+@media print{ body.rpprint .rpbreak{break-before:page} body.rpprint .hmcard{break-inside:avoid} }
 .ka2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:8px 0}.ka2 > div{padding:12px 14px;border-radius:14px;border:1px solid var(--line);background:var(--bg);min-width:0}
 .ka2 .k{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}.ka2 h4{margin:2px 0 4px;font-family:var(--f-head);font-size:19px}.ka2 p{margin:4px 0 0;font-size:14px}
 .ka2 .past{border-left:4px solid #8a7fb8}.ka2 .fut{border-left:4px solid #2f9e8f}
@@ -335,6 +363,7 @@ th{background:var(--panel)}
     <button role="tab" data-tab="rul">Управители и домове</button>
     <button role="tab" data-tab="lots">Жребии, пари, средни точки</button>
     <button role="tab" data-tab="karma">Кармична астрология</button>
+    <button role="tab" data-tab="rp">Доклад (PDF)</button>
     <button role="tab" data-tab="syn">Синастрия</button>
     <button role="tab" data-tab="hor">Хорар</button>
     <button role="tab" data-tab="rect">Ректификация</button>
@@ -749,6 +778,22 @@ th{background:var(--panel)}
       <label class="field" style="flex-direction:row;align-items:center;gap:8px;margin:0 0 12px"><input type="checkbox" id="mdNT"> <span>Часът на раждане е неизвестен (в профила е въведено 12:00): изключи Асцендента, домовете и аспектите на Луната</span></label>
       <p class="mdwarn"><b>Това не е диагноза и не замества лекар.</b> Картата показва предразположение, а не съдба. Сайтът нарочно не назовава болести: говори за зони, теми и грижа за себе си.</p>
       <div id="mdOut"></div>
+    </div>
+  </section>
+
+  <section id="tab-rp" role="tabpanel" hidden>
+    <div class="panel">
+      <h2 id="rpHead">Доклад</h2>
+      <p class="int-hint">Обобщава всички раздели в един документ. <b>Професионален</b>: с техники, аспекти и орбиси, общо резюме, резюме на всеки раздел и пълното съдържание на разделите (за учене). <b>За клиент</b>: описателен, с прости думи, без технически термини. Синтезът следва правилото на потвърждението: тема, към която сочат няколко техники, е по-важна.</p>
+      <div class="controls">
+        <label class="field"><span>Вид</span><select id="rpMode"><option value="pro">Професионален</option><option value="cl">За клиент</option></select></label>
+        <label class="field"><span>Синастрия с</span><select id="rpB"></select></label>
+      </div>
+      <div id="rpSecBox"><p class="note">Раздели в професионалния доклад: <button type="button" class="linkbtn" id="rpAll">всички</button> · <button type="button" class="linkbtn" id="rpNone">нито един</button></p><div id="rpSecs" class="rpsecs"></div><label class="rpchk"><input type="checkbox" id="rpShort"> Само резюметата (общото и на всеки раздел), без пълното съдържание на разделите</label></div>
+      <div class="controls"><button id="rpGo" class="primary">Генерирай доклада</button><span id="rpStat" class="note"></span></div>
+      <div id="rpActs" class="controls" hidden><button id="rpPdf">Изтегли PDF</button><button id="rpPrint">Печат / Запази като PDF</button><button id="rpHtml">Изтегли HTML</button></div>
+      <p id="rpBigNote" class="note" hidden>Пълният професионален доклад е около 100 страници. Запазете го като PDF с „Печат / Запази като PDF“ (в прозореца за печат изберете „Запази като PDF“). Ако печатът не се отваря тук, изтеглете HTML, отворете файла в браузъра и натиснете Ctrl+P. Бутонът „Изтегли PDF“ е за клиентския доклад и за варианта „Само резюметата“.</p>
+      <div id="rpOut"></div>
     </div>
   </section>
 
@@ -8196,7 +8241,7 @@ INTX.initUI();
 
 
 // =============== TABS ===============
-const TABS=['eph','moon','ecl','herm','med','apsy','rul','lots','karma','chart','nt','pr','ps','yr','ai','dh','sky','an','tr','pass','hs','sr','pd','kw','syn','hor','rect','cyc','jr'];
+const TABS=['eph','moon','ecl','herm','med','apsy','rul','lots','karma','rp','chart','nt','pr','ps','yr','ai','dh','sky','an','tr','pass','hs','sr','pd','kw','syn','hor','rect','cyc','jr'];
 tab = store.get('tab','eph'); if (!TABS.includes(tab)) tab='eph';
 function showTab(t){
   tab=t; store.set('tab',t);
@@ -8221,6 +8266,7 @@ function render(){
   else if (tab==='rul') runRulers();
   else if (tab==='lots') runLots();
   else if (tab==='karma') runKarma();
+  else if (tab==='rp') initReport();
   else if (tab==='syn') runSyn();
   else if (tab==='hor') { initHor(); runHor(); }
   else if (tab==='moon') { runMoon(); if(!elInit) initElect(); }
@@ -8234,6 +8280,7 @@ function render(){
   else if (tab==='sky') runSky();
   else if (tab==='cyc') { INTX.runCyc(); runDoynov(); if(!shInit) initSatHist(); else runSatHist(); }
   else if (tab==='jr') INTX.renderJr();
+  try{ rpTabSum(tab); }catch(e){}
 }
 
 // =============== EVENTS (per chart) ===============
@@ -9231,18 +9278,18 @@ const KA_CHI=['раната в самоусещането и тялото; ле�
 const KA_LIL=['собствената идентичност: не приема да бъде контролирана','парите и ценностите: изкушение и отказ от чужди мерки','думите: казва неудобната истина','дома и рода: отхвърленото в семейната история','страстта и удоволствието: забраненото желание','работата и тялото: бунт срещу рутината','партньорството: власт и привличане към „забраненото“','сексуалността и силата: тайната страна на желанието','вярата: отхвърляне на догмите','обществото: бунт срещу авторитета','групите: усещане за аутсайдер','скритото: тайни страхове и силна интуиция'];
 const KA_ASC=['действието: учи се на смелост без агресия','устойчивостта: учи се да не се вкопчва','думите и любопитството: учи се на дълбочина','чувството и грижата: учи се да не се крие в черупката','сърцето и изявата: учи се да свети без нужда от аплауз','полезността: учи се да не критикува себе си и другите','хармонията: учи се да не губи себе си, за да угоди','силата и проницателността: учи се на доверие','ентусиазма и вярата: учи се на постоянство','отговорността: учи се на лекота и топлина','оригиналността: учи се на близост','съпричастността: учи се на граници'];
 const KA_MOON=[
- ['воин, пионер, защитник на слабите','незабавна реакция, свобода да действа, усещане за собствена сила','да изчаква и да отчита чувствата на другите, преди да действа'],
- ['земеделец, майстор, човек, който осигурява храна и сигурност','стабилност, телесен комфорт, сигурен дом и ресурси','да пуска навреме и да намира сигурността в себе си, не във вещите'],
- ['вестоносец, търговец, оратор, посредник','разговор, обмен, мисловна свобода','да преживява чувствата, а не само да ги обяснява'],
- ['майка, акушерка, домакиня, човек, който храни и пази','принадлежност, грижа, семейство, познато място','да расте отвъд ролята на детето или на майката и да се грижи и за себе си'],
- ['владетел, водач, артист на сцената','да бъде видяна, обичана и специална','да дава светлина, без да зависи от аплодисментите'],
- ['слуга, лечител, администратор, занаятчия','да бъде полезна и редът да е спазен','да приеме собствените си нужди като нещо нормално, не като слабост'],
- ['дипломат, посредник, „половинката“ в двойката','връзка, хармония, красота','да не губи себе си, за да запази мира'],
- ['лечител, алхимик, жрица, човек между два свята','дълбочина, истина, интензивна близост','да прощава и да пуска старите обиди и борбата за контрол'],
- ['пътешественик, търсач, учител, проповедник','свобода, смисъл, хоризонт','да остане и да изгради истинска близост'],
- ['съдия, законодател, пазител на реда и традицията','контрол, сигурност, признание','да покаже чувствата си и да не носи сам целия товар'],
- ['реформатор, бунтар, човек на идеите и групата','свобода и пространство, приятелство','да усети собствените си чувства, вместо да ги рационализира'],
- ['мистик, поет, лечител, човек на вярата','сливане, вдъхновение, състрадание','да постави граници и да не се жертва']];
+ ['воин, пионер, защитник на слабите','незабавна реакция, свобода да действа, усещане за собствена сила','изчаквайте и отчитайте чувствата на другите, преди да действате'],
+ ['земеделец, майстор, човек, който осигурява храна и сигурност','стабилност, телесен комфорт, сигурен дом и ресурси','пускайте навреме и търсете сигурността в себе си, не във вещите'],
+ ['вестоносец, търговец, оратор, посредник','разговор, обмен, мисловна свобода','преживявайте чувствата, а не само ги обяснявайте'],
+ ['майка, акушерка, домакиня, човек, който храни и пази','принадлежност, грижа, семейство, познато място','растете отвъд ролята на детето или на майката и се грижете и за себе си'],
+ ['владетел, водач, артист на сцената','вниманието, обичта и усещането, че сте специални','давайте светлина, без да зависите от аплодисментите'],
+ ['слуга, лечител, администратор, занаятчия','полезността и спазеният ред','приемайте собствените си нужди като нещо нормално, а не като слабост'],
+ ['дипломат, посредник, „половинката“ в двойката','връзка, хармония, красота','не губете себе си, за да запазите мира'],
+ ['лечител, алхимик, жрица, човек между два свята','дълбочина, истина, интензивна близост','прощавайте и пускайте старите обиди и борбата за контрол'],
+ ['пътешественик, търсач, учител, проповедник','свобода, смисъл, хоризонт','останете и изградете истинска близост'],
+ ['съдия, законодател, пазител на реда и традицията','контрол, сигурност, признание','показвайте чувствата си и не носете сами целия товар'],
+ ['реформатор, бунтар, човек на идеите и групата','свобода и пространство, приятелство','усещайте собствените си чувства, вместо да ги рационализирате'],
+ ['мистик, поет, лечител, човек на вярата','сливане, вдъхновение, състрадание','поставяйте граници и не се жертвайте']];
 const KA_PFH=['когато е себе си пред другите и хората около нея откриват собствената си радост','когато създава и цени нещо свое, без да се вкопчва в него','когато учи, споделя идеи и общува','в дома, корените и сигурната емоционална основа','в творчеството, играта, любовта и децата','в полезната работа, грижата и усъвършенстването','чрез партньорството и хората, на които помага','когато пуска старото и се преобразява; в дълбочината','чрез смисъла, ученето, пътуванията и вярата','чрез постижението и призванието, което служи и на другите','чрез приятелите, групите и общите идеали','в тишината, вътрешния свят и безкористната помощ'];
 const KA_PFS=['смелостта да започне','спокойствието и простите радости','любопитството и думите','грижата и храненето на другите','сърдечността и щедростта','реда и полезното','хармонията и красотата','дълбочината и истината','надеждата и широкия поглед','постоянството и изграденото','свободата и приятелството','състраданието и вдъхновението'];
 const KA_GR=[['страхът, че силата не стига, за да бъдеш себе си; сдържаност и прекален самоконтрол','спокойна, истинска увереност, изградена с времето'],
@@ -9482,6 +9529,210 @@ function runKarma(){
   }
   $('kaOut').innerHTML=H.join('');
   const kb=$('kaB'); if(kb) kb.onchange=()=>{ store.set('kaB',kb.value); runKarma(); };
+}
+
+// =============== ДОКЛАД ===============
+const RP_SECT=[['chart','Натална карта'],['nt','Бележки и показатели'],['rul','Управители и домове'],['ps','Фигури и комплекси'],['apsy','Астропсихология'],['herm','Херметични принципи'],['pr','Професия и Фортуна'],['lots','Жребии, пари, средни точки'],['dh','Додекатемории и фази'],['med','Медицинска астрология'],['karma','Кармична астрология'],['cyc','Цикли и възрасти'],['yr','Годишна прогноза'],['pd','Прогресии и дирекции'],['sr','Солар и лунар'],['tr','Транзити'],['syn','Синастрия']];
+const RP_EL=['Огън','Земя','Въздух','Вода'], RP_MD=['кардинален','фиксиран','мутабилен'];
+const RP_ELP=['енергия, ентусиазъм и нужда от действие','практичност, търпение и усет за реалното','мисъл, общуване и интерес към идеите','чувства, интуиция и съпричастност'];
+const RP_ELW=['може да ви е по-трудно да се „запалите“ и да започнете; помагат движение, ясни цели и малки победи','конкретиката, рутината и парите изискват повече усилие; помагат списъци, бюджет и малки стъпки','дистанцията и изказването на чувствата с думи са по-трудни; помагат разговорът и писането','чувствата могат да остават на заден план; помагат време за себе си и близки хора, пред които не е нужно да сте силни'];
+const RP_MDP=['започвате лесно и обичате инициативата','държите на постоянството и довършвате','се приспособявате гъвкаво към промените'];
+function rpFacts(p, pB){
+  const n=natalOf(p), P=k=>k==='ASC'?{k,lon:n.hs.asc,house:1}:k==='MC'?{k,lon:n.hs.mc,house:10}:n.pts.find(x=>x.k===k), noT=!!store.get('notime_'+p.id,false);
+  const F={p,n,noT}; const S=k=>sgn(P(k).lon);
+  F.sun=P('Sun'); F.moon=P('Moon'); F.asS=sgn(n.hs.asc); F.mcS=sgn(n.hs.mc); F.ruler=RUL_MOD[F.asS]; F.rp=P(F.ruler);
+  const w={Sun:2,Moon:2,ASC:2,Mercury:1,Venus:1,Mars:1,Jupiter:1,Saturn:1,Uranus:.5,Neptune:.5,Pluto:.5};
+  F.el=[0,0,0,0]; F.md=[0,0,0];
+  Object.entries(w).forEach(([k,v])=>{ if(noT&&k==='ASC') return; const s=S(k); F.el[s%4]+=v; F.md[s%3]+=v; });
+  F.elD=F.el.indexOf(Math.max(...F.el)); F.elW=F.el.indexOf(Math.min(...F.el)); F.mdD=F.md.indexOf(Math.max(...F.md));
+  const byS={}, byH={}; P10.forEach(k=>{ const q=P(k); (byS[sgn(q.lon)]=byS[sgn(q.lon)]||[]).push(k); (byH[q.house]=byH[q.house]||[]).push(k); });
+  F.stS=Object.entries(byS).filter(([s,a])=>a.length>=3).map(([s,a])=>({s:+s,a})); F.stH=noT?[]:Object.entries(byH).filter(([h,a])=>a.length>=3).map(([h,a])=>({h:+h,a}));
+  F.ang=noT?[]:P10.map(k=>{ const q=P(k); const r=[['ASC',n.hs.asc],['MC',n.hs.mc],['DSC',norm(n.hs.asc+180)],['IC',norm(n.hs.mc+180)]].map(([a,l])=>({a,o:Math.abs(dif(q.lon,l))})).sort((x,y)=>x.o-y.o)[0]; return r.o<=8?{k,a:r.a,o:r.o}:null; }).filter(Boolean);
+  F.dig=P10.map(k=>{ const s=S(k); const t=(DOMICILE[k]||[]).includes(s)?'обител':EXALT[k]===s?'екзалтация':(DOMICILE[k]||[]).includes((s+6)%12)?'изгнание':EXALT[k]===(s+6)%12?'падение':''; return t?{k,t}:null; }).filter(Boolean);
+  try{ F.chars=psChars(n,psCtx(n)).slice(0,3); }catch(e){ F.chars=[]; }
+  try{ F.figs=findFigures(n).filter(f=>FIG_TXT[f.type]&&!['st','sth'].includes(f.type)); }catch(e){ F.figs=[]; }
+  F.asp=courseAspects(n).filter(x=>P10.includes(x.a)&&P10.includes(x.b)&&[0,60,90,120,180].includes(x.asp)).sort((a,b)=>a.o-b.o);
+  F.tight=F.asp.slice(0,6);
+  const cS=h=>sgn(n.hs.cusp[h-1]), rul=h=>RUL_MOD[cS(h)];
+  F.cS=cS; F.rul=rul;
+  F.mcR=RUL_MOD[F.mcS]; F.mcRp=P(F.mcR);
+  F.h7=P10.filter(k=>P(k).house===7); F.h2=P10.filter(k=>P(k).house===2); F.h8=P10.filter(k=>P(k).house===8); F.h10=P10.filter(k=>P(k).house===10);
+  F.ven=P('Venus'); F.mar=P('Mars'); F.sat=P('Saturn'); F.plu=P('Pluto'); F.nn=P('Node'); F.sn={lon:norm(F.nn.lon+180),house:(F.nn.house+5)%12+1};
+  F.pf=norm(n.hs.asc+F.moon.lon-F.sun.lon); F.pfs=sgn(F.pf); F.pfh=AC.houseOf(F.pf,n.hs.cusp);
+  const oldNT=MD_NT; MD_NT=noT; try{ F.zones=mdZones(n,mdCtx(n)).filter(z=>z.sc>=1.5).slice(0,3); }catch(e){ F.zones=[]; } MD_NT=oldNT;
+  // време: 12 месеца
+  const now=new Date(), to=new Date(now.getTime()+365*864e5), ev=[];
+  const tg=[['Sun',F.sun.lon],['Moon',F.moon.lon],...(noT?[]:[['ASC',n.hs.asc],['MC',n.hs.mc]]),[F.ruler,F.rp.lon]].filter((x,i,a)=>a.findIndex(y=>y[0]===x[0])===i);
+  ['Jupiter','Saturn','Uranus','Neptune','Pluto'].forEach(t=>tg.forEach(([k,l])=>(t==='Jupiter'?[0,120]:[0,90,180]).forEach(a=>{ try{ AC.transitHits(t,l,a,now,to).forEach(h=>ev.push({d:h.date,t,k,a})); }catch(e){} })));
+  const seen=new Set(); F.ev=ev.sort((a,b)=>a.d-b.d).filter(x=>{ const key=x.t+x.k+x.a; if(seen.has(key)) return false; seen.add(key); return true; }).slice(0,8);
+  const bd=localToUTC(p.date,p.time,p.tz,p.off), age=Math.floor((now-bd)/(365.2422*864e5));
+  { const pd=new Date(bd.getTime()+((now-bd)/(365.2422*864e5))*864e5); F.prog={sun:AC.lon('Sun',AC.T(pd)),moon:AC.lon('Moon',AC.T(pd))}; }
+  F.age=age; F.prH=age%12+1; F.prS=(F.asS+age)%12; F.prL=RUL_MOD[F.prS];
+  F.trH={}; ['Jupiter','Saturn'].forEach(t=>{ F.trH[t]=AC.houseOf(AC.lon(t,AC.T(now)),n.hs.cusp); });
+  // синастрия
+  if(pB){ const nB=AC.chart(localToUTC(pB.date,pB.time,pB.tz,pB.off),+pB.lat,+pB.lon), I=[];
+    P10.forEach(a=>P10.forEach(b=>{ const la=P(a).lon, lb=nB.pts.find(x=>x.k===b).lon, d=Math.abs(dif(la,lb)); [0,60,90,120,180].forEach(x=>{ const o=Math.abs(d-x), orb=['Sun','Moon'].includes(a)||['Sun','Moon'].includes(b)?6:4; if(o<=orb&&['Sun','Moon','Venus','Mars','Mercury','Saturn','Jupiter'].includes(a)&&['Sun','Moon','Venus','Mars','Mercury','Saturn','Jupiter'].includes(b)) I.push({a,b,asp:x,o}); }); }));
+    F.syn={pB,I:I.sort((x,y)=>x.o-y.o).slice(0,8)}; }
+  // потвърждение
+  const W={}, addH=(h,v,why)=>{ if(!h||noT) return; (W[h]=W[h]||{v:0,f:[]}).v+=v; W[h].f.push(why); };
+  addH(F.sun.house,3,'Слънцето'); addH(F.moon.house,2,'Луната'); addH(F.rp.house,3,'управителят на Асцендента ('+yrPN(F.ruler)+')');
+  F.stH.forEach(x=>addH(x.h,3,'стелиум ('+x.a.map(yrPN).join(', ')+')')); addH(F.mcRp.house,1,'управителят на MC');
+  addH(F.nn.house,2,'Северният възел'); addH((F.plu.house+5)%12+1,2,'полярната точка на Плутон'); addH(F.sat.house,1,'Сатурн'); addH(F.pfh,1,'Локус фортуна');
+  addH(F.prH,2,'годишната профекция ('+F.age+' г.)');
+  F.topH=Object.entries(W).filter(([h,v])=>v.f.length>=2).sort((a,b)=>b[1].v-a[1].v).slice(0,3).map(([h,v])=>({h:+h,...v}));
+  const PW={}, addP=(k,v,why)=>{ if(!P10.includes(k)) return; (PW[k]=PW[k]||{v:0,f:[]}).v+=v; if(!PW[k].f.includes(why)) PW[k].f.push(why); };
+  F.chars.forEach((c,i)=>addP(c.k,3-i,'сред най-силните планети (брой и сила на аспектите)'));
+  F.ang.forEach(x=>addP(x.k,2,'на ъгъл ('+x.a+', '+x.o.toFixed(1)+'°)')); addP(F.ruler,2,'управител на Асцендента');
+  F.dig.forEach(x=>addP(x.k,1,x.t)); F.figs.forEach(f=>f.pts.forEach(k=>addP(k,1,FIG_TXT[f.type][0].toLowerCase())));
+  F.asp.filter(x=>x.o<=1).forEach(x=>{ addP(x.a,1,'точен аспект'); addP(x.b,1,'точен аспект'); });
+  F.ev.forEach(x=>addP(x.k,1,'засегнат от транзит през годината'));
+  F.topP=Object.entries(PW).filter(([k,v])=>v.f.length>=2).sort((a,b)=>b[1].v-a[1].v).slice(0,3).map(([k,v])=>({k,...v}));
+  return F;
+}
+const rpHA=h=>KW.houses[h-1].area.slice(0,2).join(' и ');
+const rpAdv=(s,n=3)=>KW.signs[s].adv.slice(0,n).join(', ');
+const rpFn=(k,n=2)=>k==='ASC'?'личността':k==='MC'?'целите и призванието':KW.planets[k].fn.slice(0,n).join(' и ');
+const rpTr=x=>{ const tr=KW.planets[x.t].tr; return `${fmtD(x.d)}: ${yrPN(x.t)} ${aspOf(x.a).n} ${x.k==='ASC'?'Асцендента':x.k==='MC'?'MC':yrPN(x.k)}`; };
+const rpTrPlain=x=>`${fmtD(x.d)}: ${KW.planets[x.t].tr[x.a===120||x.a===60?1:0]} в темата на ${rpFn(x.k,1)}`;
+function rpSummaryPro(F){
+  const n=F.n, L=[];
+  L.push(`<h3>1. Портрет</h3><ul class="ntul"><li>Слънце ${vIn2(SIGNS[sgn(F.sun.lon)])}${F.noT?'':', '+F.sun.house+' дом'}; Луна ${vIn2(SIGNS[sgn(F.moon.lon)])}${F.noT?'':', '+F.moon.house+' дом'}${F.noT?'':`; Асцендент ${SIGNS[F.asS]}, управител ${yrPN(F.ruler)} ${vIn2(SIGNS[sgn(F.rp.lon)])}, ${F.rp.house} дом`}.</li>
+    <li>Стихии (претеглено): ${RP_EL.map((e,i)=>`${e} ${F.el[i]}`).join(', ')}. Доминира ${RP_EL[F.elD]}, най-слаб е ${RP_EL[F.elW]}. Кръст: преобладава ${RP_MD[F.mdD]}.</li>
+    ${F.ang.length?`<li>Ъглови планети: ${F.ang.map(x=>`${yrPN(x.k)} (${x.a}, ${x.o.toFixed(1)}°)`).join(', ')}.</li>`:''}
+    ${F.stS.length||F.stH.length?`<li>Стелиуми: ${[...F.stS.map(x=>`${SIGNS[x.s]}: ${x.a.map(yrPN).join(', ')}`),...F.stH.map(x=>`${x.h} дом: ${x.a.map(yrPN).join(', ')}`)].join('; ')}.</li>`:''}
+    ${F.dig.length?`<li>Есенциално достойнство: ${F.dig.map(x=>`${yrPN(x.k)} в ${x.t}`).join(', ')}.</li>`:''}
+    ${F.figs.length?`<li>Аспектни фигури: ${F.figs.map(f=>`${FIG_TXT[f.type][0]} (${f.pts.map(yrPN).join(', ')})`).join('; ')}.</li>`:''}</ul>`);
+  L.push(`<h3>2. Главните теми (потвърждение от няколко техники)</h3>${F.topH.length?`<ul class="ntul">${F.topH.map(x=>`<li><b>${x.h} дом (${rpHA(x.h)})</b>: ${x.f.join(', ')}.</li>`).join('')}</ul>`:'<p>Няма дом, към който да сочат няколко техники.</p>'}
+    ${F.topP.length?`<p><b>Ключови планети:</b></p><ul class="ntul">${F.topP.map(x=>`<li><b>${yrPN(x.k)}</b>: ${x.f.join(', ')}.</li>`).join('')}</ul>`:''}`);
+  L.push(`<h3>3. Най-точните аспекти</h3><ul class="ntul">${F.tight.map(x=>`<li>${yrPN(x.a)} ${aspOf(x.asp).n} ${yrPN(x.b)} (${x.o.toFixed(1)}°)</li>`).join('')}</ul>`);
+  L.push(`<h3>4. Работа, пари, отношения</h3><ul class="ntul">${F.noT?'':`<li>MC ${vIn2(SIGNS[F.mcS])}, управител ${yrPN(F.mcR)} в ${F.mcRp.house} дом${F.h10.length?`; в 10 дом: ${F.h10.map(yrPN).join(', ')}`:''}.</li>
+    <li>2 дом ${vIn2(SIGNS[F.cS(2)])}, управител ${yrPN(F.rul(2))} в ${n.pts.find(x=>x.k===F.rul(2))?.house||'?'} дом${F.h2.length?`; в 2 дом: ${F.h2.map(yrPN).join(', ')}`:''}${F.h8.length?`; в 8 дом: ${F.h8.map(yrPN).join(', ')}`:''}. Локус фортуна ${vIn2(SIGNS[F.pfs])}, ${F.pfh} дом.</li>
+    <li>7 дом ${vIn2(SIGNS[F.cS(7)])}, управител ${yrPN(F.rul(7))} в ${n.pts.find(x=>x.k===F.rul(7))?.house||'?'} дом${F.h7.length?`; в 7 дом: ${F.h7.map(yrPN).join(', ')}`:''}.</li>`}
+    <li>Венера ${vIn2(SIGNS[sgn(F.ven.lon)])}${F.noT?'':', '+F.ven.house+' дом'}; Марс ${vIn2(SIGNS[sgn(F.mar.lon)])}${F.noT?'':', '+F.mar.house+' дом'}.</li></ul>`);
+  L.push(`<h3>5. Чувствителни зони (медицинска астрология)</h3>${F.zones.length?`<ul class="ntul">${F.zones.map(z=>`<li>${SIGNS[z.s]} (${MD_ZONE[z.s]}), тежест ${z.sc.toFixed(1)}: ${z.f.slice(0,3).join('; ')}.</li>`).join('')}</ul>`:'<p>Няма силно подчертани зони.</p>'}`);
+  L.push(`<h3>6. Кармичната ос</h3><p>Южен възел ${vIn2(SIGNS[sgn(F.sn.lon)])}${F.noT?'':', '+F.sn.house+' дом'} → Северен възел ${vIn2(SIGNS[sgn(F.nn.lon)])}${F.noT?'':', '+F.nn.house+' дом'}. Плутон ${vIn2(SIGNS[sgn(F.plu.lon)])}${F.noT?'':`, ${F.plu.house} дом → полярна точка в ${(F.plu.house+5)%12+1} дом`}. Сатурн ${vIn2(SIGNS[sgn(F.sat.lon)])}${F.noT?'':', '+F.sat.house+' дом'}.</p>`);
+  L.push(`<h3>7. Следващите 12 месеца</h3><ul class="ntul">${F.noT?'':`<li>Годишна профекция: ${F.age} г. → ${F.prH} дом (${SIGNS[F.prS]}), господар на годината ${yrPN(F.prL)}.</li><li>Транзитен Юпитер в ${F.trH.Jupiter} дом, Сатурн в ${F.trH.Saturn} дом.</li>`}${F.ev.map(x=>`<li>${rpTr(x)}</li>`).join('')}</ul>`);
+  if(F.syn) L.push(`<h3>8. Синастрия: ${escapeHtml(F.syn.pB.name)}</h3><ul class="ntul">${F.syn.I.map(x=>`<li>${yrPN(x.a)} ${aspOf(x.asp).n} ${yrPN(x.b)} на партньора (${x.o.toFixed(1)}°)</li>`).join('')}</ul>`);
+  return L.join('');
+}
+function rpClient(F){
+  const n=F.n, ss=sgn(F.sun.lon), ms=sgn(F.moon.lon), L=[], M=KA_MOON[ms], NS=KA_NS[sgn(F.nn.lon)], G=KA_GR[sgn(F.sat.lon)];
+  L.push(`<h3>Накратко за вас</h3><p>По природа действате ${rpAdv(ss)}. ${F.noT?'':`Към света подхождате ${KW.signs[F.asS].adv.slice(0,2).join(' и ')}: така ви виждат другите при първа среща. `}Емоционално ви храни: ${M[1]}.</p>
+    <p>Във вас преобладава ${RP_ELP[F.elD]}. Като темперамент ${RP_MDP[F.mdD]}.</p>`);
+  if(F.topH.length) L.push(`<h3>Най-важните теми в живота ви</h3><p>Към тези сфери сочат няколко различни части на картата, затова те са централни:</p><ul class="ntul">${F.topH.map(x=>`<li><b>${cap(rpHA(x.h))}</b></li>`).join('')}</ul>`);
+  const str=[]; F.topP.forEach(x=>str.push(`${cap(rpFn(x.k))}: тук имате естествена сила, която е добре да използвате съзнателно.`));
+  F.asp.filter(x=>[60,120].includes(x.asp)).slice(0,2).forEach(x=>str.push(`${cap(rpFn(x.a,1))} и ${rpFn(x.b,1)} си помагат лесно: това ви се отдава без много усилие.`));
+  if(!F.noT) str.push(`Радостта идва най-лесно чрез ${rpHA(F.pfh)}.`);
+  L.push(`<h3>Силните ви страни</h3><ul class="ntul">${str.map(s=>`<li>${s}</li>`).join('')}</ul>`);
+  const ch=[`${cap(G[0])}. Това е зоната, в която растете най-много: с времето тук се изгражда ${G[1]}.`];
+  F.asp.filter(x=>[90,180].includes(x.asp)).slice(0,2).forEach(x=>ch.push(`${cap(rpFn(x.a,1))} и ${rpFn(x.b,1)} се дърпат в различни посоки. Когато намерите начин да дадете място и на двете, това става източник на енергия.`));
+  ch.push(`Най-слабата стихия във вас е ${['огънят','земята','въздухът','водата'][F.elW]}: ${RP_ELW[F.elW]}.`);
+  L.push(`<h3>Предизвикателствата и как да работите с тях</h3><ul class="ntul">${ch.map(s=>`<li>${s}</li>`).join('')}</ul>`);
+  L.push(`<h3>Любов и отношения</h3><p>В любовта подхождате ${rpAdv(sgn(F.ven.lon))}. ${F.noT?'':`Привличат ви партньори, които действат ${rpAdv(F.cS(7),2)}. `}${F.h7.length?`Отношенията носят силна енергия на ${F.h7.map(k=>rpFn(k,1)).join(' и ')}. `:''}Желанието и инициативата в отношенията се проявяват ${rpAdv(sgn(F.mar.lon),2)}.</p>`);
+  if(!F.noT) L.push(`<h3>Работа и призвание</h3><p>В професията се развивате най-добре, когато работите ${rpAdv(F.mcS)}. Пътят към призванието минава през ${rpHA(F.mcRp.house)}.${F.h10.length?` В работата силно се проявяват ${F.h10.map(k=>rpFn(k,1)).join(' и ')}.`:''}</p>
+    <h3>Пари</h3><p>С парите се справяте най-добре, когато действате ${rpAdv(F.cS(2),2)}. ${F.h2.length?`Доходът е свързан с ${F.h2.map(k=>rpFn(k,1)).join(' и ')}. `:''}${F.h8.length?`Важни са и общите ресурси (партньор, наследство, кредити). `:''}</p>`);
+  L.push(`<h3>Здраве: на какво да обръщате внимание</h3>${F.zones.length?`<p>Това не е диагноза, а места, които носят повече напрежение и обичат грижа и профилактика:</p><ul class="ntul">${F.zones.map(z=>`<li>${cap(MD_ZONE[z.s])}</li>`).join('')}</ul>`:'<p>Няма силно подчертани зони; важни са общият ритъм, сънят и движението.</p>'}`);
+  L.push(`<h3>Пътят на душата</h3><p>Старият, удобен навик е ${NS[0]}. Урокът сега е ${NS[1]}. Първите стъпки в новата посока изглеждат несигурни, но точно те носят растеж.</p>`);
+  L.push(`<h3>Следващите 12 месеца</h3>${F.noT?'':`<p>Темата на годината е ${rpHA(F.prH)}.</p>`}${F.ev.length?`<ul class="ntul">${F.ev.slice(0,6).map(x=>`<li>${rpTrPlain(x)}</li>`).join('')}</ul>`:'<p>Годината е без силни външни влияния: време за спокойно изграждане.</p>'}`);
+  if(F.syn) L.push(`<h3>Връзката: ${escapeHtml(F.syn.pB.name)}</h3><ul class="ntul">${F.syn.I.slice(0,5).map(x=>`<li>${cap(rpFn(x.a,1))} (ваше) и ${rpFn(x.b,1)} (на ${escapeHtml(F.syn.pB.name)}): ${[60,120].includes(x.asp)?'лекота и подкрепа':x.asp===0?'силно сливане':'напрежение, което иска разбиране'}.</li>`).join('')}</ul>`);
+  L.push(`<h3>Три съвета</h3><ol class="ntul"><li>${cap(NS[2])}.</li><li>${cap(M[2])}.</li><li>Там, където се страхувате, че не сте достатъчни, действайте бавно и последователно, вместо да избягвате.</li></ol>`);
+  return L.join('');
+}
+function rpSecSum(id,F){
+  const n=F.n, li=a=>`<ul class="ntul">${a.filter(Boolean).map(s=>`<li>${s}</li>`).join('')}</ul>`;
+  const big=`Слънце ${vIn2(SIGNS[sgn(F.sun.lon)])}, Луна ${vIn2(SIGNS[sgn(F.moon.lon)])}${F.noT?'':`, Асцендент ${SIGNS[F.asS]} (управител ${yrPN(F.ruler)} в ${F.rp.house} дом)`}`;
+  const m={
+    chart:[big, `доминира ${RP_EL[F.elD]}, слаб е ${RP_EL[F.elW]}; кръст: ${RP_MD[F.mdD]}`, F.ang.length?'ъглови: '+F.ang.map(x=>yrPN(x.k)+' ('+x.a+')').join(', '):''],
+    nt:F.tight.slice(0,4).map(x=>`${yrPN(x.a)} ${aspOf(x.asp).n} ${yrPN(x.b)} (${x.o.toFixed(1)}°)`),
+    rul:F.noT?['без час: домовете не се използват']:[`управител на картата: ${yrPN(F.ruler)} в ${F.rp.house} дом (${rpHA(F.rp.house)})`,`управител на MC: ${yrPN(F.mcR)} в ${F.mcRp.house} дом`],
+    ps:[F.figs.length?F.figs.map(f=>FIG_TXT[f.type][0]+' ('+f.pts.map(yrPN).join(', ')+')').join('; '):'няма големи фигури', F.chars.length?'най-силни планети: '+F.chars.map(c=>yrPN(c.k)).join(', '):''],
+    apsy:[F.chars.length?'водещи „характери“: '+F.chars.map(c=>yrPN(c.k)).join(', '):'', `стихиен баланс: ${RP_EL[F.elD]} силен, ${RP_EL[F.elW]} слаб`],
+    herm:[`полярност: ${RP_EL[F.elD]} срещу ${RP_EL[F.elW]}`,`ритъм: ${RP_MD[F.mdD]} кръст`],
+    pr:F.noT?[]:[`MC ${vIn2(SIGNS[F.mcS])}, управител в ${F.mcRp.house} дом`, F.h10.length?'в 10 дом: '+F.h10.map(yrPN).join(', '):'', `Локус фортуна ${vIn2(SIGNS[F.pfs])}, ${F.pfh} дом`],
+    lots:[`Локус фортуна ${vIn2(SIGNS[F.pfs])}, ${F.pfh} дом`, F.h2.length?'в 2 дом: '+F.h2.map(yrPN).join(', '):'', F.h8.length?'в 8 дом: '+F.h8.map(yrPN).join(', '):''],
+    dh:['додекатемориите уточняват тона на всяка планета; виж таблицата'],
+    med:F.zones.length?F.zones.map(z=>`${SIGNS[z.s]}: ${MD_ZONE[z.s]} (тежест ${z.sc.toFixed(1)})`):['няма силно подчертани зони'],
+    karma:[`Южен → Северен възел: ${SIGNS[sgn(F.sn.lon)]} → ${SIGNS[sgn(F.nn.lon)]}${F.noT?'':` (${F.sn.house} → ${F.nn.house} дом)`}`, F.noT?'':`Плутон ${F.plu.house} дом → полярна точка ${(F.plu.house+5)%12+1} дом`],
+    cyc:[`възраст ${F.age} г.; профекция към ${F.prH} дом, господар ${yrPN(F.prL)}`],
+    yr:F.ev.slice(0,4).map(rpTr), pd:[`прогресивно Слънце ${vIn2(SIGNS[sgn(F.prog.sun)])}${F.noT?'':', '+AC.houseOf(F.prog.sun,n.hs.cusp)+' натален дом'}`,`прогресивна Луна ${vIn2(SIGNS[sgn(F.prog.moon)])}${F.noT?'':', '+AC.houseOf(F.prog.moon,n.hs.cusp)+' натален дом'}: емоционалният фокус в момента`], sr:[`соларът показва темата на текущата рожденна година; профекция: ${F.prH} дом`], tr:F.ev.slice(0,5).map(rpTr),
+    syn:F.syn?F.syn.I.slice(0,4).map(x=>`${yrPN(x.a)} ${aspOf(x.asp).n} ${yrPN(x.b)} (${x.o.toFixed(1)}°)`):[]
+  };
+  const a=(m[id]||[]).filter(Boolean); return a.length?`<div class="rpsum"><b>Резюме на раздела</b>${li(a)}</div>`:'';
+}
+async function rpClone(id){
+  const old=tab; tab=id; try{ render(); }catch(e){} tab=old;
+  if(id==='tr'&&$('trRun')&&$('trRun').onclick){ try{ await $('trRun').onclick(); }catch(e){} }
+  const src=$('tab-'+id); if(!src) return '';
+  const c=src.cloneNode(true); c.hidden=false;
+  c.querySelectorAll('#profForm,#grpPanel,#syncPanel,[hidden],.rptabsum').forEach(e=>e.remove());
+  c.querySelectorAll('.panel').forEach(e=>{ const h=e.querySelector('h2'); if(h&&/Резервно копие|Синхронизация/.test(h.textContent)) e.remove(); });
+  c.querySelectorAll('button,input,select,textarea,form,.controls,label.field,.int-hint,script').forEach(e=>e.remove());
+  c.querySelectorAll('[id]').forEach(e=>{ if(!e.closest('svg')) e.removeAttribute('id'); });
+  c.querySelectorAll('details').forEach(d=>d.open=true);
+  c.querySelectorAll('h2').forEach((h,i)=>{ if(i===0) h.remove(); });
+  return c.innerHTML;
+}
+async function runReport(){
+  const p=active(), mode=$('rpMode').value, bid=$('rpB').value, pB=bid?profiles.find(q=>q.id===bid):null;
+  const secs=[...document.querySelectorAll('#rpSecs input:checked')].map(x=>x.value), full=mode==='pro'&&!$('rpShort').checked;
+  $('rpStat').textContent='Изчислявам…'; await new Promise(r=>setTimeout(r,30));
+  const F=rpFacts(p,pB), today=fmtD(new Date());
+  const head=`<div class="rpcover"><h1>${mode==='pro'?'Астрологичен анализ':'Вашият астрологичен портрет'}</h1><p class="rpname">${escapeHtml(p.name)}</p><p>Роден(а): ${p.date.split('-').reverse().join('.')}${F.noT?' (часът е неизвестен)':', '+p.time} · ${escapeHtml(p.city||'')}</p><p class="note">Изготвен на ${today} · Larna Ephemerides</p></div>`;
+  let body='';
+  if(mode==='pro'){
+    body+=`<section class="rpsec"><h2>Общо резюме</h2><p class="note">Правилото на синтеза: тема, към която сочат няколко различни техники, е по-важна от тема, която се появява веднъж.</p>${rpSummaryPro(F)}</section>`;
+    const prevSyn=store.get('synB',null); if(pB) store.set('synB',pB.id);
+    for(const [id,name] of RP_SECT){ if(!secs.includes(id)) continue; if(id==='syn'&&!pB) continue;
+      $('rpStat').textContent='Подготвям: '+name+'…'; await new Promise(r=>setTimeout(r,20));
+      body+=`<section class="rpsec${full?' rpbreak':''}"><h2>${name}</h2>${rpSecSum(id,F)}${full?`<div class="rpbody">${await rpClone(id)}</div>`:''}</section>`; }
+    if(prevSyn!=null) store.set('synB',prevSyn);
+  } else {
+    body+=`<section class="rpsec">${rpClient(F)}<p class="note">Астрологията описва склонности и възможности, не предопределена съдба. Изборът и действията винаги са ваши.</p></section>`;
+  }
+  $('rpOut').innerHTML=`<div id="rpDoc" class="rpdoc ${mode==='pro'?'rp-pro':'rp-cl'}">${head}${body}</div>`;
+  $('rpStat').textContent='Готово.'; $('rpActs').hidden=false; $('rpPdf').hidden=full; $('rpBigNote').hidden=!full; RP_LAST={name:p.name,mode};
+}
+let RP_LAST=null, RP_FC={k:null,F:null};
+function rpTabSum(t){
+  if(!RP_SECT.some(([id])=>id===t)||t==='syn') return;
+  const sec=$('tab-'+t); if(!sec) return; sec.querySelectorAll('.rptabsum').forEach(e=>e.remove());
+  let F; try{ const p=active(), k=JSON.stringify(p)+isoDay(new Date())+store.get('notime_'+p.id,false); if(RP_FC.k!==k){ RP_FC={k,F:rpFacts(p,null)}; } F=RP_FC.F; }catch(e){ return; }
+  const h=rpSecSum(t,F); if(!h) return;
+  const anchor=t==='chart'?$('chHead'):sec.querySelector('h2'); if(!anchor) return;
+  const d=document.createElement('div'); d.className='rptabsum'; d.innerHTML=h; anchor.insertAdjacentElement('afterend',d);
+}
+function rpDocHtml(){
+  const css=[...document.querySelectorAll('style')].map(s=>s.textContent).join('\n');
+  return `<!doctype html><html lang="bg" data-theme="light"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escapeHtml(RP_LAST.name)} – доклад</title><style>${css}\nbody{background:#fff}</style></head><body class="rpprint">${$('rpDoc').outerHTML}</body></html>`;
+}
+const rpFile=ext=>`doklad-${(RP_LAST.name||'karta').replace(/[^\p{L}\p{N}]+/gu,'-')}-${RP_LAST.mode==='pro'?'profesionalen':'klient'}.${ext}`;
+async function rpSave(blob,ext){
+  const name=rpFile(ext);
+  if(window.claude&&window.claude.use){ const dl=await window.claude.use('downloads').catch(()=>null);
+    if(dl){ try{ await dl.save({filename:name,data:blob}); $('rpStat').textContent='Файлът е предаден за запис.'; }catch(e){ $('rpStat').textContent=e&&e.code==='declined'?'Записът е отказан.':'Записът не е възможен тук.'; } return; } }
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name; document.body.append(a); a.click(); a.remove();
+}
+function rpLoadLib(){ return new Promise((res,rej)=>{ if(window.html2pdf) return res(); const s=document.createElement('script'); s.src='https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js'; s.onload=()=>res(); s.onerror=()=>rej(); document.head.append(s); }); }
+async function rpPdf(){
+  $('rpStat').textContent='Създавам PDF… (при пълния професионален доклад може да отнеме минута)';
+  try{ await rpLoadLib(); }catch(e){ $('rpStat').textContent='Библиотеката за PDF не се зареди. Използвайте „Печат“ или „Изтегли HTML“.'; return; }
+  const el=$('rpDoc'), th=document.documentElement.getAttribute('data-theme'); document.documentElement.setAttribute('data-theme','light'); el.classList.add('rpexport');
+  try{
+    const blob=await html2pdf().set({margin:[12,12,14,12],image:{type:'jpeg',quality:0.9},html2canvas:{scale:1.6,useCORS:true,backgroundColor:'#ffffff'},jsPDF:{unit:'mm',format:'a4',orientation:'portrait',compress:true},pagebreak:{mode:['css','legacy'],before:'.rpbreak',avoid:['.hmcard','tr','li','.rpsum','h3','svg','p']}}).from(el).outputPdf('blob');
+    await rpSave(blob,'pdf');
+  }catch(e){ $('rpStat').textContent='PDF не можа да се създаде. Използвайте „Печат“ или „Изтегли HTML“.'; }
+  el.classList.remove('rpexport'); if(th) document.documentElement.setAttribute('data-theme',th); else document.documentElement.removeAttribute('data-theme');
+}
+function initReport(){
+  $('rpSecs').innerHTML=RP_SECT.map(([id,nm])=>`<label class="rpchk"><input type="checkbox" value="${id}" checked> ${nm}</label>`).join('');
+  const p=active(), others=profiles.filter(q=>q.id!==p.id);
+  $('rpB').innerHTML=`<option value="">без синастрия</option>`+profOptions(others,'',q=>q.name).replace(/ selected/,'');
+  $('rpGo').onclick=runReport; $('rpPdf').onclick=rpPdf; $('rpPrint').onclick=()=>{ const th=document.documentElement.getAttribute('data-theme'); document.documentElement.setAttribute('data-theme','light'); document.body.classList.add('rp-printing'); try{ window.print(); }catch(e){} setTimeout(()=>{ document.body.classList.remove('rp-printing'); if(th) document.documentElement.setAttribute('data-theme',th); else document.documentElement.removeAttribute('data-theme'); },800); };
+  $('rpHtml').onclick=()=>rpSave(new Blob([rpDocHtml()],{type:'text/html'}),'html');
+  $('rpAll').onclick=()=>document.querySelectorAll('#rpSecs input').forEach(x=>x.checked=true);
+  $('rpNone').onclick=()=>document.querySelectorAll('#rpSecs input').forEach(x=>x.checked=false);
+  $('rpMode').onchange=()=>{ $('rpSecBox').hidden=$('rpMode').value!=='pro'; };
+  $('rpHead').textContent='Доклад: '+p.name;
 }
 
 // =============== ЗАТЪМНЕНИЯ ===============
