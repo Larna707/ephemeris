@@ -9553,7 +9553,7 @@ function rpFacts(p, pB){
   try{ F.figs=findFigures(n).filter(f=>FIG_TXT[f.type]&&!['st','sth'].includes(f.type)); }catch(e){ F.figs=[]; }
   F.asp=courseAspects(n).filter(x=>P10.includes(x.a)&&P10.includes(x.b)&&[0,60,90,120,180].includes(x.asp)).sort((a,b)=>a.o-b.o);
   F.tight=F.asp.slice(0,6);
-  const cS=h=>sgn(n.hs.cusp[h-1]), rul=h=>RUL_MOD[cS(h)];
+  const cS=h=>sgn(n.hs.cusp[h]), rul=h=>RUL_MOD[cS(h)];
   F.cS=cS; F.rul=rul;
   F.mcR=RUL_MOD[F.mcS]; F.mcRp=P(F.mcR);
   F.h7=P10.filter(k=>P(k).house===7); F.h2=P10.filter(k=>P(k).house===2); F.h8=P10.filter(k=>P(k).house===8); F.h10=P10.filter(k=>P(k).house===10);
