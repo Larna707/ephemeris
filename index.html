@@ -9276,7 +9276,7 @@ function runKarma(){
   const p=active(), n=natalOf(p), C=kaCtx(n), P=C.P, H=[];
   $('kaHead').textContent=`Кармична астрология: ${p.name}`;
   const lvK='kaLvl_'+p.id; $('kaLvl').value=store.get(lvK,'2'); $('kaLvl').onchange=()=>{ store.set(lvK,$('kaLvl').value); runKarma(); };
-  const lvl=$('kaLvl').value;
+  const lvl=$('kaLvl').value, SUM={};
   let cn=0; const card=(num,title,motto,body,q)=>`<article class="hmcard"><div class="hmnum kanum">${++cn}</div><div class="hmbody"><h3>${title}</h3>${motto?`<p class="hmmotto">${motto}</p>`:''}${body}${q?`<p class="hmq"><b>Въпрос за размисъл:</b> ${q}</p>`:''}</div></article>`;
   const pl=P('Pluto'), nn=P('Node'), sn=P('SNode'), plS=sgn(pl.lon), plH=pl.house, ppS=(plS+6)%12, ppH=(plH+5)%12+1;
   const nnR=RUL_MOD[sgn(nn.lon)], snR=RUL_MOD[sgn(sn.lon)], nnRp=P(nnR), snRp=P(snR);
@@ -9318,7 +9318,7 @@ function runKarma(){
       <p><b>Растежът:</b> ${M[2]}. Сферата, в която навикът се вижда най-ясно: ${hs(mo.house)}.</p>`,
       'В коя ситуация тази седмица реагирах „по стария начин“?'));
   }
-  { const pf=norm(n.hs.asc+P('Moon').lon-P('Sun').lon), pfs=sgn(pf), pfh=AC.houseOf(pf,n.hs.cusp), SF=KB.SHULF, E=escapeHtml, par=a=>a.map(x=>`<p>${E(x)}</p>`).join('');
+  { const pf=norm(n.hs.asc+P('Moon').lon-P('Sun').lon), pfs=sgn(pf), pfh=AC.houseOf(pf,n.hs.cusp), _pf=(SUM.pf={s:pfs,h:pfh}), SF=KB.SHULF, E=escapeHtml, par=a=>a.map(x=>`<p>${E(x)}</p>`).join('');
     H.push(card('','Радостта: Локус фортуна','Точката, където душата изпитва естествена радост и хармония: наградата, която идва, когато живеем в съгласие със себе си (по М. Шулман).',`<p>Локус фортуна е ${vIn2(SIGNS[pfs])} ${Math.floor(pf%30)}°, ${pfh} дом (Асцендент + Луна − Слънце, както при Шулман).</p>
       <p><b>Къде идва радостта:</b> ${KA_PFH[pfh-1]}. Качеството, което я отключва, е ${KA_PFS[pfs]}.</p>
       <p>Противоположната точка (${vIn2(SIGNS[(pfs+6)%12])}, ${(pfh+5)%12+1} дом) Шулман нарича точка на безличното съзнание: там радостта идва, когато човек престане да я търси само за себе си.</p>
@@ -9367,7 +9367,7 @@ function runKarma(){
     const mg=[]; seg.forEach(x=>{ const l=mg[mg.length-1]; if(l&&l.g===x.g&&x.b-l.e<400*864e5){ l.e=x.e; for(const k in x.ph) if(!l.ph[k]) l.ph[k]=x.ph[k]; } else mg.push(x); });
     const age=t=>Math.floor((t-st)/(365.2422*864e5)), fm=t=>fmtD(new Date(t));
     const ss=mg.filter(x=>x.g==='S'), dh=mg.filter(x=>x.g!=='S'&&x.e>now&&x.b<now+30*365.2422*864e5);
-    const SIGN_SID=SIGNS[ms];
+    const SIGN_SID=SIGNS[ms]; SUM.ss=ss; SUM.dh=dh; SUM.sid=SIGN_SID;
     H.push(card('','Саде Сати и Дхайя (ведическа традиция)','Най-известните транзити на Сатурн спрямо Луната в индийската астрология: време за равносметка и изграждане, не наказание.',`
       <p>В джотиш се използва сидеричният зодиак (с отместване около 24°), затова Луната ви там е <b>${vIn2(SIGN_SID)}</b>. Саде Сати е времето, когато Сатурн минава през знака преди Луната, през знака на Луната и през знака след нея: около 7,5 години на преподреждане. Това, което е градено на слаби основи, отпада; това, което е здраво, се укрепва.</p>
       <ul class="ntul">${ss.map(x=>`<li${now>=x.b&&now<=x.e?' class="now"':''}><b>${x.b===st?'от раждането':fm(x.b)} – ${fm(x.e)}</b> (${x.b===st?'до':'на '+age(x.b)+'–'}${age(x.e)} г.)${now>=x.b&&now<=x.e?' <b>сега</b>':''}${x.ph.s2?`; върхът (Сатурн над Луната) от ${fm(x.ph.s2)}`:''}</li>`).join('')}</ul>
@@ -9387,7 +9387,7 @@ function runKarma(){
   { const ks=[...P10,'ASC','MC'], lonOf=k=>k==='ASC'?n.hs.asc:k==='MC'?n.hs.mc:P(k).lon, nm=k=>k==='ASC'?'Асцендент':k==='MC'?'MC':yrPN(k), F=[];
     for(let i=0;i<ks.length;i++) for(let j=i+1;j<ks.length;j++){ if(ks[i]==='ASC'&&ks[j]==='MC') continue; const d=Math.abs(dif(lonOf(ks[i]),lonOf(ks[j])));
       KA_PH.forEach(x=>{ const o=Math.abs(d-x.a); if(o<=x.o) F.push({a:ks[i],b:ks[j],x,o}); }); }
-    const K=F.filter(z=>z.x.k).sort((a,b)=>a.o-b.o), Cr=F.filter(z=>!z.x.k).sort((a,b)=>a.o-b.o);
+    const K=F.filter(z=>z.x.k).sort((a,b)=>a.o-b.o), Cr=F.filter(z=>!z.x.k).sort((a,b)=>a.o-b.o); SUM.K=K; SUM.Cr=Cr;
     const li=z=>`<li><b>${nm(z.a)} – ${nm(z.b)}</b>, ${z.x.n} ${z.x.a}° (${z.o.toFixed(1)}°): ${z.x.t}.</li>`;
     const bal=K.length>Cr.length?'Кармичните аспекти преобладават: повече теми идват като задача, която трябва да се изпълни; свободата се печели чрез осъзнаване.':Cr.length>K.length?'Творческите аспекти преобладават: повече свобода на избор, а заедно с нея и повече лична отговорност.':'Кармичните и творческите аспекти са в равновесие: предопределеното и свободното си партнират.';
     H.push(card('','Кармични и творчески аспекти (по Л. Назарова)','Малките „феноменални“ аспекти от школата на П. Глоба: кармичните показват къде действа предопределеността, творческите къде има свобода.',`
@@ -9447,6 +9447,39 @@ function runKarma(){
   H.push(card('7','Как работи еволюцията (рамка)','Четирите начина на Плутон и трите реакции (Дж. У. Грийн).',`<ul class="ntul"><li><b>Четирите начина на промяна:</b> (1) внезапна загуба на нещо, за което сме се държали; (2) нова връзка с човек, знание или цел, чрез която „поемаме“ това, което ни липсва; (3) осъзнаване на блокаж и криза, докато не се открие причината; (4) събуждане на спяща способност.</li>
     <li><b>Трите реакции:</b> съпротива; пълно приемане; и най-честото: промяна в едно, съпротива в друго от страх от неизвестното.</li>
     <li>Колкото по-малка е съпротивата, толкова по-плавна е промяната. Кризата не е наказание, а натрупан натиск за растеж.</li></ul>`,''));
+  // Резюме
+  { const W={}, add=(h,w,lab)=>{ if(!h) return; (W[h]=W[h]||{w:0,f:[]}).w+=w; W[h].f.push(lab); };
+    const sa=P('Saturn'), mo=P('Moon'), li=n.pts.find(x=>x.k==='Lilith');
+    add(ppH,3,'полярната точка на Плутон'); add(nn.house,3,'Северният възел'); add(plH,2,'Плутон'); add(sn.house,2,'Южният възел'); add(sa.house,2,'Сатурн');
+    add(nnRp.house,1,'управителят на Северния възел'); if(ch) add(ch.house,1,'Хирон'); add(mo.house,1,'Луната'); if(SUM.pf) add(SUM.pf.h,1,'Локус фортуна'); if(li) add(li.house,1,'Лилит');
+    rx.filter(k=>k!=='Pluto').forEach(k=>add(P(k).house,1,'ретрограден '+yrPN(k)));
+    const top=Object.entries(W).filter(([h,v])=>v.f.length>=2).sort((a,b)=>b[1].w-a[1].w).slice(0,3);
+    const PW={}, padd=(k,lab)=>{ if(!P10.includes(k)) return; (PW[k]=PW[k]||new Set()).add(lab); };
+    courseAspects(n).forEach(x=>{ const hard=[0,90,180].includes(x.asp); ['Pluto','Saturn'].forEach(t=>{ if(hard&&(x.a===t||x.b===t)){ const o=x.a===t?x.b:x.a; padd(o,t==='Pluto'?'напрегнат аспект с Плутон':'напрегнат аспект със Сатурн'); } }); });
+    P10.forEach(k=>{ if(k!=='Pluto'&&C.asp(P(k).lon,nn.lon,[0,90,180],5)) padd(k,'аспект с възловата ос'); });
+    (SUM.K||[]).forEach(z=>{ padd(z.a,'кармичен аспект'); padd(z.b,'кармичен аспект'); });
+    rx.forEach(k=>padd(k,'ретрограден'));
+    const kp=Object.entries(PW).filter(([k,v])=>v.size>=2).sort((a,b)=>b[1].size-a[1].size).slice(0,3);
+    const now2=Date.now(), ssNow=(SUM.ss||[]).find(x=>now2>=x.b&&now2<=x.e), ssNext=(SUM.ss||[]).find(x=>x.b>now2);
+    const nx=EV.slice(0,3), M=KA_MOON[sgn(mo.lon)], G=KA_GR[sgn(sa.lon)];
+    H.push(card('','Резюме: какво казва всичко това заедно','Обобщение на всички карти по-горе. Правилото е „потвърждението“: тема, към която сочат няколко различни техники, е по-важна от тема, която се появява само веднъж.',`
+      <h4>1. Основният урок</h4>
+      <p>От ${SIGNS[sgn(sn.lon)]} и ${sn.house} дом (${hs(sn.house)}) към ${SIGNS[ns]} и ${nn.house} дом (${hs(nn.house)}). Плутон дърпа от ${plH} дом (${hs(plH)}) към ${ppH} дом (${hs(ppH)}). С една дума: ${NSx[1].split(':')[0]}.</p>
+      ${pl.spd<0||C.asp(pl.lon,nn.lon,[90],8)?`<p>${C.asp(pl.lon,nn.lon,[90],8)?'Плутон е в квадрат с възлите: има „прескочени стъпки“, които се довършват, преди да се тръгне напред. ':''}${pl.spd<0?'Плутон е ретрограден: пътят се извървява по свой, а не по общоприет начин.':''}</p>`:''}
+      <h4>2. Сферите, към които сочат няколко техники</h4>
+      ${top.length?`<ul class="ntul">${top.map(([h,v])=>`<li><b>${h} дом (${hs(+h)})</b>: ${v.f.join(', ')}.</li>`).join('')}</ul>`:'<p>Няма сфера, към която да сочат повече от една техника: темите са разпределени.</p>'}
+      <h4>3. Ключовите планети</h4>
+      ${kp.length?`<ul class="ntul">${kp.map(([k,v])=>`<li><b>${yrPN(k)}</b> (${kfn(k)}): ${[...v].join(', ')}.</li>`).join('')}</ul>`:'<p>Няма планета, която да се повтаря в няколко кармични фактора.</p>'}
+      <h4>4. Ресурсите</h4>
+      <ul class="ntul"><li>Радостта (Локус фортуна): ${SUM.pf?KA_PFH[SUM.pf.h-1]:''}.</li><li>Златото на Сатурн: ${G[1]}.</li>${(SUM.Cr||[]).length?`<li>Творчески аспекти: ${SUM.Cr.map(z=>`${z.a==='ASC'?'Асцендент':yrPN(z.a)} – ${z.b==='ASC'?'Асцендент':z.b==='MC'?'MC':yrPN(z.b)}`).join(', ')}: тук има свобода на избор.</li>`:''}</ul>
+      <h4>5. Времето</h4>
+      <ul class="ntul"><li>Транзитният Плутон е във вашия ${tpH} дом (${hs(tpH)}).</li>
+      ${ssNow?`<li>Сега тече Саде Сати (до ${fmtD(new Date(ssNow.e))}): време за преподреждане.</li>`:ssNext?`<li>Следващото Саде Сати: ${fmtD(new Date(ssNext.b))} – ${fmtD(new Date(ssNext.e))}.</li>`:''}
+      ${nx.map(x=>`<li>${fmtD(x.d)}: ${x.t}</li>`).join('')}</ul>
+      <h4>6. Три практични стъпки</h4>
+      <ol class="ntul"><li>${cap(NSx[2])}.</li><li>Луна: ${M[2]}.</li><li>Сатурн: в сферата на ${hs(sa.house)} действайте бавно и последователно, вместо да избягвате или да прекалявате.</li></ol>`,
+      'Ако трябва да избера само една от трите стъпки за следващия месец, коя е?'));
+  }
   $('kaOut').innerHTML=H.join('');
   const kb=$('kaB'); if(kb) kb.onchange=()=>{ store.set('kaB',kb.value); runKarma(); };
 }
