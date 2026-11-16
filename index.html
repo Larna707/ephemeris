@@ -799,6 +799,8 @@ body.rpprint{padding:16px}
       <div class="controls">
         <label class="field"><span>Вид</span><select id="rpMode"><option value="pro">Професионален</option><option value="cl">За клиент</option></select></label>
         <label class="field"><span>Синастрия с</span><select id="rpB"></select></label>
+        <label class="field"><span>„Кога?“ за тема</span><select id="rpEv"></select></label>
+        <label class="field"><span>Период</span><select id="rpEvM"><option value="12">12 месеца</option><option value="24" selected>24 месеца</option><option value="36">36 месеца</option></select></label>
       </div>
       <div id="rpSecBox"><p class="note">Раздели в професионалния доклад: <button type="button" class="linkbtn" id="rpAll">всички</button> · <button type="button" class="linkbtn" id="rpNone">нито един</button></p><div id="rpSecs" class="rpsecs"></div><label class="rpchk"><input type="checkbox" id="rpShort"> Само резюметата (общото и на всеки раздел), без пълното съдържание на разделите</label></div>
       <div class="controls"><button id="rpGo" class="primary">Генерирай доклада</button><span id="rpStat" class="note"></span></div>
@@ -9687,18 +9689,19 @@ async function runReport(){
   const p=active(), mode=$('rpMode').value, bid=$('rpB').value, pB=bid?profiles.find(q=>q.id===bid):null;
   const secs=[...document.querySelectorAll('#rpSecs input:checked')].map(x=>x.value), full=mode==='pro'&&!$('rpShort').checked;
   $('rpStat').textContent='Изчислявам…'; await new Promise(r=>setTimeout(r,30));
-  const F=rpFacts(p,pB), today=fmtD(new Date());
+  const F=rpFacts(p,pB), today=fmtD(new Date()), evk=$('rpEv').value, EVR=evk?evBuild(p,evk,+$('rpEvM').value):null;
   const head=`<div class="rpcover"><h1>${mode==='pro'?'Астрологичен анализ':'Вашият астрологичен портрет'}</h1><p class="rpname">${escapeHtml(p.name)}</p><p>Роден(а): ${p.date.split('-').reverse().join('.')}${F.noT?' (часът е неизвестен)':', '+p.time} · ${escapeHtml(p.city||'')}</p><p class="note">Изготвен на ${today} · Larna Ephemerides</p></div>`;
   let body='';
   if(mode==='pro'){
     body+=`<section class="rpsec"><h2>Общо резюме</h2><p class="note">Правилото на синтеза: тема, към която сочат няколко различни техники, е по-важна от тема, която се появява веднъж.</p>${rpSummaryPro(F)}</section>`;
+    if(EVR) body+=`<section class="rpsec rpbreak"><h2>Кога? ${EVR.th.n}</h2><p class="note">Работен алгоритъм: натално обещание → Сатурн и бавните планети → лунните възли → затъмнения до 2° → активатори Марс и Слънце → прозорци, в които се събират няколко слоя.</p>${EVR.html}</section>`;
     const prevSyn=store.get('synB',null); if(pB) store.set('synB',pB.id);
     for(const [id,name] of RP_SECT){ if(!secs.includes(id)) continue; if(id==='syn'&&!pB) continue;
       $('rpStat').textContent='Подготвям: '+name+'…'; await new Promise(r=>setTimeout(r,20));
       body+=`<section class="rpsec${full?' rpbreak':''}"><h2>${name}</h2>${rpSecSum(id,F)}${full?`<div class="rpbody">${await rpClone(id)}</div>`:''}</section>`; }
     if(prevSyn!=null) store.set('synB',prevSyn);
   } else {
-    body+=`<section class="rpsec">${rpClient(F)}<p class="note">Астрологията описва склонности и възможности, не предопределена съдба. Изборът и действията винаги са ваши.</p></section>`;
+    body+=`<section class="rpsec">${rpClient(F)}${EVR?`<h3>Кога? ${EVR.th.n}</h3>${EVR.plain}`:''}<p class="note">Астрологията описва склонности и възможности, не предопределена съдба. Изборът и действията винаги са ваши.</p></section>`;
   }
   $('rpOut').innerHTML=`<div id="rpDoc" class="rpdoc ${mode==='pro'?'rp-pro':'rp-cl'}">${head}${body}</div>`;
   $('rpStat').textContent='Готово.'; $('rpActs').hidden=false; $('rpPdf').hidden=full; $('rpBigNote').hidden=!full; RP_LAST={name:p.name,mode};
@@ -9738,6 +9741,7 @@ function initReport(){
   $('rpSecs').innerHTML=RP_SECT.map(([id,nm])=>`<label class="rpchk"><input type="checkbox" value="${id}" checked> ${nm}</label>`).join('');
   const p=active(), others=profiles.filter(q=>q.id!==p.id);
   $('rpB').innerHTML=`<option value="">без синастрия</option>`+profOptions(others,'',q=>q.name).replace(/ selected/,'');
+  if(!$('rpEv').options.length) $('rpEv').innerHTML='<option value="">без</option>'+Object.entries(EV_TH).map(([k,v])=>`<option value="${k}">${v.n}</option>`).join('');
   $('rpGo').onclick=runReport; $('rpPdf').onclick=rpPdf; $('rpPrint').onclick=()=>{ const th=document.documentElement.getAttribute('data-theme'); document.documentElement.setAttribute('data-theme','light'); document.body.classList.add('rp-printing'); try{ window.print(); }catch(e){} setTimeout(()=>{ document.body.classList.remove('rp-printing'); if(th) document.documentElement.setAttribute('data-theme',th); else document.documentElement.removeAttribute('data-theme'); },800); };
   $('rpHtml').onclick=()=>rpSave(new Blob([rpDocHtml()],{type:'text/html'}),'html');
   $('rpAll').onclick=()=>document.querySelectorAll('#rpSecs input').forEach(x=>x.checked=true);
@@ -9757,8 +9761,11 @@ const EV_TH={
   money:{n:'Пари, имоти, чужди средства',h:[2,8],x:['Venus','Jupiter'],why:'2 и 8 дом, Венера и Юпитер'},
   home:{n:'Дом, семейство, родители',h:[4],x:['Moon'],why:'4 дом и IC, Луната'}};
 function runEvent(){
-  const p=active(), n=natalOf(p), th=EV_TH[$('evTheme').value], mon=+$('evMon').value, noT=!!store.get('notime_'+p.id,false);
   store.set('evTheme',$('evTheme').value); store.set('evMon',$('evMon').value);
+  $('evOut').innerHTML=evBuild(active(),$('evTheme').value,+$('evMon').value).html;
+}
+function evBuild(p,thKey,mon){
+  const n=natalOf(p), th=EV_TH[thKey], noT=!!store.get('notime_'+p.id,false);
   const P=k=>n.pts.find(x=>x.k===k), now=new Date(), to=new Date(now.getTime()+mon*30.44*864e5), E=escapeHtml;
   const nm=k=>k[0]==='C'?'върха на '+k.slice(1)+' дом':yrPN(k), nmN=k=>k[0]==='C'?'връх '+k.slice(1)+' дом':yrPN(k);
   const T=new Map(), addT=(k,why)=>{ if(!T.has(k)) T.set(k,[]); T.get(k).push(why); };
@@ -9796,7 +9803,7 @@ function runEvent(){
   const li=a=>a.length?`<ul class="ntul">${a.join('')}</ul>`:'<p class="note">Няма.</p>';
   const step=(i,t,b)=>`<article class="hmcard"><div class="hmnum evnum">${i}</div><div class="hmbody"><h3>${t}</h3>${b}</div></article>`;
   const LR=KB.TRLEC||null;
-  $('evOut').innerHTML=`${noT?'<p class="note">Часът на раждане е неизвестен: домовете и управителите им не се използват; анализът е само по естествените показатели.</p>':''}
+  const html=`${noT?'<p class="note">Часът на раждане е неизвестен: домовете и управителите им не се използват; анализът е само по естествените показатели.</p>':''}
    <p>Тема: <b>${th.n}</b> (${th.why}). Следени точки: ${keys.map(k=>`<b>${nmN(k)}</b> (${T.get(k).join(', ')})`).join('; ')}.</p>
    <div>
    ${step(1,'Наталното обещание',`<p>Темата е ${verdict}.</p>${hard.length?`<p><b>Напрегнати аспекти</b> (дават събитие и движение):</p>${li(hard.map(x=>`<li>${yrPN(x.a)} ${aspOf(x.asp).n} ${yrPN(x.b)} (${x.o.toFixed(1)}°)</li>`))}`:''}${soft.length?`<p><b>Хармонични аспекти</b> (смекчават и дават изход):</p>${li(soft.map(x=>`<li>${yrPN(x.a)} ${aspOf(x.asp).n} ${yrPN(x.b)} (${x.o.toFixed(1)}°)</li>`))}`:''}<p class="note">Събитие, което не е заложено в картата, не се очаква: транзитите само активират обещанието.</p>`)}
@@ -9807,6 +9814,9 @@ function runEvent(){
    ${step(6,'Най-вероятните прозорци',win.length?li(win.map(([m,v])=>`<li><b>${MN[m%12]} ${Math.floor(m/12)}</b>: ${[...v.f].slice(0,4).map(E).join('; ')}</li>`)):'<p>Няма месец, в който да се съберат няколко слоя: периодът е спокоен за тази тема.</p>')}
    </div>
    ${LR?`<details><summary>Правилата от лекцията (Прогностика, упражнение по транзити)</summary><div class="ntx">${LR.map(x=>`<p>${E(x)}</p>`).join('')}</div></details>`:''}`;
+  const plain=`<p>${hard.length>=3?'Тази тема е силно застъпена в картата ви: в нея има движение и събития.':hard.length?'Тази тема е застъпена умерено в картата ви.':'Тази тема е спокойна в картата ви: промените идват по-плавно.'}${soft.length?' Има и подкрепящи влияния, които помагат нещата да се подредят добре.':''}</p>
+   ${win.length?`<p>Периодите, в които темата е най-активна:</p><ul class="ntul">${win.map(([m])=>`<li><b>${MN[m%12]} ${Math.floor(m/12)}</b></li>`).join('')}</ul><p>В тези месеци е добре да сте по-внимателни, да планирате важните стъпки съзнателно и да не прибързвате.</p>`:'<p>В разглеждания период няма месец, в който няколко влияния да се съберат: времето е спокойно за тази тема.</p>'}`;
+  return {html, plain, th};
 }
 function initEvent(){
   if(!$('evTheme').options.length) $('evTheme').innerHTML=Object.entries(EV_TH).map(([k,v])=>`<option value="${k}">${v.n}</option>`).join('');
