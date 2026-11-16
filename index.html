@@ -247,6 +247,7 @@ th{background:var(--panel)}
 .ruempty h4{margin:0 0 4px;font-size:15px}.ruempty p,.ruempty li{font-size:13px}.ruempty ul{margin:4px 0 0;padding-left:18px}
 .ruplus{color:#2f9e8f}.ruminus{color:#d0603a}
 .kanum{background:linear-gradient(135deg,#5b3fa8,#d0603a)}
+.evnum{background:linear-gradient(135deg,#a2391f,#2e3080)}
 .rpnum{background:linear-gradient(135deg,#2e3080,#a2762a)}
 .rpsecs{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:4px 14px;margin:6px 0 12px}
 .rpchk{display:flex;gap:6px;align-items:center;font-size:.92rem}
@@ -609,6 +610,16 @@ body.rpprint{padding:16px}
         <p class="int-hint">Обобщение на всичко отгоре: кои теми са главни, кога е най-натоварено и как да разчитате транзитите. Включени са транзитите с тежест над 30; по-слабите са фон.</p>
         <div id="trAn"></div>
         <div class="flex" style="margin-top:10px"><button type="button" class="primary" id="trAnAI">Попитай Claude за периода</button><button type="button" id="trAnCopy">Копирай анализа</button></div>
+      </div>
+      <div class="panel" style="grid-column:1/-1" id="evPanel">
+        <h2>Кога? Събитие по тема</h2>
+        <p class="int-hint">Работният алгоритъм от упражнението по прогностика: наталната карта показва <b>какво е възможно</b>, Сатурн и висшите планети <b>в кои години</b>, затъмненията <b>кой сезон</b>, а Марс и Слънцето <b>коя седмица</b>. Транзитите само активират заложеното в картата.</p>
+        <div class="controls">
+          <label class="field"><span>Тема</span><select id="evTheme"></select></label>
+          <label class="field"><span>Период</span><select id="evMon"><option value="12">12 месеца</option><option value="24" selected>24 месеца</option><option value="36">36 месеца</option></select></label>
+          <button type="button" class="primary" id="evRun">Анализирай</button>
+        </div>
+        <div id="evOut"></div>
       </div>
     </div>
   </section>
@@ -8253,7 +8264,7 @@ function render(){
   if (tab==='eph') renderEph();
   else if (tab==='chart') { loadForm(active()); renderChart(natalOf(active()), 'Натална карта: '+active().name); }
   else if (tab==='an') { renderEventsList(); runAn(); }
-  else if (tab==='tr') { if(!trInit) initTr(); renderTrNow(); }
+  else if (tab==='tr') { if(!trInit) initTr(); renderTrNow(); initEvent(); }
   else if (tab==='pass') { initPass(); if(!rxInit) initRx(); }
   else if (tab==='hs') initHs();
   else if (tab==='sr') runSR();
@@ -9735,6 +9746,73 @@ function initReport(){
   $('rpHead').textContent='Доклад: '+p.name;
 }
 
+
+// =============== СЪБИТИЕ ПО ТЕМА ===============
+const EV_TH={
+  marriage:{n:'Брак, партньорство, раздяла',h:[7,1],x:['Venus'],why:'оста Асцендент – Десцендент, 7 дом и Венера'},
+  children:{n:'Деца, зачеване',h:[5,11],x:['Sun','Moon','Jupiter'],why:'оста 5 – 11 дом, Слънцето, Луната и Юпитер'},
+  travel:{n:'Пътувания, преместване, чужбина',h:[3,9],x:['Mercury','Jupiter'],why:'оста 3 – 9 дом, Меркурий и Юпитер'},
+  health:{n:'Здраве, операция',h:[1,6,8],x:['Mars','Saturn'],why:'1, 6 и 8 дом, Марс и Сатурн'},
+  career:{n:'Кариера, власт, позиция',h:[10],x:['Sun','Saturn'],why:'10 дом и MC, Слънцето и Сатурн'},
+  money:{n:'Пари, имоти, чужди средства',h:[2,8],x:['Venus','Jupiter'],why:'2 и 8 дом, Венера и Юпитер'},
+  home:{n:'Дом, семейство, родители',h:[4],x:['Moon'],why:'4 дом и IC, Луната'}};
+function runEvent(){
+  const p=active(), n=natalOf(p), th=EV_TH[$('evTheme').value], mon=+$('evMon').value, noT=!!store.get('notime_'+p.id,false);
+  store.set('evTheme',$('evTheme').value); store.set('evMon',$('evMon').value);
+  const P=k=>n.pts.find(x=>x.k===k), now=new Date(), to=new Date(now.getTime()+mon*30.44*864e5), E=escapeHtml;
+  const nm=k=>k[0]==='C'?'върха на '+k.slice(1)+' дом':yrPN(k), nmN=k=>k[0]==='C'?'връх '+k.slice(1)+' дом':yrPN(k);
+  const T=new Map(), addT=(k,why)=>{ if(!T.has(k)) T.set(k,[]); T.get(k).push(why); };
+  th.x.forEach(k=>addT(k,'естествен показател'));
+  if(!noT) th.h.forEach(h=>{ const sg=sgn(n.hs.cusp[h]); addT(RUL_MOD[sg],'управител на '+h+' дом'); if(RUL_TRAD[sg]!==RUL_MOD[sg]) addT(RUL_TRAD[sg],'втори управител на '+h+' дом');
+    P10.filter(k=>P(k).house===h).forEach(k=>addT(k,'в '+h+' дом')); addT('C'+h,'връх на дома'); });
+  const lonOf=k=>k[0]==='C'?n.hs.cusp[+k.slice(1)]:P(k).lon, keys=[...T.keys()], pk=keys.filter(k=>k[0]!=='C');
+  // 1. обещание
+  const na=courseAspects(n).filter(x=>(pk.includes(x.a)||pk.includes(x.b))&&P10.includes(x.a)&&P10.includes(x.b));
+  const hard=na.filter(x=>[90,180].includes(x.asp)||(x.asp===0&&['Mars','Saturn','Uranus','Neptune','Pluto'].some(m=>m===x.a||m===x.b))), soft=na.filter(x=>[60,120].includes(x.asp));
+  const verdict=hard.length>=3?'силно заложена: носи динамика и събития':hard.length?'заложена умерено':'слабо заложена: по-скоро плавни промени';
+  // 2. бавни планети
+  const slow=[];
+  ['Saturn','Uranus','Neptune','Pluto','Jupiter'].forEach(t=>keys.forEach(k=>(t==='Jupiter'?[0]:[0,90,180]).forEach(a=>{ try{ AC.transitHits(t,lonOf(k),a,now,to).forEach(h=>slow.push({d:h.date,t,k,a})); }catch(e){} })));
+  slow.sort((a,b)=>a.d-b.d);
+  const satIn=[]; if(!noT){ let prev=null; for(let ms=now.getTime(); ms<=to.getTime(); ms+=5*864e5){ const h=AC.houseOf(AC.lon('Saturn',AC.T(new Date(ms))),n.hs.cusp); if(h!==prev&&th.h.includes(h)) satIn.push({d:new Date(ms),h}); prev=h; } }
+  // 3. възли
+  const nd=[], nn=P('Node').lon; [[0,'възврат на възлите: ключова година'],[180,'обърнати възли: преоценка на посоката']].forEach(([a,t])=>{ try{ AC.transitHits('Node',nn,a,new Date(now.getTime()-180*864e5),to).forEach(h=>nd.push({d:h.date,t})); }catch(e){} });
+  // 4. затъмнения
+  const ecl=ecList(new Date(now.getTime()-183*864e5),to), eh=[];
+  ecl.forEach(e=>keys.forEach(k=>[0,90,180].forEach(a=>{ const o=Math.abs(Math.abs(dif(e.lon,lonOf(k)))-a); if(o<=2) eh.push({e,k,a,o}); })));
+  // 5. активатори
+  const act=[];
+  eh.forEach(x=>{ const end=new Date(x.e.date.getTime()+183*864e5); ['Mars','Sun'].forEach(t=>{ try{ AC.transitHits(t,x.e.lon,0,new Date(Math.max(x.e.date,now)),end<to?end:to).forEach(h=>act.push({d:h.date,t,k:'затъмнението от '+fmtD(x.e.date)})); }catch(e){} }); });
+  slow.filter(x=>x.t!=='Jupiter').forEach(x=>{ const a0=new Date(Math.max(now,x.d-45*864e5)), a1=new Date(Math.min(to,x.d.getTime()+45*864e5)); if(a1<=a0) return; try{ AC.transitHits('Mars',lonOf(x.k),0,a0,a1).forEach(h=>act.push({d:h.date,t:'Mars',k:nm(x.k)})); }catch(e){} });
+  const seenA=new Set(), actU=act.sort((a,b)=>a.d-b.d).filter(x=>{ const key=x.t+x.k+isoDay(x.d); if(seenA.has(key)) return false; seenA.add(key); return true; });
+  // 6. прозорци
+  const M={}, mk=d=>d.getFullYear()*12+d.getMonth(), addM=(d,v,why)=>{ if(d<now||d>to) return; const m=mk(d); (M[m]=M[m]||{v:0,f:new Set()}).v+=v; M[m].f.add(why); };
+  slow.forEach(x=>{ const v=x.t==='Saturn'?3:x.t==='Jupiter'?1:2; [-1,0,1].forEach(o=>{ const d=new Date(x.d.getFullYear(),x.d.getMonth()+o,15); addM(d,o?v-1:v,`${yrPN(x.t)} ${aspOf(x.a).n} ${nm(x.k)}`); }); });
+  eh.forEach(x=>{ for(let o=0;o<6;o++) addM(new Date(x.e.date.getFullYear(),x.e.date.getMonth()+o,15),o?1:3,`затъмнение ${fmtD(x.e.date)} върху ${nm(x.k)}`); });
+  actU.forEach(x=>addM(x.d,2,`${yrPN(x.t)} активира ${x.k}`)); satIn.forEach(x=>{ for(let o=0;o<4;o++) addM(new Date(x.d.getFullYear(),x.d.getMonth()+o,15),1,`Сатурн в ${x.h} дом`); });
+  nd.forEach(x=>addM(x.d,1,x.t));
+  const MN=['януари','февруари','март','април','май','юни','юли','август','септември','октомври','ноември','декември'];
+  const win=Object.entries(M).filter(([m,v])=>v.f.size>=2).sort((a,b)=>b[1].v-a[1].v).slice(0,4).sort((a,b)=>a[0]-b[0]);
+  const li=a=>a.length?`<ul class="ntul">${a.join('')}</ul>`:'<p class="note">Няма.</p>';
+  const step=(i,t,b)=>`<article class="hmcard"><div class="hmnum evnum">${i}</div><div class="hmbody"><h3>${t}</h3>${b}</div></article>`;
+  const LR=KB.TRLEC||null;
+  $('evOut').innerHTML=`${noT?'<p class="note">Часът на раждане е неизвестен: домовете и управителите им не се използват; анализът е само по естествените показатели.</p>':''}
+   <p>Тема: <b>${th.n}</b> (${th.why}). Следени точки: ${keys.map(k=>`<b>${nmN(k)}</b> (${T.get(k).join(', ')})`).join('; ')}.</p>
+   <div>
+   ${step(1,'Наталното обещание',`<p>Темата е ${verdict}.</p>${hard.length?`<p><b>Напрегнати аспекти</b> (дават събитие и движение):</p>${li(hard.map(x=>`<li>${yrPN(x.a)} ${aspOf(x.asp).n} ${yrPN(x.b)} (${x.o.toFixed(1)}°)</li>`))}`:''}${soft.length?`<p><b>Хармонични аспекти</b> (смекчават и дават изход):</p>${li(soft.map(x=>`<li>${yrPN(x.a)} ${aspOf(x.asp).n} ${yrPN(x.b)} (${x.o.toFixed(1)}°)</li>`))}`:''}<p class="note">Събитие, което не е заложено в картата, не се очаква: транзитите само активират обещанието.</p>`)}
+   ${step(2,'Години: Сатурн и бавните планети',`${li([...satIn.map(x=>`<li>${fmtD(x.d)}: Сатурн влиза в ${x.h} дом</li>`),...slow.map(x=>`<li>${fmtD(x.d)}: транзитен ${yrPN(x.t)} ${aspOf(x.a).n} ${x.k[0]==='C'?nm(x.k):'натален '+nm(x.k)}</li>`)])}<p class="note">Първо се гледа Сатурн. Бавната планета действа през целия знак; точната дата дават активаторите.</p>`)}
+   ${step(3,'Лунните възли',`${li(nd.map(x=>`<li>${fmtD(x.d)}: ${x.t}</li>`))}<p class="note">Възвратът на възлите (около 18,6 г.) отбелязва важна година, не непременно трудна.</p>`)}
+   ${step(4,'Сезон: затъмненията (до 2°)',`${li(eh.map(x=>`<li>${fmtD(x.e.date)}: ${x.e.kind==='sol'?'слънчево':'лунно'} затъмнение ${aspOf(x.a).n} ${nm(x.k)} (${x.o.toFixed(1)}°)${x.e.date<now?' (минало, още действа)':''}</li>`))}<p class="note">Затъмнението действа около половин година. Тежките събития се случват най-често между двете затъмнения или малко след лунното.</p>`)}
+   ${step(5,'Седмица: активаторите Марс и Слънце',`${li(actU.slice(0,12).map(x=>`<li>${fmtD(x.d)}: транзитен ${yrPN(x.t)} минава през ${x.k}</li>`))}<p class="note">Марс е спусъкът: събитието идва, когато мине през градуса на затъмнението или през засегнатата точка, малко преди или малко след точния аспект.</p>`)}
+   ${step(6,'Най-вероятните прозорци',win.length?li(win.map(([m,v])=>`<li><b>${MN[m%12]} ${Math.floor(m/12)}</b>: ${[...v.f].slice(0,4).map(E).join('; ')}</li>`)):'<p>Няма месец, в който да се съберат няколко слоя: периодът е спокоен за тази тема.</p>')}
+   </div>
+   ${LR?`<details><summary>Правилата от лекцията (Прогностика, упражнение по транзити)</summary><div class="ntx">${LR.map(x=>`<p>${E(x)}</p>`).join('')}</div></details>`:''}`;
+}
+function initEvent(){
+  if(!$('evTheme').options.length) $('evTheme').innerHTML=Object.entries(EV_TH).map(([k,v])=>`<option value="${k}">${v.n}</option>`).join('');
+  $('evTheme').value=store.get('evTheme','marriage'); $('evMon').value=store.get('evMon','24');
+  $('evRun').onclick=runEvent;
+}
 // =============== ЗАТЪМНЕНИЯ ===============
 const EC_SYN=29.530588853, EC_ANCH={sol:{t:Date.UTC(2024,3,8,18,17),s:139}, lun:{t:Date.UTC(2025,2,14,6,59),s:123}};
 const EC_INV=(()=>{ for(let x=1;x<223;x++) if((358*x)%223===1) return x; })();
